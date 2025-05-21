@@ -1,0 +1,73 @@
+{
+  "name": "bayesian-flashcards",
+  "productName": "Bayesian Flashcards",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development electron .",
+    "build": "npm run build-frontend && npm run bundle-python && npm run build-electron",
+    "build-frontend": "cd ../srs-frontend && npm run build && cp -r build ../electron-wrapper/",
+    "bundle-python": "./bundle-python.sh",
+    "build-electron": "electron-builder build --mac",
+    "package": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "keywords": [
+    "flashcards",
+    "bayesian",
+    "learning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "A Bayesian implementation of spaced repetition flashcards",
+  "dependencies": {
+    "wait-on": "^8.0.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "electron": "^36.2.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.bayesianflashcards.app",
+    "productName": "Bayesian Flashcards",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "build/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      { 
+        "from": "../backend", 
+        "to": "app/backend" 
+      },
+      {
+        "from": "python-bundle",
+        "to": "app/python"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.education",
+      "target": "dmg",
+      "icon": "build/logo512.png"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
+}
