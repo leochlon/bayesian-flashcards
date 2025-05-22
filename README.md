@@ -1,12 +1,35 @@
-Bayesian ADHD-Aware Flashcard SRS
-A modern, extensible, and research-backed flashcard app designed for optimal learning, focus, and memory—especially for users with ADHD and anyone who wants smarter, science-based study sessions.
+# Bayesian Adaptive SRS Flashcard System (ADHD-aware)
 
-Personalized, Bayesian spaced repetition: Each review is scheduled using a probabilistic memory model that adapts to you—maximizing long-term retention and minimizing wasted effort.
+This project implements a research-grade, fully extensible **spaced repetition system (SRS)** that leverages Bayesian memory modeling and adaptive cognitive features for individualized, optimal review scheduling. It’s designed to support diverse learners, with special consideration for users with ADHD and variable attention.
 
-Motivational study experience: Dynamically targets the 80% “desirable difficulty” zone for maximum engagement and learning flow.
+---
 
-Pomodoro + cognitive indicators: Built-in session timer, fatigue detection, and visual memory confidence help you maintain focus, avoid burnout, and track your progress.
+## Key Features
 
-Rich media flashcards: Supports text, images, and flexible deck management.
+### 📊 Bayesian Memory Modeling
+- Every card’s review interval is computed using a per-card Beta posterior, modeling memory decay and recall probability over time.
+- Personalized decay rates are further adapted from global user recall statistics.
 
-Beautiful, cross-platform interface: Modern React frontend with a Python (Flask) backend—runs as a electron app on Mac or in your browser.
+### 🎯 Desirable Difficulty Targeting
+- Schedules reviews to maintain an empirically optimal ~80% correct recall rate (“desirable difficulty”).
+- Automatically adjusts intervals to prevent both under- and overlearning.
+
+### 🧠 Cognitive & Behavioral Adaptivity
+- **Pomodoro-based session management** with dynamic fatigue detection and session break suggestions.
+- **Real-time focus drop monitoring** and review rebalancing (“rescue mode”) to mitigate distractions or attention lapses.
+- **Meta-cognitive spot-checks** and calibration for self-assessment accuracy.
+
+### 🖼️ Rich Content Support
+- Create and study flashcards with rich text and images on both front and back.
+- Organize cards into decks.
+
+### 🛠️ Modern, Modular Stack
+- **Frontend:** React, with support for rich text editors, image upload, and live Bayesian visualizations (Plotly/Chart.js).
+- **Backend:** Python (Flask/FastAPI) for all memory modeling, session scheduling, and data endpoints.
+- **Desktop-ready:** Ships as a cross-platform desktop app (Mac, Windows, Linux) via Tauri or Electron.
+
+### 📈 Data-Driven Visualization
+- Live visual feedback for Bayesian recall distributions, interval histories, session progress, and cognitive indicators—all toggleable during study.
+
+---
+
