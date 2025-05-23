@@ -117,13 +117,17 @@ class Card(db.Model):
         return (datetime.now() - self.date_added).total_seconds() / 60
     
     def to_dict(self):
+        latest_review = max((r.timestamp for r in self.reviews), default=None) if self.reviews else None
         return {
             'id': self.id,
             'front': self.front,
             'back': self.back,
             'frontImage': self.front_image,
             'backImage': self.back_image,
-            'type': self.card_type
+            'type': self.card_type,
+            'last_review': latest_review.isoformat() if latest_review else None,
+            'review_count': len(self.reviews),
+            'is_mature': self.is_mature
         }
 
 
@@ -137,6 +141,9 @@ class Session(db.Model):
     
     # Relationship with Review
     reviews = db.relationship('Review', backref='session_info', lazy=True)
+    
+    # Add explicit references to user_profile and deck_info relations (they are defined in the parent models' backrefs)
+    # but making them explicit here for better code readability
     
     def add_review(self, card_id, rating):
         review = Review(

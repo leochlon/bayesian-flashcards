@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, User, Deck, Card, Session, Review
+import json
 
 import numpy as np
 from datetime import datetime, timedelta
@@ -50,24 +51,43 @@ def adaptive_decay(card, user_profile, base_decay=None, history_window=5):
     return max(0.001, decay)
 
 def sample_next_review(card, user_profile, target_recall=0.7, n_samples=3000):
-    alpha, beta = bayesian_posterior(card)
-    decay = adaptive_decay(card, user_profile)
-    p0_samples = np.random.beta(alpha, beta, n_samples)
-    t_samples = []
-    for p0 in p0_samples:
-        if p0 <= target_recall:
-            t_samples.append(1)
-        else:
-            t = np.log(p0 / target_recall) / decay
-            t_samples.append(max(1, t))
+    try:
+        alpha, beta = bayesian_posterior(card)
+        decay = adaptive_decay(card, user_profile)
+        p0_samples = np.random.beta(alpha, beta, n_samples)
+        t_samples = []
+        for p0 in p0_samples:
+            if p0 <= target_recall:
+                t_samples.append(1)
+            else:
+                t = np.log(p0 / target_recall) / decay
+                t_samples.append(max(1, t))
+        
+        # Safely handle streak/age calculation
+        try:
+            mature_streak = getattr(card, 'mature_streak', 0)
+            # Safely call time_since_added
+            time_since = 0
+            try:
+                time_since = card.time_since_added()
+            except Exception:
+                # If time_since_added fails, calculate directly if possible
+                if hasattr(card, 'date_added'):
+                    time_since = (datetime.now() - card.date_added).total_seconds() / 60
             
-    # Streak/age/maturity logic: stretch for mature/old cards
-    age_factor = 1 + (card.mature_streak // 2) + (card.time_since_added() / (60 * 24 * 7))
-    t_samples = [t * age_factor for t in t_samples]
-    
-    # Add random jitter for multi-scale spacing
-    interval = int(np.percentile(t_samples, np.random.uniform(30, 80)))
-    return interval, t_samples
+            age_factor = 1 + (mature_streak // 2) + (time_since / (60 * 24 * 7))
+            t_samples = [t * age_factor for t in t_samples]
+        except Exception as e:
+            print(f"Error calculating age factor: {str(e)}")
+            # Continue without applying age factor if there's an error
+        
+        # Add random jitter for multi-scale spacing
+        interval = int(np.percentile(t_samples, np.random.uniform(30, 80)))
+        return interval, t_samples
+    except Exception as e:
+        print(f"Error in sample_next_review: {str(e)}")
+        # Return default values if anything fails
+        return 1, [1] * n_samples
 
 def interval_to_text(minutes):
     if minutes < 60:
@@ -110,14 +130,30 @@ class Scheduler:
         matures = []
         
         for c in self.cards:
-            if self.card_review_counts[c.id] >= max_reviews_per_card:
-                continue
-            if c.review_count() == 0:
+            try:
+                # Skip if we've already reviewed this card enough times
+                if self.card_review_counts[c.id] >= max_reviews_per_card:
+                    continue
+                    
+                # Safely get review count
+                review_count = 0
+                try:
+                    review_count = c.review_count()
+                except Exception:
+                    # If review_count method fails, try to calculate directly
+                    review_count = len(c.reviews) if hasattr(c, 'reviews') else 0
+                
+                if review_count == 0:
+                    news.append(c)
+                elif not getattr(c, 'is_mature', False) or (getattr(c, 'last_wrong', None) and 
+                        (datetime.now() - c.last_wrong).total_seconds() / 3600 < 48):
+                    urgents.append(c)
+                else:
+                    matures.append(c)
+            except Exception as e:
+                print(f"Error processing card {c.id}: {str(e)}")
+                # Add to news by default if we have an error
                 news.append(c)
-            elif not c.is_mature or (c.last_wrong and (datetime.now() - c.last_wrong).total_seconds() / 3600 < 48):
-                urgents.append(c)
-            else:
-                matures.append(c)
                 
         random.shuffle(urgents)
         random.shuffle(news)
@@ -142,51 +178,167 @@ class Scheduler:
 # ------------------- APP CONFIGURATION -------------------
 
 app = Flask(__name__)
-CORS(app)
+# Configure CORS to accept requests from all origins, including the Electron app
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"]}})
+
+# Add a health check endpoint
+@app.route('/api/health', methods=['GET', 'HEAD'])
+def health_check():
+    try:
+        # Simple health check that doesn't require database access
+        return jsonify({"status": "ok", "service": "running"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db')
+db_path = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db'))
+print(f"Using database at: {db_path}")
+app.config['SQLALCHEMY_DATABASE_URI'] = db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy with the Flask app
 db.init_app(app)
 migrate = Migrate(app, db)
 
-# Create default user if not exists - updated to use with_app_context
+# Create default user if not exists - updated to properly use app_context
 def create_default_user():
     with app.app_context():
-        if not User.query.filter_by(username='default').first():
-            default_user = User(username='default')
-            db.session.add(default_user)
-            db.session.commit()
+        try:
+            # Check if default user exists
+            user = User.query.filter_by(username='default').first()
+            if not user:
+                print("Creating default user...")
+                default_user = User(username='default')
+                db.session.add(default_user)
+                db.session.commit()
+                print("Default user created successfully")
+            else:
+                print("Default user already exists")
+            return True
+        except Exception as e:
+            print(f"Error creating default user: {str(e)}")
+            db.session.rollback()
+            return False
+
+# Initialize database and create tables
+with app.app_context():
+    try:
+        print("Creating database tables...")
+        db.create_all()
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Database initialization error: {str(e)}")
+
+# Create default user after tables are created
+create_default_user()
+
+# Wrap route handlers with better error handling
+@app.errorhandler(500)
+def handle_500_error(e):
+    print(f"Internal Server Error: {str(e)}")
+    return jsonify(error=str(e)), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    print(f"Unhandled Exception: {str(e)}")
+    return jsonify(error=str(e)), 500
 
 # ------------------- API ROUTES -------------------
 
-@app.route('/api/decks', methods=['GET', 'POST'])
+@app.route('/api/decks', methods=['GET', 'POST', 'HEAD', 'OPTIONS'])
 def decks():
+    print(f"Request to /api/decks with method {request.method}")
+    print(f"Request headers: {dict(request.headers)}")
+    
+    # Special handling for OPTIONS request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, HEAD, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        print("Responding to OPTIONS request")
+        return response
+        
+    # Special handling for HEAD requests
+    if request.method == 'HEAD':
+        print("Responding to HEAD request")
+        return jsonify([])  # Return empty array for HEAD requests
+        
     if request.method == 'GET':
-        all_decks = Deck.query.all()
-        return jsonify([deck.name for deck in all_decks])
-    else:
         try:
-            deck_name = request.json.get('deck')
+            all_decks = Deck.query.all()
+            deck_names = [deck.name for deck in all_decks]
+            print(f"GET request returning deck names: {deck_names}")
+            return jsonify(deck_names)
+        except Exception as e:
+            print(f"Error in GET /api/decks: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+    else:  # POST
+        try:
+            print(f"POST /api/decks request received")
+            print(f"Content-Type: {request.headers.get('Content-Type')}")
+            print(f"Request data: {request.data}")
+            
+            # Handle request data
+            data = None
+            
+            # First try to get JSON from request directly
+            if request.is_json:
+                data = request.json
+                print(f"Got JSON data: {data}")
+            else:
+                # Fallback: try to parse JSON from request body
+                try:
+                    data = json.loads(request.data)
+                    print(f"Parsed JSON from request data: {data}")
+                except Exception as e:
+                    print(f"Could not parse JSON from request data: {str(e)}")
+                    
+                    # If the data couldn't be parsed, log the raw data for debugging
+                    print(f"Raw request data: {request.data}")
+                    
+                    # As a last resort, try to get form data
+                    if request.form:
+                        print(f"Form data: {request.form}")
+                        if 'deck' in request.form:
+                            data = {'deck': request.form.get('deck')}
+                            print(f"Using form data: {data}")
+                        else:
+                            return jsonify({'error': 'Invalid form data format'}), 400
+                    else:
+                        return jsonify({'error': 'Invalid JSON or Content-Type not set to application/json'}), 415
+            
+            if not data:
+                return jsonify({'error': 'No data provided'}), 400
+                
+            deck_name = data.get('deck')
+            print(f"Deck name from request: {deck_name}")
+            
             if not deck_name:
                 return jsonify({'error': 'Deck name is required'}), 400
                 
             # Check if deck already exists
-            if Deck.query.filter_by(name=deck_name).first():
+            existing = Deck.query.filter_by(name=deck_name).first()
+            if existing:
+                print(f"Deck '{deck_name}' already exists")
                 return jsonify({'error': 'Deck already exists'}), 409
                 
             # Create new deck
+            print(f"Creating new deck: '{deck_name}'")
             new_deck = Deck(name=deck_name)
             db.session.add(new_deck)
             db.session.commit()
+            print(f"Deck '{deck_name}' created successfully")
             
-            return jsonify({'success': True, 'message': f'Deck "{deck_name}" created successfully'})
+            # Return success response
+            response = jsonify({'success': True, 'message': f'Deck "{deck_name}" created successfully'})
+            print(f"Sending response: {response.data}")
+            return response
         except Exception as e:
             # Roll back transaction in case of error
             db.session.rollback()
             print(f"Error creating deck: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             return jsonify({'error': f'Failed to create deck: {str(e)}'}), 500
 
 @app.route('/api/cards/<deck>', methods=['GET', 'POST'])
@@ -220,95 +372,163 @@ def cards(deck):
 
 @app.route('/api/next_card/<deck>/<user>', methods=['POST'])
 def next_card(deck, user):
+    print(f"@@@@@@ Request for next card - deck: {deck}, user: {user}")
+    
     # Get or create user
     user_obj = User.query.filter_by(username=user).first()
     if not user_obj:
+        print(f"@@@@@@ Creating new user: {user}")
         user_obj = User(username=user)
         db.session.add(user_obj)
         db.session.commit()
     
     # Get deck
     deck_obj = Deck.query.filter_by(name=deck).first()
-    if not deck_obj or not deck_obj.cards:
-        return jsonify({'error': 'No cards in deck'}), 404
+    if not deck_obj:
+        print(f"@@@@@@ Error: Deck not found: {deck}")
+        return jsonify({'success': False, 'error': f'Deck "{deck}" not found'}), 404
+        
+    if not deck_obj.cards or len(deck_obj.cards) == 0:
+        print(f"@@@@@@ Error: No cards in deck {deck}")
+        return jsonify({'success': False, 'error': f'No cards in deck "{deck}". Please add cards before studying.'}), 400
+    
+    print(f"@@@@@@ Found {len(deck_obj.cards)} cards in deck {deck}")
     
     # Use the scheduler to get the next card
-    scheduler = Scheduler(user_obj, deck_obj.cards)
-    next_card = scheduler.select_next_card()
-    
-    if not next_card:
-        return jsonify({'error': 'No cards available'}), 404
+    try:
+        scheduler = Scheduler(user_obj, deck_obj.cards)
+        next_card = scheduler.select_next_card()
+        
+        if not next_card:
+            print(f"@@@@@@ Error: Scheduler returned no cards")
+            return jsonify({'success': False, 'error': 'No cards available for study at this time.'}), 200
+            
+        print(f"@@@@@@ Selected card ID: {next_card.id}")
+    except Exception as e:
+        print(f"@@@@@@ Error selecting next card: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': f'Error selecting next card: {str(e)}'}), 500
     
     # Get interval prediction
-    interval, _ = sample_next_review(next_card, user_obj)
-    
-    stats = {
-        "next_interval": interval,
-        "pomodoro_time": user_obj.pomodoro_length
-    }
-    
-    return jsonify({**next_card.to_dict(), "stats": stats})
+    try:
+        interval, _ = sample_next_review(next_card, user_obj)
+        
+        stats = {
+            "next_interval": interval,
+            "pomodoro_time": user_obj.pomodoro_length
+        }
+        
+        # Convert card to dict to ensure all fields are serializable
+        card_dict = next_card.to_dict()
+        
+        print(f"@@@@@@ Returning card data for card ID: {next_card.id}")
+        
+        # Return in the structure expected by the frontend
+        return jsonify({
+            "success": True,
+            "next_card": {**card_dict, "stats": stats}
+        })
+    except Exception as e:
+        print(f"@@@@@@ Error preparing card response: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': f'Error preparing card: {str(e)}'}), 500
 
 @app.route('/api/review/<deck>/<user>', methods=['POST'])
 def review_card(deck, user):
-    data = request.json
-    card_id = data.get('id')
-    rating = data.get('rating')
-    session_id = data.get('session_id')
-    
-    # Get or create user
-    user_obj = User.query.filter_by(username=user).first()
-    if not user_obj:
-        user_obj = User(username=user)
-        db.session.add(user_obj)
-    
-    # Find the card
-    card = Card.query.get(card_id)
-    if not card:
-        return jsonify({'error': 'Card not found'}), 404
-    
-    # Use active session from the user profile if not explicitly provided
-    if not session_id and user_obj.active_session_id:
-        session_id = user_obj.active_session_id
-    
-    # Add the review
-    card.add_review(rating, session_id)
-    user_obj.add_recall(0, rating >= 7)  # Simple success/fail based on rating
-    
-    # If there's an active session, track the review there as well
-    session = None
-    if session_id:
-        session = Session.query.get(session_id)
-        if session:
-            session.add_review(card_id, rating)
-    
-    db.session.commit()
-    
-    # Get the deck object
-    deck_obj = Deck.query.filter_by(name=deck).first()
-    if not deck_obj:
-        return jsonify({'error': 'Deck not found'}), 404
-    
-    # Get next card using scheduler
-    scheduler = Scheduler(user_obj, deck_obj.cards)
-    next_card = scheduler.select_next_card()
-    
-    if not next_card:
-        return jsonify({'error': 'No more cards available'}), 404
-    
-    # Get interval prediction for next card
-    interval, _ = sample_next_review(next_card, user_obj)
-    
-    stats = {
-        "next_interval": interval,
-        "pomodoro_time": user_obj.pomodoro_length,
-        "session_id": session_id
-    }
-    
-    return jsonify({
-        'success': True,
-        'next_card': {**next_card.to_dict(), "stats": stats}
-    })
+    print(f"@@@@@@ Receiving review for deck: {deck}, user: {user}")
+    try:
+        data = request.json
+        print(f"@@@@@@ Review data: {data}")
+        
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        card_id = data.get('id')
+        rating = data.get('rating')
+        session_id = data.get('session_id')
+        
+        if card_id is None:
+            return jsonify({'success': False, 'error': 'Card ID is required'}), 400
+            
+        if rating is None:
+            return jsonify({'success': False, 'error': 'Rating is required'}), 400
+            
+        # Get or create user
+        user_obj = User.query.filter_by(username=user).first()
+        if not user_obj:
+            user_obj = User(username=user)
+            db.session.add(user_obj)
+            db.session.commit()
+        
+        # Find the card
+        card = Card.query.get(card_id)
+        if not card:
+            return jsonify({'success': False, 'error': f'Card with ID {card_id} not found'}), 404
+        
+        # Use active session from the user profile if not explicitly provided
+        if not session_id and user_obj.active_session_id:
+            session_id = user_obj.active_session_id
+            print(f"@@@@@@ Using active session: {session_id}")
+        
+        # Add the review
+        card.add_review(rating, session_id)
+        user_obj.add_recall(0, rating >= 7)  # Simple success/fail based on rating
+        
+        # If there's an active session, track the review there as well
+        session = None
+        if session_id:
+            session = Session.query.get(session_id)
+            if session:
+                print(f"@@@@@@ Adding review to session: {session.name}")
+                session.add_review(card_id, rating)
+            else:
+                print(f"@@@@@@ Session not found: {session_id}")
+        
+        db.session.commit()
+        
+        # Get the deck object
+        deck_obj = Deck.query.filter_by(name=deck).first()
+        if not deck_obj:
+            return jsonify({'success': False, 'error': f'Deck {deck} not found'}), 404
+        
+        # Get next card using scheduler
+        print(f"@@@@@@ Getting next card after review")
+        scheduler = Scheduler(user_obj, deck_obj.cards)
+        next_card = scheduler.select_next_card()
+        
+        if not next_card:
+            print(f"@@@@@@ No more cards available for review")
+            return jsonify({
+                'success': True,
+                'error': 'No more cards available for review',
+                'next_card': None
+            })
+        
+        print(f"@@@@@@ Next card ID: {next_card.id}")
+        
+        # Get interval prediction for next card
+        interval, _ = sample_next_review(next_card, user_obj)
+        
+        stats = {
+            "next_interval": interval,
+            "pomodoro_time": user_obj.pomodoro_length,
+            "session_id": session_id
+        }
+        
+        # Convert card to dict to ensure all fields are serializable
+        card_dict = next_card.to_dict()
+        
+        return jsonify({
+            'success': True,
+            'next_card': {**card_dict, "stats": stats}
+        })
+    except Exception as e:
+        print(f"@@@@@@ Error in review_card: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'error': f'Error processing review: {str(e)}'}), 500
 
 @app.route('/api/sessions', methods=['GET'])
 def get_sessions():
@@ -337,39 +557,72 @@ def get_sessions():
 
 @app.route('/api/sessions', methods=['POST'])
 def create_session():
+    print("=== POST request to /api/sessions ===")
     data = request.json
     deck_name = data.get('deck')
     user_name = data.get('user', 'default')
     session_name = data.get('name')
     
+    print(f"Request data: deck={deck_name}, user={user_name}, name={session_name}")
+    
     if not deck_name:
+        print("Error: Deck is required")
         return jsonify({'error': 'Deck is required'}), 400
     
     # Get user
     user = User.query.filter_by(username=user_name).first()
     if not user:
+        print(f"Creating new user: {user_name}")
         user = User(username=user_name)
         db.session.add(user)
+    else:
+        print(f"Found existing user: {user_name} (id={user.id})")
     
     # Get deck
     deck = Deck.query.filter_by(name=deck_name).first()
     if not deck:
+        print(f"Error: Deck not found: {deck_name}")
         return jsonify({'error': 'Deck not found'}), 404
+    else:
+        print(f"Found deck: {deck_name} (id={deck.id})")
+        
+    # Check if deck has cards
+    if not deck.cards or len(deck.cards) == 0:
+        print(f"Error: Deck {deck_name} has no cards")
+        return jsonify({'error': 'This deck has no cards. Please add cards before studying.'}), 400
+    else:
+        print(f"Deck {deck_name} has {len(deck.cards)} cards")
     
     # Create session
     name = session_name or f"Session {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    print(f"Creating new session with name: {name}")
     session = Session(name=name, user_id=user.id, deck_id=deck.id)
     
-    # Link session to user
-    user.start_session(session.id)
-    
-    db.session.add(session)
-    db.session.commit()
-    
-    return jsonify({
-        'success': True,
-        'session': session.to_dict()
-    })
+    try:
+        # Add session to database first
+        db.session.add(session)
+        db.session.commit()
+        print(f"Created session successfully with ID: {session.id}")
+        
+        # Link session to user AFTER committing to ensure session.id is valid
+        print(f"Linking session {session.id} to user {user.username}")
+        user.start_session(session.id)
+        db.session.commit()
+        print(f"Successfully linked session to user")
+        
+        session_dict = session.to_dict()
+        print(f"Session data: {session_dict}")
+        
+        return jsonify({
+            'success': True,
+            'session': session_dict
+        })
+    except Exception as e:
+        print(f"Error creating session: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        db.session.rollback()
+        return jsonify({'success': False, 'error': f'Error creating session: {str(e)}'}), 500
 
 @app.route('/api/sessions/<session_id>', methods=['GET'])
 def get_session(session_id):
@@ -562,11 +815,125 @@ def update_card(deck, card_id):
         print(f"Error updating card: {str(e)}")
         return jsonify({'error': f'Failed to update card: {str(e)}'}), 500
 
+# ------------------- DIAGNOSTIC ENDPOINTS -------------------
+
+@app.route('/api/diagnostic/deck/<deck>', methods=['GET'])
+def diagnostic_deck(deck):
+    try:
+        # Get deck
+        deck_obj = Deck.query.filter_by(name=deck).first()
+        if not deck_obj:
+            return jsonify({
+                "error": f"Deck '{deck}' not found",
+                "available_decks": [d.name for d in Deck.query.all()]
+            }), 404
+            
+        # Get cards
+        cards = deck_obj.cards
+        
+        return jsonify({
+            "success": True,
+            "deck_info": {
+                "id": deck_obj.id,
+                "name": deck_obj.name,
+                "date_created": deck_obj.date_created.isoformat(),
+                "card_count": len(cards),
+                "cards": [{
+                    "id": card.id,
+                    "front": card.front,
+                    "back": card.back,
+                    "front_image": card.front_image,
+                    "back_image": card.back_image,
+                    "card_type": card.card_type,
+                    "date_added": card.date_added.isoformat(),
+                    "review_count": len(card.reviews),
+                    "is_mature": card.is_mature,
+                    "mature_streak": card.mature_streak,
+                    "last_wrong": card.last_wrong.isoformat() if card.last_wrong else None,
+                    "last_review": (max((r.timestamp for r in card.reviews), default=None).isoformat() if card.reviews else None)
+                } for card in cards]
+            }
+        })
+    except Exception as e:
+        print(f"Error in diagnostic endpoint: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/diagnostic/session/<user>', methods=['GET'])
+def diagnostic_session(user):
+    try:
+        # Get user
+        user_obj = User.query.filter_by(username=user).first()
+        if not user_obj:
+            return jsonify({
+                "error": f"User '{user}' not found",
+                "available_users": [u.username for u in User.query.all()]
+            }), 404
+            
+        # Get active session if any
+        active_session = None
+        if user_obj.active_session_id:
+            active_session = Session.query.get(user_obj.active_session_id)
+        
+        return jsonify({
+            "success": True,
+            "user_info": {
+                "id": user_obj.id,
+                "username": user_obj.username,
+                "global_decay": user_obj.global_decay,
+                "pomodoro_length": user_obj.pomodoro_length,
+                "active_session_id": user_obj.active_session_id,
+                "active_session": {
+                    "id": active_session.id,
+                    "name": active_session.name,
+                    "start_time": active_session.start_time.isoformat(),
+                    "end_time": active_session.end_time.isoformat() if active_session.end_time else None,
+                    "review_count": len(active_session.reviews)
+                } if active_session else None,
+                "recall_history": user_obj.get_recall_history()
+            }
+        })
+    except Exception as e:
+        print(f"Error in diagnostic endpoint: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/diagnostic/db', methods=['GET'])
+def diagnostic_db():
+    try:
+        return jsonify({
+            "success": True,
+            "database_info": {
+                "decks": [{
+                    "id": deck.id,
+                    "name": deck.name,
+                    "card_count": len(deck.cards)
+                } for deck in Deck.query.all()],
+                "users": [{
+                    "id": user.id,
+                    "username": user.username,
+                    "active_session_id": user.active_session_id
+                } for user in User.query.all()],
+                "sessions": [{
+                    "id": session.id,
+                    "name": session.name,
+                    "user": session.user_profile.username,
+                    "deck": session.deck_info.name,
+                    "review_count": len(session.reviews)
+                } for session in Session.query.all()]
+            }
+        })
+    except Exception as e:
+        print(f"Error in diagnostic endpoint: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
 # ------------------- DB INITIALIZATION -------------------
 
 # Note: We've removed db.create_all() to let migrations handle the database schema
 
 if __name__ == '__main__':
-    # Call create_default_user when the app starts
-    create_default_user()
-    app.run(port=5001, debug=True)
+    app.run(port=5002, debug=True)  # Changed port from 5001 to 5002
