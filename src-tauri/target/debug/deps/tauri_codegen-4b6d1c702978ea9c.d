@@ -1,0 +1,11 @@
+/Users/leo/bayesFlashcards/src-tauri/target/debug/deps/libtauri_codegen-4b6d1c702978ea9c.rmeta: /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/lib.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/context.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/embedded_assets.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/mod.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/blake3_reference.rs
+
+/Users/leo/bayesFlashcards/src-tauri/target/debug/deps/libtauri_codegen-4b6d1c702978ea9c.rlib: /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/lib.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/context.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/embedded_assets.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/mod.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/blake3_reference.rs
+
+/Users/leo/bayesFlashcards/src-tauri/target/debug/deps/tauri_codegen-4b6d1c702978ea9c.d: /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/lib.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/context.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/embedded_assets.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/mod.rs /Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/blake3_reference.rs
+
+/Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/lib.rs:
+/Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/context.rs:
+/Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/embedded_assets.rs:
+/Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/mod.rs:
+/Users/leo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-codegen-1.4.6/src/vendor/blake3_reference.rs:

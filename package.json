@@ -1,0 +1,30 @@
+{
+  "name": "bayesian-flashcards",
+  "version": "0.1.0",
+  "description": "Bayesian Adaptive SRS Flashcard System",
+  "main": "src-tauri/src/main.rs",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:debug": "tauri build --debug",
+    "frontend:dev": "cd frontend && npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "backend:dev": "cd backend && python app.py",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "build": "npm run frontend:build && npm run tauri:build",
+    "setup": "npm run install:frontend && npm run install:backend && npm run install:tauri",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && pip install -r requirements.txt",
+    "install:tauri": "cargo install tauri-cli",
+    "bundle:python": "node scripts/bundle-python.js"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.0.0",
+    "fs-extra": "^11.3.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.0.0",
+    "concurrently": "^7.6.0"
+  }
+}
