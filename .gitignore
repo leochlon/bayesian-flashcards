@@ -84,3 +84,6 @@ logs/
 *.tmp
 *.temp
 .cache/
+
+# DMG files (disk images)
+*.dmg
