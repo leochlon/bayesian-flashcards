@@ -52,3 +52,35 @@ yarn-error.log*
 .vscode/
 *.swp
 *.swo
+
+# Tauri
+src-tauri/target/
+src-tauri/Cargo.lock
+python-dist/
+.tauri/
+
+# Rust/Cargo
+target/
+Cargo.lock
+
+# Frontend build (if not already covered)
+frontend/build/
+frontend/dist/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

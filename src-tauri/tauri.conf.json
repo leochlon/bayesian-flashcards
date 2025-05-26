@@ -1,132 +1,46 @@
 {
+  "$schema": "https://schema.tauri.app/config/2.0.0",
+  "productName": "Bayesian Flashcards",
+  "version": "0.1.0",
+  "identifier": "com.bayesflashcards.app",
   "build": {
-    "beforeDevCommand": "npm run frontend:dev",
-    "beforeBuildCommand": "npm run frontend:build",
-    "devPath": "http://localhost:3000",
-    "distDir": "../frontend/build",
-    "withGlobalTauri": false
+    "beforeBuildCommand": "cd frontend && npm run build",
+    "beforeDevCommand": "cd frontend && BROWSER=none PORT=3001 npm start",
+    "devUrl": "http://localhost:3001",
+    "frontendDist": "../frontend/build"
   },
-  "package": {
-    "productName": "Bayesian Flashcards",
-    "version": "0.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true,
-        "execute": true,
-        "sidecar": true,
-        "scope": [
-          {
-            "name": "python-backend",
-            "cmd": "python",
-            "args": ["backend/app.py"]
-          }
-        ]
-      },
-      "fs": {
-        "all": true,
-        "readFile": true,
-        "writeFile": true,
-        "readDir": true,
-        "copyFile": true,
-        "createDir": true,
-        "removeDir": true,
-        "removeFile": true,
-        "renameFile": true,
-        "exists": true,
-        "scope": ["$APPDATA", "$LOCALDATA", "$RESOURCE", "$DESKTOP", "$DOCUMENT"]
-      },
-      "dialog": {
-        "all": true,
-        "ask": true,
-        "confirm": true,
-        "message": true,
-        "open": true,
-        "save": true
-      },
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "startDragging": true
-      },
-      "process": {
-        "all": false,
-        "exit": true,
-        "relaunch": true,
-        "relaunchDangerousAllowSymlinkMacos": false
-      },
-      "protocol": {
-        "all": true,
-        "asset": true,
-        "assetScope": ["$APPDATA", "$RESOURCE"]
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.leonchlon.bayesflashcards",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "resources": [
-        "python-dist/**/*",
-        "python-dist/backend/**/*"
-      ],
-      "copyright": "Copyright © 2024 Leon Chlon",
-      "category": "Education",
-      "shortDescription": "Bayesian Adaptive SRS Flashcard System",
-      "longDescription": "A research-grade spaced repetition system using Bayesian memory modeling for optimal learning, with ADHD-aware adaptive features.",
-      "macOS": {
-        "frameworks": [],
-        "minimumSystemVersion": "10.13",
-        "exceptionDomain": "",
-        "signingIdentity": null,
-        "providerShortName": null,
-        "entitlements": null
-      },
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
-      },
-      "deb": {
-        "depends": ["python3", "python3-pip"]
-      },
-      "appimage": {
-        "bundleMediaFramework": false
-      }
-    },
+  "app": {
     "security": {
-      "csp": null
+      "csp": null,
+      "capabilities": ["main-capability"]
     },
     "windows": [
       {
         "fullscreen": false,
+        "height": 600,
         "resizable": true,
         "title": "Bayesian Flashcards",
-        "width": 1200,
-        "height": 800,
-        "minWidth": 800,
-        "minHeight": 600,
-        "center": true,
-        "decorations": true,
-        "alwaysOnTop": false,
-        "skipTaskbar": false,
-        "theme": "Dark"
+        "width": 800,
+        "minWidth": 400,
+        "minHeight": 300
       }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "targets": "all",
+    "resources": [
+      "python-dist/backend/*",
+      "python-dist/python-venv/**",
+      "python-dist/python-backend"
     ]
   }
 }

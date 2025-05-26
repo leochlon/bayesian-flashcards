@@ -142,6 +142,51 @@ const ImageDropZone = ({ onDrop, image, onRemove, side }) => {
   );
 };
 
+// StudySessionModal component for entering session name
+const StudySessionModal = ({ onClose, onSubmit }) => {
+  const [sessionName, setSessionName] = useState(`Session ${new Date().toLocaleString()}`);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      onSubmit(sessionName.trim() || `Session ${new Date().toLocaleString()}`);
+    } catch (error) {
+      console.error("Error submitting session name:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content create-deck-modal" onClick={e => e.stopPropagation()}>
+        <h2>New Study Session</h2>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="session-name">Enter a name for this study session:</label>
+          <input
+            id="session-name"
+            type="text"
+            value={sessionName}
+            onChange={(e) => setSessionName(e.target.value)}
+            placeholder="Enter session name"
+            className="deck-name-input"
+            autoFocus
+          />
+          <div className="modal-buttons">
+            <button type="button" onClick={onClose} className="cancel-button">Cancel</button>
+            <button type="submit" className="create-button" disabled={isSubmitting}>
+              {isSubmitting ? 'Starting...' : 'Start Session'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [decks, setDecks] = useState([]);
   const [currentDeck, setCurrentDeck] = useState(null);
@@ -158,6 +203,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
+  const [showStudySessionModal, setShowStudySessionModal] = useState(false);
 
   const [timer, setTimer] = useState(60); // 1 minute default
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -247,8 +293,18 @@ function App() {
       window.removeEventListener('message', handlePostMessage);
     };
   }, [decks]); // Re-run when decks list changes
-useEffect(() => {
-    axios.get(`${API}/decks`).then(res => setDecks(res.data));
+  
+  useEffect(() => {
+    console.log("Component mounted, loading decks...");
+    console.log("API URL:", `${API}/decks`);
+    axios.get(`${API}/decks`)
+      .then(res => {
+        console.log("Decks loaded successfully:", res.data);
+        setDecks(res.data);
+      })
+      .catch(error => {
+        console.error("Error loading decks:", error);
+      });
   }, []);
 
   // Load deck cards when deck changes
@@ -281,34 +337,11 @@ useEffect(() => {
   }, [view, stopTimer, resetTimer]);
 
   // Session management functions
-  const startStudySession = async () => {
+  const startStudySession = async (sessionName) => {
     try {
-      let sessionName;
-      
-      if (window.__TAURI__) {
-        // Use Tauri dialog
-        sessionName = await invoke('show_prompt_dialog', {
-          title: 'Enter a name for this study session (or leave blank for default):',
-          defaultValue: `Session ${new Date().toLocaleString()}`
-        });
-        
-        if (sessionName === null) {
-          setView('decks');
-          return;
-        }
-      } else {
-        // Use browser prompt
-        sessionName = prompt("Enter a name for this study session (or leave blank for default):");
-        if (sessionName === null) {
-          setView('decks');
-          return;
-        }
-      }
-      
       // Check if currentDeck is valid
       if (!currentDeck) {
         alert("Please select a deck before studying.");
-        setView('decks');
         return;
       }
       
@@ -776,7 +809,7 @@ useEffect(() => {
           className="study-button"
           onClick={() => {
             if (currentDeck) {
-              startStudySession();
+              setShowStudySessionModal(true);
             } else {
               alert("Please select a deck first");
             }
@@ -1312,6 +1345,17 @@ useEffect(() => {
           onSubmit={(name) => {
             handleCreateDeck(name);
             setShowCreateDeckModal(false);
+          }}
+        />
+      )}
+
+      {/* Study session modal */}
+      {showStudySessionModal && (
+        <StudySessionModal 
+          onClose={() => setShowStudySessionModal(false)}
+          onSubmit={(name) => {
+            startStudySession(name);
+            setShowStudySessionModal(false);
           }}
         />
       )}

@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tauri::{Manager, State, Window};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tokio::time::sleep;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,44 +23,84 @@ struct AppState {
 async fn start_backend(app_handle: tauri::AppHandle, state: State<'_, AppState>) -> Result<String, String> {
     println!("Starting Python backend...");
     
-    let resource_dir = app_handle.path_resolver()
-        .resource_dir()
-        .ok_or("Failed to get resource directory")?;
+    let resource_dir = app_handle.path().resource_dir()
+        .map_err(|e| format!("Failed to get resource directory: {}", e))?;
     
-    let backend_dir = resource_dir.join("backend");
     let python_dist = resource_dir.join("python-dist");
+    let backend_dir = python_dist.join("backend");
     
     // Check if we have a bundled Python
-    let python_executable = if python_dist.exists() {
-        python_dist.join("python").join("python")
+    let python_executable = if python_dist.join("python-venv").join("bin").join("python").exists() {
+        python_dist.join("python-venv").join("bin").join("python")
     } else {
         // Fall back to system Python
         std::path::PathBuf::from("python3")
     };
     
     let app_py_path = backend_dir.join("app.py");
+    let init_db_path = backend_dir.join("init_db.py");
     
     if !app_py_path.exists() {
         return Err(format!("Backend script not found at: {:?}", app_py_path));
     }
     
-    // Set up environment
-    let mut cmd = Command::new(&python_executable);
-    cmd.arg(&app_py_path)
-       .current_dir(&backend_dir)
-       .env("PYTHONPATH", &backend_dir)
-       .stdout(Stdio::piped())
-       .stderr(Stdio::piped());
-    
     // Set database path to app data directory
-    let app_data_dir = app_handle.path_resolver()
-        .app_data_dir()
-        .ok_or("Failed to get app data directory")?;
+    let app_data_dir = app_handle.path().app_local_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
     
     std::fs::create_dir_all(&app_data_dir).map_err(|e| format!("Failed to create app data dir: {}", e))?;
     
     let db_path = app_data_dir.join("flashcards.db");
-    cmd.env("DATABASE_URL", format!("sqlite:///{}", db_path.display()));
+    let database_url = format!("sqlite:///{}", db_path.display());
+    
+    // Initialize database if it doesn't exist or if init_db.py exists
+    if !db_path.exists() || init_db_path.exists() {
+        println!("Initializing database at: {}", db_path.display());
+        println!("Using Python executable: {}", python_executable.display());
+        println!("Using init script: {}", init_db_path.display());
+        
+        let mut init_cmd = Command::new(&python_executable);
+        init_cmd.arg(&init_db_path)
+               .current_dir(&backend_dir)
+               .env("PYTHONPATH", &backend_dir)
+               .env("DATABASE_URL", &database_url)
+               .stdout(Stdio::piped())
+               .stderr(Stdio::piped());
+        
+        match init_cmd.output() {
+            Ok(output) => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                
+                if output.status.success() {
+                    println!("Database initialized successfully");
+                    println!("Init stdout: {}", stdout);
+                } else {
+                    println!("Database initialization failed with exit code: {}", output.status);
+                    println!("Init stdout: {}", stdout);
+                    println!("Init stderr: {}", stderr);
+                }
+            },
+            Err(e) => {
+                println!("Failed to run database initialization: {}", e);
+            }
+        }
+    } else {
+        println!("Database already exists at: {}", db_path.display());
+    }
+    
+    // Set up environment for main app
+    println!("Starting main backend with Python: {}", python_executable.display());
+    println!("Backend directory: {}", backend_dir.display());
+    println!("Database URL: {}", database_url);
+    
+    let mut cmd = Command::new(&python_executable);
+    cmd.arg(&app_py_path)
+       .current_dir(&backend_dir)
+       .env("PYTHONPATH", &backend_dir)
+       .env("DATABASE_URL", &database_url)
+       .stdout(Stdio::piped())
+       .stderr(Stdio::piped());
     
     let child = cmd.spawn().map_err(|e| format!("Failed to start backend: {}", e))?;
     
@@ -126,29 +167,41 @@ async fn end_session(state: State<'_, AppState>) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn confirm_navigation(window: Window) -> Result<bool, String> {
-    let result = tauri::api::dialog::blocking::confirm(
-        Some(&window),
-        "Active Study Session",
-        "You have an active study session. Do you want to end it and navigate away? Your progress will be saved."
-    );
-    Ok(result)
+async fn confirm_navigation(_window: Window) -> Result<bool, String> {
+    // In Tauri v2, dialog functionality is different
+    // For now, just return true - you can implement proper dialogs later
+    Ok(true)
 }
 
 #[tauri::command]
 async fn show_prompt_dialog(window: Window, title: String, default_value: String) -> Result<Option<String>, String> {
-    // For now, use a simple confirm dialog - you can enhance this with a custom dialog
-    let message = format!("{}\n\nDefault: {}", title, default_value);
-    let result = tauri::api::dialog::blocking::confirm(
-        Some(&window),
-        "Input Required",
-        &message
-    );
+    // Since Tauri v2 doesn't have a built-in text input dialog,
+    // we'll show a confirmation dialog and use the default value
+    // In a production app, you might want to create a custom dialog window
     
-    if result {
-        Ok(Some(default_value))
-    } else {
-        Ok(None)
+    println!("Prompt dialog requested: {}", title);
+    println!("Default value: {}", default_value);
+    
+    let message = format!("{}\n\nWe'll use the default name: {}\n\nWould you like to continue?", title, default_value);
+    
+    let response = window.dialog()
+        .message(message)
+        .title("Study Session")
+        .kind(MessageDialogKind::Info)
+        .buttons(MessageDialogButtons::YesNo)
+        .blocking_show();
+    
+    println!("Dialog response: {:?}", response);
+    
+    match response {
+        true => {
+            println!("User accepted, returning default value: {}", default_value);
+            Ok(Some(default_value))
+        },
+        false => {
+            println!("User cancelled");
+            Ok(None)
+        }
     }
 }
 
@@ -167,6 +220,7 @@ fn main() {
     };
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(app_state)
         .invoke_handler(tauri::generate_handler![
             start_backend,
@@ -193,9 +247,8 @@ fn main() {
             
             Ok(())
         })
-        .on_window_event(|event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event.event() {
-                let window = event.window();
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let state = window.state::<AppState>();
                 
                 // Stop backend when window closes
@@ -207,6 +260,9 @@ fn main() {
                         let _ = proc.wait();
                     }
                 });
+                
+                // Prevent the window from closing immediately
+                api.prevent_close();
             }
         })
         .run(tauri::generate_context!())

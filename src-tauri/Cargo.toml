@@ -2,27 +2,34 @@
 name = "bayes-flashcards"
 version = "0.1.0"
 description = "Bayesian Adaptive SRS Flashcard System"
-authors = ["Leon Chlon"]
-license = "MIT"
-repository = "https://github.com/yourusername/bayesFlashcards"
+authors = ["you"]
+license = ""
+repository = ""
+default-run = "bayes-flashcards"
 edition = "2021"
+rust-version = "1.60"
 
 [build-dependencies]
-tauri-build = { version = "1.0", features = [] }
+tauri-build = { version = "2.0", features = [] }
 
 [dependencies]
-tauri = { version = "1.0", features = [ "window-hide", "shell-execute", "window-minimize", "process-exit", "window-start-dragging", "protocol-all", "window-close", "window-show", "shell-sidecar", "window-unmaximize", "window-maximize", "window-unminimize", "process-relaunch", "shell-open", "fs-all", "dialog-all"] }
-serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2.0", features = [] }
+tauri-plugin-fs = "2.0"
+tauri-plugin-dialog = "2.0"
+tauri-plugin-shell = "2.0"
+tauri-plugin-http = "2.0"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
-which = "4.0"
 tempfile = "3.0"
 zip = "0.6"
+which = "4.0"
 
 [features]
-default = ["custom-protocol"]
-custom-protocol = ["tauri/custom-protocol"]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]
 
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-tauri = { version = "1.0", features = ["api-all", "shell-open", "window-all", "fs-all", "dialog-all", "process-all"] }
+[[bin]]
+name = "bayes-flashcards"
+path = "src/main.rs"

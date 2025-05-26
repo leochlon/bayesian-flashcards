@@ -20,11 +20,11 @@
     "bundle:python": "node scripts/bundle-python.js"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0",
+    "@tauri-apps/api": "^2.0.0",
     "fs-extra": "^11.3.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.0.0",
+    "@tauri-apps/cli": "^2.0.0",
     "concurrently": "^7.6.0"
   }
 }

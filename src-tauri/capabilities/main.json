@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.0.0",
+  "identifier": "main-capability",
+  "description": "Capability for the main application",
+  "context": "local",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "dialog:allow-open",
+    "dialog:allow-save", 
+    "fs:allow-read-file",
+    "fs:allow-write-file",
+    "fs:allow-read-dir",
+    "fs:allow-copy-file",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-rename",
+    "fs:allow-exists",
+    "fs:allow-stat",
+    "fs:scope-app",
+    "fs:scope-appdata",
+    "fs:scope-applocaldata",
+    "http:default"
+  ]
+}

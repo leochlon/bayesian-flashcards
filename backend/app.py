@@ -190,6 +190,27 @@ def health_check():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Add a database health check endpoint  
+@app.route('/api/health/db', methods=['GET'])
+def db_health_check():
+    try:
+        # Check if we can query the database
+        with app.app_context():
+            user_count = User.query.count()
+            deck_count = Deck.query.count()
+            return jsonify({
+                "status": "ok", 
+                "database": "connected",
+                "users": user_count,
+                "decks": deck_count
+            })
+    except Exception as e:
+        return jsonify({
+            "status": "error", 
+            "database": "disconnected",
+            "message": str(e)
+        }), 500
+
 # Database configuration
 db_path = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db'))
 print(f"Using database at: {db_path}")

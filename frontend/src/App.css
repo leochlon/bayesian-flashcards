@@ -1269,3 +1269,15 @@
 .retry-button:hover {
   background: #1e7db8;
 }
+
+/* Study Session Modal styles */
+.modal-content.create-deck-modal label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #ccc;
+}
+
+.modal-content.create-deck-modal input {
+  margin-bottom: 20px;
+}
