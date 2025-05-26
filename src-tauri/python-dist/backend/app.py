@@ -212,7 +212,25 @@ def db_health_check():
         }), 500
 
 # Database configuration
-db_path = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db'))
+def get_database_path():
+    """Get the appropriate database path for the current environment"""
+    # Check if we're running from a bundled app
+    if getattr(sys, 'frozen', False):
+        # Running in a PyInstaller bundle or similar
+        bundle_dir = os.path.dirname(sys.executable)
+        # Use a user-writable location
+        app_data_dir = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Bayesian Flashcards')
+        os.makedirs(app_data_dir, exist_ok=True)
+        db_path = os.path.join(app_data_dir, 'flashcards.db')
+        
+        # We're no longer copying an existing database - init_db.py will create a fresh one
+        
+        return 'sqlite:///' + db_path
+    else:
+        # Running in development mode
+        return os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db'))
+
+db_path = get_database_path()
 print(f"Using database at: {db_path}")
 app.config['SQLALCHEMY_DATABASE_URI'] = db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

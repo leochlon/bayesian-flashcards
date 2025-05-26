@@ -69,38 +69,46 @@ def check_database():
     """Check database file and basic connectivity"""
     colored_print("3. Checking database...", 'yellow')
     
-    # Check backend database
-    backend_db = Path('backend/flashcards.db')
+    # Check database file
+    app_data_dir = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Bayesian Flashcards')
+    backend_db = Path(os.path.join(app_data_dir, 'flashcards.db'))
+    dev_db = Path('backend/flashcards.db')
+    
     if backend_db.exists():
-        colored_print("✓ Backend database file exists", 'green')
+        colored_print(f"✓ Database file exists at {backend_db}", 'green')
         print(f"Size: {backend_db.stat().st_size} bytes")
-        
-        try:
-            conn = sqlite3.connect(str(backend_db))
-            cursor = conn.cursor()
-            
-            # Check tables
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = cursor.fetchall()
-            colored_print(f"✓ Database tables: {[t[0] for t in tables]}", 'green')
-            
-            # Check basic data
-            cursor.execute("SELECT COUNT(*) FROM deck;")
-            deck_count = cursor.fetchone()[0]
-            print(f"Decks in database: {deck_count}")
-            
-            cursor.execute("SELECT COUNT(*) FROM card;")
-            card_count = cursor.fetchone()[0]
-            print(f"Cards in database: {card_count}")
-            
-            conn.close()
-            return True
-            
-        except Exception as e:
-            colored_print(f"✗ Database connection error: {e}", 'red')
-            return False
+        db_to_check = backend_db
+    elif dev_db.exists():
+        colored_print(f"✓ Development database file exists at {dev_db}", 'green')
+        print(f"Size: {dev_db.stat().st_size} bytes")
+        db_to_check = dev_db
     else:
-        colored_print("✗ Backend database file missing", 'red')
+        colored_print("✗ Database file missing", 'red')
+        return False
+    
+    try:
+        conn = sqlite3.connect(str(db_to_check))
+        cursor = conn.cursor()
+        
+        # Check tables
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        colored_print(f"✓ Database tables: {[t[0] for t in tables]}", 'green')
+        
+        # Check basic data
+        cursor.execute("SELECT COUNT(*) FROM deck;")
+        deck_count = cursor.fetchone()[0]
+        print(f"Decks in database: {deck_count}")
+        
+        cursor.execute("SELECT COUNT(*) FROM card;")
+        card_count = cursor.fetchone()[0]
+        print(f"Cards in database: {card_count}")
+        
+        conn.close()
+        return True
+            
+    except Exception as e:
+        colored_print(f"✗ Database connection error: {e}", 'red')
         return False
 
 def test_api_endpoints():

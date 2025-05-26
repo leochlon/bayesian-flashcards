@@ -45,11 +45,23 @@ async fn start_backend(app_handle: tauri::AppHandle, state: State<'_, AppState>)
     }
     
     // Set database path to app data directory
-    let app_data_dir = app_handle.path().app_local_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
-    
+    let app_data_dir = if cfg!(target_os = "macos") {
+        // On macOS, use Application Support directory
+        let home = std::env::var("HOME").map_err(|e| format!("Failed to get HOME directory: {}", e))?;
+        let app_support = std::path::PathBuf::from(home)
+            .join("Library")
+            .join("Application Support")
+            .join("Bayesian Flashcards");
+        std::fs::create_dir_all(&app_support).map_err(|e| format!("Failed to create app dir: {}", e))?;
+        app_support
+    } else {
+        // On other platforms, use the default app_local_data_dir
+        app_handle.path().app_local_data_dir()
+            .map_err(|e| format!("Failed to get app data directory: {}", e))?
+    };
+
     std::fs::create_dir_all(&app_data_dir).map_err(|e| format!("Failed to create app data dir: {}", e))?;
-    
+
     let db_path = app_data_dir.join("flashcards.db");
     let database_url = format!("sqlite:///{}", db_path.display());
     

@@ -18,7 +18,7 @@ async function bundlePython() {
     try {
         // Create a virtual environment
         console.log('Creating virtual environment...');
-        execSync('python -m venv python-venv', { cwd: distDir });
+        execSync('python3.12 -m venv python-venv', { cwd: distDir });
         
         const venvPath = path.join(distDir, 'python-venv');
         const pythonExe = process.platform === 'win32' 
@@ -31,7 +31,8 @@ async function bundlePython() {
             stdio: 'inherit'
         });
         
-        // Copy backend files
+        // Copy backend files - Note: We're no longer bundling any existing database
+        // The init_db.py script will create a fresh database on first run
         console.log('Copying backend files...');
         fs.copySync(srcDir, path.join(distDir, 'backend'));
         

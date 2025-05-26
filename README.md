@@ -33,3 +33,77 @@ This project implements a research-grade, fully extensible **spaced repetition s
 
 ---
 
+# Bayes Flashcards
+
+A Bayesian adaptive spaced repetition system for flashcards.
+
+## Building the Application
+
+### Prerequisites
+
+- Node.js (v14 or later)
+- npm (v6 or later)
+- Rust and Cargo (for Tauri)
+- Python 3.7+ (for the backend)
+
+### Setup
+
+Install all dependencies with:
+
+```bash
+npm run setup
+```
+
+This will:
+- Install frontend npm dependencies
+- Install Python backend dependencies
+- Install Tauri CLI
+
+### Building
+
+To build the entire application:
+
+```bash
+npm run build
+```
+
+This command:
+1. Builds the React frontend
+2. Bundles the Python backend
+3. Packages everything into a Tauri desktop application
+
+### For Development
+
+Run the application in development mode:
+
+```bash
+npm run dev
+```
+
+Or run just the Tauri development environment:
+
+```bash
+npm run tauri:dev
+```
+
+### Manual Build Process
+
+If you need to run each step manually:
+
+1. Bundle the Python backend:
+   ```bash
+   npm run bundle:python
+   ```
+
+2. Build the React frontend:
+   ```bash
+   npm run frontend:build
+   ```
+
+3. Build the Tauri application:
+   ```bash
+   npm run tauri:build
+   ```
+
+The final executable will be available in the `src-tauri/target/release` directory.
+

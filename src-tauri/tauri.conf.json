@@ -40,7 +40,7 @@
     "resources": [
       "python-dist/backend/*",
       "python-dist/python-venv/**",
-      "python-dist/python-backend"
+      "python-dist/backend"
     ]
   }
 }

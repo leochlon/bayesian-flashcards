@@ -13,7 +13,15 @@ def init_database():
     """Initialize the database with all tables and default data"""
     try:
         # Get database path from environment or use default
-        db_url = os.environ.get('DATABASE_URL', 'sqlite:///flashcards.db')
+        db_url = os.environ.get('DATABASE_URL')
+        
+        # Set default path if not provided in environment
+        if not db_url:
+            # Use a path in the user's Application Support directory
+            app_data_dir = os.path.join(os.path.expanduser('~'), 'Library', 'Application Support', 'Bayesian Flashcards')
+            os.makedirs(app_data_dir, exist_ok=True)
+            db_path = os.path.join(app_data_dir, 'flashcards.db')
+            db_url = f'sqlite:///{db_path}'
         
         # Extract file path from SQLite URL
         if db_url.startswith('sqlite:///'):
