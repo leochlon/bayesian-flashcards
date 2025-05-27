@@ -1,6 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::process::{Command, Stdio};
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use tauri::{Manager, State};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 
@@ -10,318 +13,60 @@ struct AppState {
 
 #[tauri::command]
 async fn start_backend() -> Result<String, String> {
-    println!("Starting Python backend...");
+    println!("Starting backend server...");
     
-    // Get the resource directory
-    let resource_dir = std::env::current_exe()
-        .map_err(|e| format!("Failed to get current exe path: {}", e))?
-        .parent()
-        .ok_or("Failed to get parent directory")?
-        .join("../Resources");
-    
-    println!("Resource directory: {:?}", resource_dir);
-    
-    // Check if we're in development or production
-    let (python_script, python_exe, working_dir) = if resource_dir.exists() {
-        // Production - use bundled Python backend
-        let script = resource_dir.join("python-dist/backend/app.py");
-        let backend_dir = resource_dir.join("python-dist/backend");
-        
-        // Try multiple Python executable paths for macOS
-        let python_candidates = vec![
-            "/usr/bin/python3",
-            "/usr/local/bin/python3", 
-            "/opt/homebrew/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
-            "python3",
-            "python",
-        ];
-        
-        let mut found_python = None;
-        for candidate in python_candidates {
-            // First check if the executable exists (for absolute paths)
-            let exe_exists = if candidate.starts_with('/') {
-                std::path::Path::new(candidate).exists()
-            } else {
-                true // For relative paths like "python3", we'll test by running
-            };
-            
-            if exe_exists {
-                // Test if this Python can import required modules
-                println!("Testing Python candidate: {}", candidate);
-                let test_cmd = std::process::Command::new(candidate)
-                    .args(["-c", "import sys; print('Python version:', sys.version); import flask, sqlalchemy; print('Required modules available')"])
-                    .output();
-                
-                if let Ok(output) = test_cmd {
-                    if output.status.success() {
-                        println!("Found working Python: {}", candidate);
-                        println!("Python test output: {}", String::from_utf8_lossy(&output.stdout));
-                        found_python = Some(candidate.to_string());
-                        break;
-                    } else {
-                        println!("Python test failed for {}: {}", candidate, String::from_utf8_lossy(&output.stderr));
-                    }
-                } else {
-                    println!("Could not execute Python candidate: {}", candidate);
-                }
-            }
-        }
-        
-        let python = found_python.ok_or_else(|| {
-            "No suitable Python installation found. Please install Python 3.10+ with Flask and SQLAlchemy packages.\n\nYou can install the requirements using:\npip3 install flask sqlalchemy flask-sqlalchemy flask-migrate flask-cors requests numpy matplotlib".to_string()
-        })?;
-        
-        (script, python, backend_dir)
-    } else {
-        // Development - use backend in the current directory
-        let current_dir = std::env::current_dir()
-            .map_err(|e| format!("Failed to get current dir: {}", e))?;
-        let script = current_dir.join("backend/app.py");
-        let backend_dir = current_dir.join("backend");
-        (script, "python3".to_string(), backend_dir)
-    };
+    // Try to start the Python backend
+    let mut cmd = Command::new("python3");
+    cmd.arg("-m")
+       .arg("flask")
+       .arg("--app")
+       .arg("app.py")
+       .arg("run")
+       .arg("--host")
+       .arg("127.0.0.1")
+       .arg("--port")
+       .arg("5002")
+       .current_dir("../backend")
+       .stdout(Stdio::piped())
+       .stderr(Stdio::piped());
 
-    println!("Python script path: {:?}", python_script);
-    println!("Python executable: {}", python_exe);
-    println!("Working directory: {:?}", working_dir);
-    
-    if !python_script.exists() {
-        return Err(format!("Python script not found at: {:?}", python_script));
-    }
-    
-    if !working_dir.exists() {
-        return Err(format!("Backend directory not found at: {:?}", working_dir));
-    }
-    
-    // Start the Python process
-    let mut cmd = std::process::Command::new(&python_exe);
-    cmd.arg(python_script.to_str().unwrap());
-    
-    // Set working directory to the backend directory
-    cmd.current_dir(&working_dir);
-    
-    // Set environment variables to help with Python path issues
-    cmd.env("PYTHONPATH", &working_dir);
-    cmd.env("PYTHONUNBUFFERED", "1");
-    cmd.env("FLASK_ENV", "production");
-    
-    // Redirect output to help with debugging
-    cmd.stdout(std::process::Stdio::piped());
-    cmd.stderr(std::process::Stdio::piped());
-    
-    println!("Executing command: {:?}", cmd);
-    println!("Working directory: {:?}", working_dir);
-    
     match cmd.spawn() {
-        Ok(mut child) => {
-            println!("Python backend started with PID: {}", child.id());
+        Ok(child) => {
+            println!("Backend process started with PID: {}", child.id());
             
-            // Give the backend time to start up
-            tokio::time::sleep(tokio::time::Duration::from_secs(8)).await;
+            // Give the server time to start
+            thread::sleep(Duration::from_secs(3));
             
-            // Check if the process is still running
-            match child.try_wait() {
-                Ok(Some(status)) => {
-                    // Process has exited
-                    return Err(format!("Backend process exited immediately with status: {}", status));
-                }
-                Ok(None) => {
-                    // Process is still running, good!
-                    println!("Backend process is running");
-                }
-                Err(e) => {
-                    return Err(format!("Error checking backend process status: {}", e));
-                }
-            }
-            
-            // Test the connection
-            let test_result = test_backend_connection().await;
-            match test_result {
-                Ok(_) => {
-                    println!("Backend connection test successful");
-                    // Note: We're not storing the child process here because this function
-                    // is called independently. The process management should be handled 
-                    // by the calling setup function.
-                    Ok(format!("Backend started successfully with PID: {}", child.id()))
-                }
-                Err(e) => {
-                    println!("Backend connection test failed: {}", e);
-                    // Try to get error output from the process
-                    if let Ok(output) = child.wait_with_output() {
-                        let stderr = String::from_utf8_lossy(&output.stderr);
-                        let stdout = String::from_utf8_lossy(&output.stdout);
-                        return Err(format!("Backend process started but connection failed: {}\n\nProcess output:\nSTDOUT: {}\nSTDERR: {}", e, stdout, stderr));
-                    }
-                    Err(format!("Backend process started but connection failed: {}", e))
-                }
-            }
-        }
+            Ok("Backend started successfully".to_string())
+        },
         Err(e) => {
-            let error_msg = format!(
-                "Failed to start Python backend: {}.\n\nTroubleshooting:\n1. Ensure Python 3.10+ is installed\n2. Install required packages: pip3 install flask sqlalchemy flask-sqlalchemy flask-migrate flask-cors requests numpy matplotlib\n3. Check that the backend files exist at: {:?}",
-                e, working_dir
-            );
-            println!("{}", error_msg);
-            Err(error_msg)
-        }
-    }
-}
-
-// Function for managing backend with state
-async fn start_and_manage_backend(state: &AppState) -> Result<String, String> {
-    // Check if backend is already running
-    {
-        let process_guard = state.backend_process.lock().unwrap();
-        if process_guard.is_some() {
-            // Test if still accessible
-            if test_backend_connection().await.is_ok() {
-                return Ok("Backend already running".to_string());
-            }
-            // If not accessible, we'll restart it
-        }
-    }
-    
-    // Get the resource directory
-    let resource_dir = std::env::current_exe()
-        .map_err(|e| format!("Failed to get current exe path: {}", e))?
-        .parent()
-        .ok_or("Failed to get parent directory")?
-        .join("../Resources");
-    
-    println!("Resource directory: {:?}", resource_dir);
-    
-    // Check if we're in development or production
-    let (python_script, python_exe, working_dir) = if resource_dir.exists() {
-        // Production - use bundled Python backend
-        let script = resource_dir.join("python-dist/backend/app.py");
-        let backend_dir = resource_dir.join("python-dist/backend");
-        
-        // Try multiple Python executable paths for macOS
-        let python_candidates = vec![
-            "/usr/bin/python3",
-            "/usr/local/bin/python3", 
-            "/opt/homebrew/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
-            "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
-            "python3",
-            "python",
-        ];
-        
-        let mut found_python = None;
-        for candidate in python_candidates {
-            // First check if the executable exists (for absolute paths)
-            let exe_exists = if candidate.starts_with('/') {
-                std::path::Path::new(candidate).exists()
-            } else {
-                true // For relative paths like "python3", we'll test by running
-            };
+            println!("Failed to start backend: {}", e);
             
-            if exe_exists {
-                // Test if this Python can import required modules
-                println!("Testing Python candidate: {}", candidate);
-                let test_cmd = std::process::Command::new(candidate)
-                    .args(["-c", "import sys; print('Python version:', sys.version); import flask, sqlalchemy; print('Required modules available')"])
-                    .output();
+            // Try with python instead of python3
+            let mut cmd2 = Command::new("python");
+            cmd2.arg("-m")
+                .arg("flask")
+                .arg("--app")
+                .arg("app.py")
+                .arg("run")
+                .arg("--host")
+                .arg("127.0.0.1")
+                .arg("--port")
+                .arg("5002")
+                .current_dir("../backend")
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
                 
-                if let Ok(output) = test_cmd {
-                    if output.status.success() {
-                        println!("Found working Python: {}", candidate);
-                        println!("Python test output: {}", String::from_utf8_lossy(&output.stdout));
-                        found_python = Some(candidate.to_string());
-                        break;
-                    } else {
-                        println!("Python test failed for {}: {}", candidate, String::from_utf8_lossy(&output.stderr));
-                    }
-                } else {
-                    println!("Could not execute Python candidate: {}", candidate);
+            match cmd2.spawn() {
+                Ok(child) => {
+                    println!("Backend process started with PID: {}", child.id());
+                    thread::sleep(Duration::from_secs(3));
+                    Ok("Backend started successfully".to_string())
+                },
+                Err(e2) => {
+                    Err(format!("Failed to start backend with both python3 and python: {} / {}", e, e2))
                 }
             }
-        }
-        
-        let python = found_python.ok_or_else(|| {
-            "No suitable Python installation found. Please install Python 3.10+ with Flask and SQLAlchemy packages.\n\nYou can install the requirements using:\npip3 install flask sqlalchemy flask-sqlalchemy flask-migrate flask-cors requests numpy matplotlib".to_string()
-        })?;
-        
-        (script, python, backend_dir)
-    } else {
-        // Development - use backend in the current directory
-        let current_dir = std::env::current_dir()
-            .map_err(|e| format!("Failed to get current dir: {}", e))?;
-        let script = current_dir.join("backend/app.py");
-        let backend_dir = current_dir.join("backend");
-        (script, "python3".to_string(), backend_dir)
-    };
-
-    println!("Python script path: {:?}", python_script);
-    println!("Python executable: {}", python_exe);
-    println!("Working directory: {:?}", working_dir);
-    
-    if !python_script.exists() {
-        return Err(format!("Python script not found at: {:?}", python_script));
-    }
-    
-    if !working_dir.exists() {
-        return Err(format!("Backend directory not found at: {:?}", working_dir));
-    }
-    
-    // Start the Python process
-    let mut cmd = std::process::Command::new(&python_exe);
-    cmd.arg(python_script.to_str().unwrap());
-    
-    // Set working directory to the backend directory
-    cmd.current_dir(&working_dir);
-    
-    // Set environment variables to help with Python path issues
-    cmd.env("PYTHONPATH", &working_dir);
-    cmd.env("PYTHONUNBUFFERED", "1");
-    cmd.env("FLASK_ENV", "production");
-    
-    // Redirect output to help with debugging
-    cmd.stdout(std::process::Stdio::piped());
-    cmd.stderr(std::process::Stdio::piped());
-    
-    println!("Executing command: {:?}", cmd);
-    
-    match cmd.spawn() {
-        Ok(mut child) => {
-            let pid = child.id();
-            println!("Python backend started with PID: {}", pid);
-            
-            // Store the process in the state
-            {
-                let mut process_guard = state.backend_process.lock().unwrap();
-                *process_guard = Some(child);
-            }
-            
-            // Give the backend time to start up
-            tokio::time::sleep(tokio::time::Duration::from_secs(8)).await;
-            
-            // Test the connection
-            let test_result = test_backend_connection().await;
-            match test_result {
-                Ok(_) => {
-                    println!("Backend connection test successful");
-                    Ok(format!("Backend started successfully with PID: {}", pid))
-                }
-                Err(e) => {
-                    println!("Backend connection test failed: {}", e);
-                    Err(format!("Backend process started but connection failed: {}", e))
-                }
-            }
-        }
-        Err(e) => {
-            let error_msg = format!(
-                "Failed to start Python backend: {}.\n\nTroubleshooting:\n1. Ensure Python 3.10+ is installed\n2. Install required packages: pip3 install flask sqlalchemy flask-sqlalchemy flask-migrate flask-cors requests numpy matplotlib\n3. Check that the backend files exist at: {:?}",
-                e, working_dir
-            );
-            println!("{}", error_msg);
-            Err(error_msg)
         }
     }
 }

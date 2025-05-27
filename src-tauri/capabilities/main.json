@@ -6,24 +6,10 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "shell:allow-open",
     "dialog:allow-open",
     "dialog:allow-save", 
     "dialog:allow-message",
     "dialog:allow-confirm",
-    "dialog:allow-ask",
-    "fs:allow-read-file",
-    "fs:allow-write-file",
-    "fs:allow-read-dir",
-    "fs:allow-copy-file",
-    "fs:allow-mkdir",
-    "fs:allow-remove",
-    "fs:allow-rename",
-    "fs:allow-exists",
-    "fs:allow-stat",
-    "fs:scope-app",
-    "fs:scope-appdata",
-    "fs:scope-applocaldata",
-    "http:default"
+    "dialog:allow-ask"
   ]
 }

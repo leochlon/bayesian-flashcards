@@ -25,6 +25,18 @@ async function bundlePython() {
             ? path.join(venvPath, 'Scripts', 'python.exe')
             : path.join(venvPath, 'bin', 'python');
         
+        // Upgrade pip first to ensure compatibility
+        console.log('Upgrading pip...');
+        execSync(`"${pythonExe}" -m pip install --upgrade pip`, {
+            stdio: 'inherit'
+        });
+        
+        // Install setuptools and wheel first to ensure build dependencies are available
+        console.log('Installing build dependencies...');
+        execSync(`"${pythonExe}" -m pip install "setuptools>=69.0.0" "wheel>=0.42.0"`, {
+            stdio: 'inherit'
+        });
+        
         // Install dependencies
         console.log('Installing Python dependencies...');
         execSync(`"${pythonExe}" -m pip install -r "${path.join(srcDir, 'requirements.txt')}"`, {

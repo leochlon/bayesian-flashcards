@@ -1,35 +1,29 @@
 [package]
-name = "bayes-flashcards"
+name = "bayesian-flashcards"
 version = "0.1.0"
-description = "Bayesian Adaptive SRS Flashcard System"
+description = "A Tauri App"
 authors = ["you"]
 license = ""
 repository = ""
-default-run = "bayes-flashcards"
+default-run = "bayesian-flashcards"
 edition = "2021"
 rust-version = "1.60"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [build-dependencies]
-tauri-build = { version = "2.0", features = [] }
+tauri-build = { version = "2.0.0", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "2.0", features = [] }
-tauri-plugin-fs = "2.0"
-tauri-plugin-dialog = "2.0"
-tauri-plugin-shell = "2.0"
-tauri-plugin-http = "2.0"
-tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
-tempfile = "3.0"
-zip = "0.6"
-which = "4.0"
+tokio = { version = "1.0", features = ["full"] }
+tauri = { version = "2.0.0", features = [] }
+tauri-plugin-dialog = "2.0.0"
+reqwest = { version = "0.12", features = ["json"] }
 
 [features]
-default = [ "custom-protocol" ]
+# this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
+# If you use cargo directly instead of tauri's cli you can use this feature flag to switch between tauri's `dev` and `build` modes.
+# DO NOT REMOVE!!
 custom-protocol = [ "tauri/custom-protocol" ]
-
-[[bin]]
-name = "bayes-flashcards"
-path = "src/main.rs"

@@ -16,7 +16,12 @@ from io import BytesIO
 
 # ------------------- BAYESIAN MODEL -------------------
 
-def bayesian_posterior(card, prior_alpha=1.0, prior_beta=1.0):
+def bayesian_posterior(card, user_profile, prior_alpha=None, prior_beta=None):
+    if prior_alpha is None:
+        prior_alpha = user_profile.prior_alpha
+    if prior_beta is None:
+        prior_beta = user_profile.prior_beta
+    
     ratings = card.get_ratings()
     if not ratings:
         return prior_alpha, prior_beta
@@ -24,10 +29,13 @@ def bayesian_posterior(card, prior_alpha=1.0, prior_beta=1.0):
     fail = sum(r < 7 for r in ratings)
     return prior_alpha + success, prior_beta + fail
 
-def adaptive_decay(card, user_profile, base_decay=None, history_window=5):
+def adaptive_decay(card, user_profile, base_decay=None, history_window=None):
     reviews = card.reviews
     if base_decay is None:
         base_decay = user_profile.global_decay
+    if history_window is None:
+        history_window = user_profile.history_window
+    
     if len(reviews) < 2:
         return base_decay
         
@@ -50,9 +58,14 @@ def adaptive_decay(card, user_profile, base_decay=None, history_window=5):
         decay *= 0.6
     return max(0.001, decay)
 
-def sample_next_review(card, user_profile, target_recall=0.7, n_samples=3000):
+def sample_next_review(card, user_profile, target_recall=None, n_samples=None):
     try:
-        alpha, beta = bayesian_posterior(card)
+        if target_recall is None:
+            target_recall = user_profile.target_recall
+        if n_samples is None:
+            n_samples = user_profile.n_samples
+            
+        alpha, beta = bayesian_posterior(card, user_profile)
         decay = adaptive_decay(card, user_profile)
         p0_samples = np.random.beta(alpha, beta, n_samples)
         t_samples = []
@@ -122,9 +135,14 @@ class Scheduler:
     def __init__(self, user_profile, cards):
         self.user_profile = user_profile
         self.cards = cards
-        self.card_review_counts = {card.id: 0 for card in self.cards}  # For per-session review limits
+        self.card_review_counts = {card.id: 0 for card in self.cards}
 
-    def select_next_card(self, backlog_limit=50, max_reviews_per_card=2):
+    def select_next_card(self, backlog_limit=None, max_reviews_per_card=None):
+        if backlog_limit is None:
+            backlog_limit = self.user_profile.backlog_limit
+        if max_reviews_per_card is None:
+            max_reviews_per_card = self.user_profile.max_reviews_per_card
+            
         urgents = []
         news = []
         matures = []
@@ -159,7 +177,9 @@ class Scheduler:
         random.shuffle(news)
         random.shuffle(matures)
         
-        to_study = urgents[:backlog_limit] + news[:3] + matures[:5]
+        to_study = (urgents[:backlog_limit] + 
+                   news[:self.user_profile.new_cards_per_session] + 
+                   matures[:self.user_profile.mature_cards_per_session])
         if len(to_study) > backlog_limit:
             to_study = to_study[:backlog_limit]
             
@@ -322,7 +342,8 @@ def decks():
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
                 
-            deck_name = data.get('deck')
+            # Handle both 'deck' and 'name' fields for compatibility
+            deck_name = data.get('deck') or data.get('name')
             print(f"Deck name from request: {deck_name}")
             
             if not deck_name:
@@ -382,7 +403,12 @@ def cards(deck):
         
         return jsonify({'success': True, 'id': new_card.id})
 
-@app.route('/api/next_card/<deck>/<user>', methods=['POST'])
+@app.route('/api/next_card/<deck>', methods=['GET'])
+def next_card_get(deck):
+    user = request.args.get('user', 'default')
+    return next_card(deck, user)
+
+@app.route('/api/next_card/<deck>/<user>', methods=['GET', 'POST'])
 def next_card(deck, user):
     print(f"@@@@@@ Request for next card - deck: {deck}, user: {user}")
     
@@ -826,6 +852,201 @@ def update_card(deck, card_id):
         db.session.rollback()
         print(f"Error updating card: {str(e)}")
         return jsonify({'error': f'Failed to update card: {str(e)}'}), 500
+
+# ------------------- NEW API ROUTES -------------------
+
+@app.route('/api/users/<username>/settings', methods=['GET'])
+def get_user_settings(username):
+    """Get user's hyperparameter settings"""
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    return jsonify({
+        'success': True,
+        'settings': user.get_hyperparameters()
+    })
+
+@app.route('/api/users/<username>/settings', methods=['PUT'])
+def update_user_settings(username):
+    """Update user's hyperparameter settings"""
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    try:
+        settings = request.json
+        user.update_hyperparameters(settings)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Settings updated successfully',
+            'settings': user.get_hyperparameters()
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to update settings: {str(e)}'}), 500
+
+@app.route('/api/sessions/<session_id>', methods=['DELETE'])
+def delete_session(session_id):
+    """Delete a session and recompute user's posterior without it"""
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({'error': 'Session not found'}), 404
+    
+    try:
+        user = session.user_profile
+        
+        # Recompute posterior without this session
+        user.recompute_posterior_without_sessions([session_id])
+        
+        # Delete all reviews associated with this session
+        Review.query.filter_by(session_id=session_id).delete()
+        
+        # Delete the session
+        db.session.delete(session)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Session deleted and posterior recomputed'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete session: {str(e)}'}), 500
+
+@app.route('/api/decks/<deck_name>', methods=['DELETE'])
+def delete_deck(deck_name):
+    """Delete a deck and all its associated data"""
+    deck = Deck.query.filter_by(name=deck_name).first()
+    if not deck:
+        return jsonify({'error': 'Deck not found'}), 404
+    
+    try:
+        # Get all cards in this deck
+        card_ids = [card.id for card in deck.cards]
+        
+        # Delete all reviews for cards in this deck
+        if card_ids:
+            Review.query.filter(Review.card_id.in_(card_ids)).delete(synchronize_session=False)
+        
+        # Delete all sessions for this deck
+        Session.query.filter_by(deck_id=deck.id).delete()
+        
+        # Delete all cards in this deck
+        for card in deck.cards:
+            db.session.delete(card)
+        
+        # Delete the deck itself
+        db.session.delete(deck)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Deck "{deck_name}" deleted successfully'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete deck: {str(e)}'}), 500
+
+@app.route('/api/hyperparameters/info', methods=['GET'])
+def get_hyperparameter_info():
+    """Get information about all available hyperparameters"""
+    return jsonify({
+        'hyperparameters': {
+            'bayesian': {
+                'prior_alpha': {
+                    'description': 'Beta distribution prior for successes (higher = optimistic)',
+                    'type': 'float',
+                    'default': 1.0,
+                    'min': 0.1,
+                    'max': 10.0
+                },
+                'prior_beta': {
+                    'description': 'Beta distribution prior for failures (higher = pessimistic)',
+                    'type': 'float', 
+                    'default': 1.0,
+                    'min': 0.1,
+                    'max': 10.0
+                },
+                'global_decay': {
+                    'description': 'Memory decay rate (higher = faster forgetting)',
+                    'type': 'float',
+                    'default': 0.03,
+                    'min': 0.001,
+                    'max': 0.1
+                },
+                'target_recall': {
+                    'description': 'Target recall probability (0.7 = 70% success rate)',
+                    'type': 'float',
+                    'default': 0.7,
+                    'min': 0.5,
+                    'max': 0.95
+                },
+                'n_samples': {
+                    'description': 'Monte Carlo samples for interval prediction (more = slower but accurate)',
+                    'type': 'integer',
+                    'default': 3000,
+                    'min': 1000,
+                    'max': 10000
+                },
+                'history_window': {
+                    'description': 'Number of recent reviews to consider for adaptive decay',
+                    'type': 'integer',
+                    'default': 5,
+                    'min': 3,
+                    'max': 20
+                }
+            },
+            'scheduler': {
+                'backlog_limit': {
+                    'description': 'Maximum number of urgent cards to review',
+                    'type': 'integer',
+                    'default': 50,
+                    'min': 10,
+                    'max': 200
+                },
+                'max_reviews_per_card': {
+                    'description': 'Maximum reviews per card per session',
+                    'type': 'integer',
+                    'default': 2,
+                    'min': 1,
+                    'max': 5
+                },
+                'new_cards_per_session': {
+                    'description': 'New cards introduced per session',
+                    'type': 'integer',
+                    'default': 3,
+                    'min': 1,
+                    'max': 20
+                },
+                'mature_cards_per_session': {
+                    'description': 'Mature cards reviewed per session',
+                    'type': 'integer',
+                    'default': 5,
+                    'min': 1,
+                    'max': 50
+                }
+            },
+            'experience': {
+                'pomodoro_length': {
+                    'description': 'Study session length in minutes',
+                    'type': 'integer',
+                    'default': 25,
+                    'min': 5,
+                    'max': 60
+                },
+                'break_length': {
+                    'description': 'Break length in minutes',
+                    'type': 'integer',
+                    'default': 5,
+                    'min': 1,
+                    'max': 30
+                }
+            }
+        }
+    })
 
 # ------------------- DB INITIALIZATION -------------------
 

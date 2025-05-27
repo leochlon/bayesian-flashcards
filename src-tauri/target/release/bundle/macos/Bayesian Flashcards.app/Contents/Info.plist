@@ -7,11 +7,11 @@
 	<key>CFBundleDisplayName</key>
 	<string>Bayesian Flashcards</string>
 	<key>CFBundleExecutable</key>
-	<string>bayes-flashcards</string>
+	<string>bayesian-flashcards</string>
 	<key>CFBundleIconFile</key>
 	<string>icon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.bayesflashcards.app</string>
+	<string>com.bayesian.flashcards</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -25,12 +25,14 @@
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.developer-tools</string>
+	<string>public.app-category.education</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.13</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string></string>
 </dict>
 </plist>

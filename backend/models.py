@@ -22,6 +22,22 @@ class User(db.Model):
     focus_drop_count = db.Column(db.Integer, default=0)
     active_session_id = db.Column(db.String(36), nullable=True)
     
+    # Bayesian hyperparameters
+    prior_alpha = db.Column(db.Float, default=1.0)
+    prior_beta = db.Column(db.Float, default=1.0)
+    target_recall = db.Column(db.Float, default=0.7)
+    n_samples = db.Column(db.Integer, default=3000)
+    history_window = db.Column(db.Integer, default=5)
+    
+    # Scheduler hyperparameters
+    backlog_limit = db.Column(db.Integer, default=50)
+    max_reviews_per_card = db.Column(db.Integer, default=2)
+    new_cards_per_session = db.Column(db.Integer, default=3)
+    mature_cards_per_session = db.Column(db.Integer, default=5)
+    
+    # Experience parameters
+    easy_mode = db.Column(db.Boolean, default=False)  # Enable 80% win rate mode
+    
     sessions = db.relationship('Session', backref='user_profile', lazy=True)
     
     def get_recall_history(self):
@@ -56,6 +72,72 @@ class User(db.Model):
     
     def end_session(self):
         self.active_session_id = None
+    
+    def get_hyperparameters(self):
+        """Return all tunable hyperparameters as a dictionary"""
+        return {
+            # Bayesian parameters
+            'prior_alpha': self.prior_alpha,
+            'prior_beta': self.prior_beta,
+            'global_decay': self.global_decay,
+            'target_recall': self.target_recall,
+            'n_samples': self.n_samples,
+            'history_window': self.history_window,
+            
+            # Scheduler parameters
+            'backlog_limit': self.backlog_limit,
+            'max_reviews_per_card': self.max_reviews_per_card,
+            'new_cards_per_session': self.new_cards_per_session,
+            'mature_cards_per_session': self.mature_cards_per_session,
+            
+            # User experience parameters
+            'pomodoro_length': self.pomodoro_length,
+            'break_length': self.break_length,
+            'easy_mode': self.easy_mode
+        }
+    
+    def update_hyperparameters(self, params):
+        """Update hyperparameters from a dictionary"""
+        valid_params = [
+            'prior_alpha', 'prior_beta', 'global_decay', 'target_recall',
+            'n_samples', 'history_window', 'backlog_limit', 'max_reviews_per_card',
+            'new_cards_per_session', 'mature_cards_per_session',
+            'pomodoro_length', 'break_length', 'easy_mode'
+        ]
+        
+        for param, value in params.items():
+            if param in valid_params and hasattr(self, param):
+                setattr(self, param, value)
+    
+    def recompute_posterior_without_sessions(self, session_ids):
+        """Recompute recall history excluding specific sessions"""
+        if not session_ids:
+            return
+            
+        # Get all reviews from excluded sessions
+        excluded_reviews = Review.query.filter(Review.session_id.in_(session_ids)).all()
+        excluded_card_reviews = {}
+        
+        for review in excluded_reviews:
+            if review.card_id not in excluded_card_reviews:
+                excluded_card_reviews[review.card_id] = []
+            excluded_card_reviews[review.card_id].append(review)
+        
+        # Rebuild recall history without these reviews
+        new_history = []
+        current_history = self.get_recall_history()
+        
+        # This is a simplified approach - in practice, you'd need to map
+        # recall history entries to specific reviews, which requires additional tracking
+        # For now, we'll just recalculate from all remaining reviews
+        all_remaining_reviews = Review.query.filter(~Review.session_id.in_(session_ids)).all()
+        
+        for review in all_remaining_reviews:
+            # Simple mapping - this could be enhanced with better tracking
+            new_history.append([0, 1 if review.rating >= 7 else 0])
+        
+        self.recall_history = json.dumps(new_history)
+        self.update_decay()
 
 
 class Deck(db.Model):
