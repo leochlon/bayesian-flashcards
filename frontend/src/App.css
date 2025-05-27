@@ -755,7 +755,7 @@
 .sessions-table th:nth-child(5) { width: 12%; } /* Cards Studied */
 .sessions-table th:nth-child(6) { width: 12%; } /* Success Rate */
 .sessions-table th:nth-child(7) { width: 10%; } /* Status */
-.sessions-table th:nth-child(8) { width: 12%; } /* Actions */
+.sessions-table th:nth-child(8) { width: 15%; } /* Actions - increased width */
 
 .sessions-table th,
 .sessions-table td {
@@ -788,10 +788,35 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  min-width: 80px; /* Ensure consistent button width */
+  margin-right: 12px; /* Increased space between buttons */
+  margin-bottom: 8px; /* Add vertical space between buttons */
+  display: inline-block; /* Ensure proper spacing */
+}
+
+.sessions-table button:last-child {
+  margin-right: 0; /* Remove margin from last button */
+}
+
+.sessions-table td:nth-child(8) {
+  padding-left: 30px; /* Increased from 20px to 30px for more space */
+}
+
+.sessions-table th:nth-child(8) {
+  padding-left: 30px; /* Also apply to header for alignment */
 }
 
 .sessions-table button:hover {
   background-color: #1a7bb9;
+}
+
+.sessions-table button.delete-button {
+  background-color: #ff4444;
+  min-width: 80px; /* Same width as other buttons */
+}
+
+.sessions-table button.delete-button:hover {
+  background-color: #e53e3e;
 }
 
 .stats-container {
