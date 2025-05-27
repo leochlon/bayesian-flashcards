@@ -681,6 +681,94 @@ function App() {
           <h3>+ Create New Deck</h3>
         </div>
       </div>
+      
+      {/* Deck Details View - appears when a deck is selected */}
+      {currentDeck && (
+        <div className="deck-details">
+          <div className="deck-details-header">
+            <h3>{currentDeck}</h3>
+            <div className="deck-actions-buttons">
+              <button 
+                className="action-button study-action"
+                onClick={() => setShowStudySessionModal(true)}
+              >
+                Study
+              </button>
+              <button 
+                className="action-button manage-action"
+                onClick={() => {
+                  setManageTab('cards');
+                  setView('manage');
+                }}
+              >
+                Manage Cards
+              </button>
+              <button 
+                className="action-button add-action"
+                onClick={() => {
+                  setEditingCard(null);
+                  setFront("");
+                  setBack("");
+                  setFrontImage(null);
+                  setBackImage(null);
+                  setCardType("Basic");
+                  setView('add');
+                }}
+              >
+                Add Cards
+              </button>
+            </div>
+          </div>
+          
+          <div className="deck-cards-preview">
+            <h4>Card Preview</h4>
+            {deck.length === 0 ? (
+              <div className="no-cards-preview">
+                <p>No cards in this deck yet. Click "Add Cards" to create your first card.</p>
+              </div>
+            ) : (
+              <div className="cards-preview-grid">
+                {deck.slice(0, 3).map(card => (
+                  <div key={card.id} className="card-preview-item">
+                    <div className="preview-card-front">
+                      <h5>Front</h5>
+                      <div className="preview-card-content">
+                        <div dangerouslySetInnerHTML={{ __html: card.front }} />
+                        {card.frontImage && (
+                          <img src={card.frontImage} alt="Front" className="preview-card-image" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="preview-card-back">
+                      <h5>Back</h5>
+                      <div className="preview-card-content">
+                        <div dangerouslySetInnerHTML={{ __html: card.back }} />
+                        {card.backImage && (
+                          <img src={card.backImage} alt="Back" className="preview-card-image" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {deck.length > 3 && (
+                  <div className="more-cards-indicator">
+                    <p>+ {deck.length - 3} more cards</p>
+                    <button 
+                      className="view-all-button"
+                      onClick={() => {
+                        setManageTab('cards');
+                        setView('manage');
+                      }}
+                    >
+                      View All
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -756,9 +844,9 @@ function App() {
           Sessions
         </button>
       </div>
-      
+
       {manageTab === 'cards' ? (
-        <div>
+        <>
           <div className="deck-actions">
             <select 
               value={currentDeck || ''} 
@@ -770,32 +858,16 @@ function App() {
                 <option key={deck} value={deck}>{deck}</option>
               ))}
             </select>
-            
-            {currentDeck && (
-              <button 
-                onClick={() => {
-                  setEditingCard(null);
-                  setFront("");
-                  setBack("");
-                  setFrontImage(null);
-                  setBackImage(null);
-                  setCardType("Basic");
-                  setView('add');
-                }}
-                className="add-new-button"
-              >
-                Add New Card
-              </button>
-            )}
+            <button onClick={() => setView('add')} className="add-new-button">Add New Card</button>
           </div>
-          
+
           {!currentDeck ? (
             <div className="no-cards-message">
-              <p>Please select a deck from the dropdown above to manage its cards.</p>
+              <p>Please select a deck to manage its cards.</p>
             </div>
           ) : deck.length === 0 ? (
             <div className="no-cards-message">
-              <p>This deck has no cards yet. Click "Add New Card" to create your first card.</p>
+              <p>No cards in this deck yet. Click "Add New Card" to create your first card.</p>
             </div>
           ) : (
             <div className="cards-list">
@@ -804,44 +876,24 @@ function App() {
                   <div className="card-preview">
                     <div className="card-preview-front">
                       <h4>Front</h4>
-                      <div className="preview-content">
-                        <div dangerouslySetInnerHTML={{ __html: card.front }} />
-                        {card.frontImage && (
-                          <img src={card.frontImage} alt="Front" className="preview-image" />
-                        )}
-                      </div>
+                      <div className="preview-content" dangerouslySetInnerHTML={{ __html: card.front }} />
+                      {card.frontImage && <img src={card.frontImage} alt="Front" className="preview-image" />}
                     </div>
-                    
                     <div className="card-preview-back">
                       <h4>Back</h4>
-                      <div className="preview-content">
-                        <div dangerouslySetInnerHTML={{ __html: card.back }} />
-                        {card.backImage && (
-                          <img src={card.backImage} alt="Back" className="preview-image" />
-                        )}
-                      </div>
+                      <div className="preview-content" dangerouslySetInnerHTML={{ __html: card.back }} />
+                      {card.backImage && <img src={card.backImage} alt="Back" className="preview-image" />}
                     </div>
                   </div>
-                  
                   <div className="card-actions">
-                    <button 
-                      onClick={() => handleEditCardSetup(card)} 
-                      className="edit-button"
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteCard(card.id)} 
-                      className="delete-button"
-                    >
-                      Delete
-                    </button>
+                    <button onClick={() => handleEditCardSetup(card)} className="edit-button">Edit</button>
+                    <button onClick={() => handleDeleteCard(card.id)} className="delete-button">Delete</button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </>
       ) : (
         <div className="sessions-list">
           {sessions.length === 0 ? (
@@ -882,7 +934,7 @@ function App() {
                       }}>
                         View Stats
                       </button>
-                      <button onClick={() => handleDeleteSession(session.id)}>
+                      <button onClick={() => handleDeleteSession(session.id)} className="delete-button">
                         Delete
                       </button>
                     </td>

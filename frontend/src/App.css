@@ -688,96 +688,158 @@
   background-color: #2f2f31;
 }
 
-/* Stats View */
-.stats-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px;
-}
-
-.stats-view h2 {
-  margin-top: 5px;
-  margin-bottom: 10px;
-}
-
-.stats-filters {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-group label {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.stats-selector {
-  background-color: #2f2f31;
-  color: #ffffff;
-  padding: 10px 16px;
-  border: 1px solid #484848;
-  border-radius: 4px;
-  font-size: 16px;
-  min-width: 200px;
-  height: 42px;
-}
-
-.session-list {
-  margin-bottom: 10px;
-}
-
-.sessions-container {
+/* Deck Details View */
+.deck-details {
+  margin-top: 30px;
   background-color: #373737;
   border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  overflow-x: auto;
+  padding: 25px;
+  border: 1px solid #484848;
 }
 
-.sessions-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed; /* Fixed layout for better column control */
-}
-
-.sessions-table th:nth-child(1) { width: 20%; } /* Name */
-.sessions-table th:nth-child(2) { width: 12%; } /* Deck */
-.sessions-table th:nth-child(3) { width: 12%; } /* Date */
-.sessions-table th:nth-child(4) { width: 10%; } /* Duration */
-.sessions-table th:nth-child(5) { width: 12%; } /* Cards Studied */
-.sessions-table th:nth-child(6) { width: 12%; } /* Success Rate */
-.sessions-table th:nth-child(7) { width: 10%; } /* Status */
-.sessions-table th:nth-child(8) { width: 15%; } /* Actions - increased width */
-
-.sessions-table th,
-.sessions-table td {
-  padding: 12px 15px;
+.deck-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
   border-bottom: 1px solid #484848;
 }
 
-.sessions-table th {
+.deck-details-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #2496dc;
+}
+
+.deck-actions-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.action-button {
+  background-color: #2496dc;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: #1a7bb9;
+  transform: translateY(-1px);
+}
+
+.action-button.study-action {
+  background-color: #28a745;
+}
+
+.action-button.study-action:hover {
+  background-color: #218838;
+}
+
+.action-button.manage-action {
+  background-color: #6c757d;
+}
+
+.action-button.manage-action:hover {
+  background-color: #5a6268;
+}
+
+.deck-cards-preview h4 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.no-cards-preview {
+  text-align: center;
+  padding: 40px 20px;
   background-color: #2f2f31;
+  border-radius: 8px;
+  color: #999;
+}
+
+.cards-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card-preview-item {
+  background-color: #2f2f31;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #484848;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.preview-card-front,
+.preview-card-back {
+  flex: 1;
+  background-color: #2f2f31;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.preview-card-front h5,
+.preview-card-back h5 {
+  margin: 0 0 10px 0;
+  color: #2496dc;
+  font-size: 14px;
   font-weight: 500;
 }
 
-.sessions-table tr:last-child td {
-  border-bottom: none;
+.preview-card-content {
+  font-size: 14px;
+  color: #fff;
 }
 
-.sessions-table tr:hover {
-  background-color: #444;
+.preview-card-image {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  margin-top: 8px;
+  border-radius: 4px;
 }
 
-.sessions-table tr.selected-row {
-  background-color: rgba(36, 150, 220, 0.2);
+.more-cards-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #2f2f31;
+  border-radius: 8px;
+  padding: 20px;
+  border: 2px dashed #484848;
+  text-align: center;
+}
+
+.more-cards-indicator p {
+  margin: 0 0 15px 0;
+  color: #999;
+  font-size: 16px;
+}
+
+.view-all-button {
+  background-color: #2496dc;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.view-all-button:hover {
+  background-color: #1a7bb9;
 }
 
 .sessions-table button {
