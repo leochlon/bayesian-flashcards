@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -163,6 +163,55 @@ const StudySessionModal = ({ onClose, onSubmit }) => {
   );
 };
 
+const ConfirmDeleteModal = ({ onClose, onConfirm, deckName }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content delete-confirmation-modal" onClick={e => e.stopPropagation()}>
+        <h2>Delete Deck</h2>
+        <p>Are you sure you want to delete the deck "<span className="deck-name-highlight">{deckName}</span>"?</p>
+        <p>This action cannot be undone and will delete all cards and sessions in this deck.</p>
+        <div className="modal-buttons">
+          <button type="button" onClick={onClose} className="cancel-button">Cancel</button>
+          <button type="button" onClick={onConfirm} className="delete-button">Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfirmDeleteSessionModal = ({ onClose, onConfirm, sessionName, sessionDate }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content delete-confirmation-modal" onClick={e => e.stopPropagation()}>
+        <h2>Delete Session</h2>
+        <p>Are you sure you want to delete the session "<span className="session-name-highlight">{sessionName}</span>"?</p>
+        <p>Date: {sessionDate}</p>
+        <p>This action cannot be undone and will remove all reviews from this session and recompute your learning progress.</p>
+        <div className="modal-buttons">
+          <button type="button" onClick={onClose} className="cancel-button">Cancel</button>
+          <button type="button" onClick={onConfirm} className="delete-button">Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfirmEndSessionModal = ({ onClose, onConfirm, sessionName }) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content delete-confirmation-modal" onClick={e => e.stopPropagation()}>
+        <h2>End Current Session</h2>
+        <p>Are you sure you want to end the current session "<span className="session-name-highlight">{sessionName}</span>"?</p>
+        <p>This will save your progress and end the study session.</p>
+        <div className="modal-buttons">
+          <button type="button" onClick={onClose} className="cancel-button">Stay in Session</button>
+          <button type="button" onClick={onConfirm} className="create-button">End Session</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [decks, setDecks] = useState([]);
   const [currentDeck, setCurrentDeck] = useState(null);
@@ -179,6 +228,13 @@ function App() {
   const [editingCard, setEditingCard] = useState(null);
   const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
   const [showStudySessionModal, setShowStudySessionModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deckToDelete, setDeckToDelete] = useState(null);
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState(null);
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [isStartingSession, setIsStartingSession] = useState(false);
   const [timer, setTimer] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
@@ -250,6 +306,101 @@ function App() {
     }
   }, [view, stopTimer, resetTimer]);
 
+  // Get next card for review
+  const getNextCard = async () => {
+    if (!currentDeck) return;
+    
+    try {
+      const response = await axios.get(`${API}/next_card/${currentDeck}/${DEFAULT_USER}`);
+      if (response.data && response.data.success) {
+        setReviewCard(response.data.next_card);
+        setShowBack(false);
+        setRating(5);
+      } else {
+        alert("No more cards to review!");
+        setView('decks');
+      }
+    } catch (error) {
+      console.error("Error getting next card:", error);
+      alert("Failed to get next card. Please try again.");
+      setView('decks');
+    }
+  };
+
+  // Handle card review submission
+  const handleReview = async () => {
+    if (!reviewCard || !currentSession) return;
+    
+    try {
+      await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}`, {
+        id: reviewCard.id,
+        rating: rating,
+        session_id: currentSession.id
+      });
+      
+      // Get next card
+      await getNextCard();
+      
+      // Restart timer for next card
+      resetTimer();
+      startTimer();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Failed to submit review. Please try again.");
+    }
+  };
+
+  // Handle deck creation
+  const handleCreateDeck = async (deckName) => {
+    console.log("handleCreateDeck called with:", deckName);
+    try {
+      await axios.post(`${API}/decks`, { deck: deckName });
+      // Reload decks
+      const response = await axios.get(`${API}/decks`);
+      setDecks(response.data);
+      // Set the new deck as current
+      setCurrentDeck(deckName);
+      console.log("Deck created successfully:", deckName);
+    } catch (error) {
+      console.error("Error creating deck:", error);
+      alert("Failed to create deck. Please try again.");
+    }
+  };
+
+  // Handle deck deletion
+  const handleDeleteDeck = async (deckName, event) => {
+    // Prevent the deck card click event from firing
+    event.stopPropagation();
+    
+    console.log("handleDeleteDeck called with:", deckName);
+    
+    // Show confirmation modal instead of window.confirm
+    setDeckToDelete(deckName);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteDeck = async () => {
+    try {
+      await axios.delete(`${API}/decks/${deckToDelete}`);
+      // Reload decks
+      const response = await axios.get(`${API}/decks`);
+      setDecks(response.data);
+      // If the deleted deck was selected, clear the selection
+      if (currentDeck === deckToDelete) {
+        setCurrentDeck(null);
+      }
+      // Close the modal
+      setShowDeleteConfirmModal(false);
+      setDeckToDelete(null);
+    } catch (error) {
+      console.error("Error deleting deck:", error);
+      alert("Failed to delete deck. Please try again.");
+      // Close the modal even on error
+      setShowDeleteConfirmModal(false);
+      setDeckToDelete(null);
+    }
+  };
+
   // Session management
   const startStudySession = async (sessionName) => {
     try {
@@ -257,6 +408,8 @@ function App() {
         alert("Please select a deck before studying.");
         return;
       }
+      
+      setIsStartingSession(true); // Prevent navigation confirmation during session start
       
       const response = await axios.post(`${API}/sessions`, {
         deck: currentDeck,
@@ -277,6 +430,8 @@ function App() {
       console.error("Error creating study session:", error);
       alert("Failed to create study session. Please try again.");
       setView('decks');
+    } finally {
+      setIsStartingSession(false); // Re-enable navigation confirmation
     }
   };
   
@@ -293,9 +448,10 @@ function App() {
     }
   };
   
-  const loadSessions = useCallback(async () => {
+  const loadSessions = useCallback(async (allSessions = false) => {
     try {
-      const response = await axios.get(`${API}/sessions?user=${DEFAULT_USER}${currentDeck ? `&deck=${currentDeck}` : ''}`);
+      const deckParam = (allSessions || !currentDeck) ? '' : `&deck=${currentDeck}`;
+      const response = await axios.get(`${API}/sessions?user=${DEFAULT_USER}${deckParam}`);
       setSessions(response.data);
     } catch (error) {
       console.error("Error loading sessions:", error);
@@ -306,13 +462,54 @@ function App() {
     loadSessions();
   }, [currentDeck, loadSessions]);
 
+  // Handle navigation with session confirmation
+  const handleNavigation = (targetView) => {
+    // Only show confirmation if we're actually trying to leave an active review session
+    // Don't show confirmation if we're currently starting a session
+    if (currentSession && view === 'review' && targetView !== 'review' && !isStartingSession) {
+      setPendingNavigation(targetView);
+      setShowEndSessionModal(true);
+    } else {
+      setView(targetView);
+    }
+  };
+
+  const confirmEndSession = async () => {
+    if (currentSession) {
+      try {
+        await axios.post(`${API}/sessions/${currentSession.id}/end`);
+        setCurrentSession(null);
+        setView('stats');
+        loadSessions(false);
+      } catch (error) {
+        console.error("Error ending study session:", error);
+      }
+    }
+    
+    // Navigate to the pending view
+    if (pendingNavigation) {
+      setView(pendingNavigation);
+      setPendingNavigation(null);
+    }
+    
+    setShowEndSessionModal(false);
+    setIsStartingSession(false); // Ensure flag is cleared
+  };
+
+  const cancelEndSession = () => {
+    setShowEndSessionModal(false);
+    setPendingNavigation(null);
+    setIsStartingSession(false); // Ensure flag is cleared
+  };
+
   // Navigation bar
   const NavigationBar = () => (
     <div className="nav-bar">
-      <button className={`nav-button ${view === 'decks' ? 'active' : ''}`} onClick={() => setView('decks')}>Decks</button>
-      <button className={`nav-button ${view === 'add' ? 'active' : ''}`} onClick={() => setView('add')}>Add</button>
-      <button className={`nav-button ${view === 'manage' ? 'active' : ''}`} onClick={() => setView('manage')}>Manage</button>
-      <button className={`nav-button ${view === 'stats' ? 'active' : ''}`} onClick={() => setView('stats')}>Stats</button>
+      <button className={`nav-button ${view === 'decks' ? 'active' : ''}`} onClick={() => handleNavigation('decks')}>Decks</button>
+      <button className={`nav-button ${view === 'add' ? 'active' : ''}`} onClick={() => handleNavigation('add')}>Add</button>
+      <button className={`nav-button ${view === 'manage' ? 'active' : ''}`} onClick={() => handleNavigation('manage')}>Manage</button>
+      <button className={`nav-button ${view === 'stats' ? 'active' : ''}`} onClick={() => handleNavigation('stats')}>Stats</button>
+      <button className={`nav-button ${view === 'settings' ? 'active' : ''}`} onClick={() => handleNavigation('settings')}>Settings</button>
       {view === 'review' && (
         <div className="timer-container">
           <span className="timer-display">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
@@ -343,114 +540,6 @@ function App() {
     setFrontImage(null);
     setBackImage(null);
     axios.get(`${API}/cards/${currentDeck}`).then(res => setDeck(res.data));
-  };
-
-  const handleCreateDeck = async (name) => {
-    try {
-      console.log(`Creating deck: ${name}`);
-      const response = await axios.post(`${API}/decks`, 
-        { deck: name },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          timeout: 15000  // Increased timeout
-        }
-      );
-      
-      console.log('Create deck response:', response.data);
-      
-      if (response.data.success) {
-        const decksResponse = await axios.get(`${API}/decks`);
-        setDecks(decksResponse.data);
-        setCurrentDeck(name);
-        alert(response.data.message || 'Deck created successfully!');
-      } else {
-        alert(`Failed to create deck: ${response.data.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error("Error creating deck:", error);
-      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error') || error.code === 'ECONNABORTED') {
-        // Backend connection failed - try to restart
-        setBackendError('Backend connection lost. Attempting to restart...');
-        setIsBackendReady(false);
-        
-        if (window.__TAURI__) {
-          try {
-            await invoke('start_backend');
-            // Wait longer for backend to restart
-            setTimeout(async () => {
-              try {
-                await checkBackendStatus();
-                if (isBackendReady) {
-                  alert('Backend restarted successfully. Please try creating the deck again.');
-                } else {
-                  alert('Backend restart failed. Please restart the application.');
-                }
-              } catch (restartError) {
-                console.error('Backend restart verification failed:', restartError);
-                alert('Backend restart verification failed. Please restart the application.');
-              }
-            }, 5000);
-          } catch (restartError) {
-            console.error('Failed to restart backend:', restartError);
-            alert('Failed to restart backend. Please restart the application or check if Python is properly installed.');
-          }
-        } else {
-          alert('Cannot connect to backend server. Please ensure the Flask server is running on port 5002.');
-        }
-      } else {
-        alert(`Failed to create deck: ${error.message}`);
-      }
-    }
-  };
-
-  const getNextCard = async () => {
-    if (!currentDeck) return;
-    try {
-      const res = await axios.post(`${API}/next_card/${currentDeck}/${DEFAULT_USER}`);
-      if (res.data && res.data.success && res.data.next_card) {
-        setReviewCard(res.data.next_card);
-        setShowBack(false);
-        setRating(10);
-      } else {
-        alert("Error: Could not load next card.");
-        setView('decks');
-      }
-    } catch (error) {
-      console.error("Error getting next card:", error);
-      alert(`Error getting next card: ${error.message}`);
-      setView('decks');
-      throw error;
-    }
-  };
-
-  const handleReview = async () => {
-    try {
-        const response = await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}`, {
-            id: reviewCard.id,
-            rating: rating,
-            session_id: currentSession ? currentSession.id : null
-        });
-        
-        if (response.data.success && response.data.next_card) {
-            stopTimer();
-            resetTimer();
-            setReviewCard(response.data.next_card);
-            setShowBack(false);
-            setRating(10);
-            startTimer();
-        } else {
-            const errorMsg = response.data.error || 'Could not load next card. Please try again.';
-            alert(`Error: ${errorMsg}`);
-            if (response.data.error && response.data.error.includes('No more cards')) {
-                setView('decks');
-            }
-        }
-    } catch (error) {
-        console.error("Error submitting review:", error);
-        alert('Error submitting review. Please try again.');
-    }
   };
 
   // Delete card function
@@ -514,27 +603,39 @@ function App() {
 
   // Delete session function
   const handleDeleteSession = async (sessionId) => {
-    if (window.confirm("Are you sure you want to delete this session? This action cannot be undone.")) {
-      try {
-        // Immediately update UI by removing the session from the local state
-        setSessions(prevSessions => prevSessions.filter(session => session.id !== sessionId));
-        
-        // If the deleted session was selected, clear the selection
-        if (selectedSession === sessionId) {
-          setSelectedSession(null);
-        }
+    // Find the session details for the confirmation modal
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+    
+    // Show confirmation modal instead of window.confirm
+    setSessionToDelete(session);
+    setShowDeleteSessionModal(true);
+  };
 
-        // Then call the API to actually delete the session
-        await axios.post(`${API}/sessions/${sessionId}/end`);
-        
-        // No need to call loadSessions() here as we've already updated the UI
-        // This avoids any potential flickering
-      } catch (error) {
-        console.error("Error deleting session:", error);
-        alert("Failed to delete session. Please try again.");
-        // If there was an error, reload the sessions to restore the UI
-        loadSessions();
+  const confirmDeleteSession = async () => {
+    try {
+      // Immediately update UI by removing the session from the local state
+      setSessions(prevSessions => prevSessions.filter(session => session.id !== sessionToDelete.id));
+      
+      // If the deleted session was selected, clear the selection
+      if (selectedSession === sessionToDelete.id) {
+        setSelectedSession(null);
       }
+
+      // Call the correct API endpoint (DELETE instead of POST to /end)
+      await axios.delete(`${API}/sessions/${sessionToDelete.id}`);
+      
+      // Close the modal
+      setShowDeleteSessionModal(false);
+      setSessionToDelete(null);
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      alert("Failed to delete session. Please try again.");
+      // If there was an error, reload the sessions to restore the UI
+      loadSessions();
+      // Close the modal even on error
+      setShowDeleteSessionModal(false);
+      setSessionToDelete(null);
     }
   };
   
@@ -565,6 +666,12 @@ function App() {
           >
             <h3>{deck}</h3>
             <p>{deck.length || 0} cards</p>
+            <button 
+              className="delete-deck-button"
+              onClick={(e) => handleDeleteDeck(deck, e)}
+            >
+              🗑️
+            </button>
           </div>
         ))}
         <div 
@@ -633,37 +740,7 @@ function App() {
   // Render card management view
   const ManageView = () => (
     <div className="manage-view">
-      <h2>{currentDeck ? `Manage Cards in ${currentDeck}` : 'Manage Your Flashcards'}</h2>
-      
-      <div className="deck-actions">
-        <select 
-          value={currentDeck || ''} 
-          onChange={(e) => setCurrentDeck(e.target.value)}
-          className="deck-selector"
-        >
-          <option value="">Select a deck</option>
-          {decks.map(deck => (
-            <option key={deck} value={deck}>{deck}</option>
-          ))}
-        </select>
-        
-        {currentDeck && (
-          <button 
-            onClick={() => {
-              setEditingCard(null);
-              setFront("");
-              setBack("");
-              setFrontImage(null);
-              setBackImage(null);
-              setCardType("Basic");
-              setView('add');
-            }}
-            className="add-new-button"
-          >
-            Add New Card
-          </button>
-        )}
-      </div>
+      <h2>Manage Your Flashcards</h2>
       
       <div className="manage-tabs">
         <button 
@@ -681,58 +758,90 @@ function App() {
       </div>
       
       {manageTab === 'cards' ? (
-        !currentDeck ? (
-          <div className="no-cards-message">
-            <p>Please select a deck from the dropdown above to manage its cards.</p>
+        <div>
+          <div className="deck-actions">
+            <select 
+              value={currentDeck || ''} 
+              onChange={(e) => setCurrentDeck(e.target.value)}
+              className="deck-selector"
+            >
+              <option value="">Select a deck</option>
+              {decks.map(deck => (
+                <option key={deck} value={deck}>{deck}</option>
+              ))}
+            </select>
+            
+            {currentDeck && (
+              <button 
+                onClick={() => {
+                  setEditingCard(null);
+                  setFront("");
+                  setBack("");
+                  setFrontImage(null);
+                  setBackImage(null);
+                  setCardType("Basic");
+                  setView('add');
+                }}
+                className="add-new-button"
+              >
+                Add New Card
+              </button>
+            )}
           </div>
-        ) : deck.length === 0 ? (
-          <div className="no-cards-message">
-            <p>This deck has no cards yet. Click "Add New Card" to create your first card.</p>
-          </div>
-        ) : (
-          <div className="cards-list">
-            {deck.map(card => (
-              <div key={card.id} className="card-item">
-                <div className="card-preview">
-                  <div className="card-preview-front">
-                    <h4>Front</h4>
-                    <div className="preview-content">
-                      <div dangerouslySetInnerHTML={{ __html: card.front }} />
-                      {card.frontImage && (
-                        <img src={card.frontImage} alt="Front" className="preview-image" />
-                      )}
+          
+          {!currentDeck ? (
+            <div className="no-cards-message">
+              <p>Please select a deck from the dropdown above to manage its cards.</p>
+            </div>
+          ) : deck.length === 0 ? (
+            <div className="no-cards-message">
+              <p>This deck has no cards yet. Click "Add New Card" to create your first card.</p>
+            </div>
+          ) : (
+            <div className="cards-list">
+              {deck.map(card => (
+                <div key={card.id} className="card-item">
+                  <div className="card-preview">
+                    <div className="card-preview-front">
+                      <h4>Front</h4>
+                      <div className="preview-content">
+                        <div dangerouslySetInnerHTML={{ __html: card.front }} />
+                        {card.frontImage && (
+                          <img src={card.frontImage} alt="Front" className="preview-image" />
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="card-preview-back">
+                      <h4>Back</h4>
+                      <div className="preview-content">
+                        <div dangerouslySetInnerHTML={{ __html: card.back }} />
+                        {card.backImage && (
+                          <img src={card.backImage} alt="Back" className="preview-image" />
+                        )}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="card-preview-back">
-                    <h4>Back</h4>
-                    <div className="preview-content">
-                      <div dangerouslySetInnerHTML={{ __html: card.back }} />
-                      {card.backImage && (
-                        <img src={card.backImage} alt="Back" className="preview-image" />
-                      )}
-                    </div>
+                  <div className="card-actions">
+                    <button 
+                      onClick={() => handleEditCardSetup(card)} 
+                      className="edit-button"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteCard(card.id)} 
+                      className="delete-button"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                
-                <div className="card-actions">
-                  <button 
-                    onClick={() => handleEditCardSetup(card)} 
-                    className="edit-button"
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteCard(card.id)} 
-                    className="delete-button"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )
+              ))}
+            </div>
+          )}
+        </div>
       ) : (
         <div className="sessions-list">
           {sessions.length === 0 ? (
@@ -742,10 +851,12 @@ function App() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Deck</th>
                   <th>Date</th>
                   <th>Duration</th>
                   <th>Cards Studied</th>
                   <th>Success Rate</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -753,10 +864,16 @@ function App() {
                 {sessions.map(session => (
                   <tr key={session.id}>
                     <td>{session.name}</td>
+                    <td>{session.deck || 'Unknown'}</td>
                     <td>{new Date(session.start_time).toLocaleDateString()}</td>
                     <td>{Math.round(session.duration)} minutes</td>
                     <td>{session.cards_studied}</td>
                     <td>{Math.round(session.success_rate * 100)}%</td>
+                    <td>
+                      <span className={`session-status ${session.end_time ? 'completed' : 'active'}`}>
+                        {session.end_time ? 'Completed' : 'Active'}
+                      </span>
+                    </td>
                     <td>
                       <button onClick={() => {
                         setSelectedSession(session.id);
@@ -790,7 +907,9 @@ function App() {
   // Load sessions when view changes to manage and when manageTab changes to sessions
   useEffect(() => {
     if (view === 'manage' && manageTab === 'sessions') {
-      loadSessions();
+      loadSessions(true); // Load all sessions regardless of deck
+    } else if (view === 'stats') {
+      loadSessions(false); // Load sessions based on current deck for stats view
     }
   }, [view, manageTab, loadSessions]);
 
@@ -802,7 +921,7 @@ function App() {
     try {
       console.log(`Checking backend status at ${API}/health`);
       const response = await axios.get(`${API}/health`, {
-        timeout: 10000,  // Increased timeout
+        timeout: 5000,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -825,16 +944,16 @@ function App() {
           const result = await invoke('start_backend');
           console.log('Backend start result:', result);
           
-          // Wait longer for backend to start in production
-          setTimeout(() => checkBackendStatus(), 8000);
+          // Wait for backend to start, then check again
+          setTimeout(() => checkBackendStatus(), 5000);
         } catch (startError) {
           console.error('Failed to start backend:', startError);
-          setBackendError(`Failed to start backend: ${startError}. Please ensure Python 3.10+ is installed.`);
+          setBackendError(`Failed to start backend: ${startError}. Please ensure Python is installed and run 'pip install -r requirements.txt' in the backend directory.`);
           // Keep trying periodically
           setTimeout(() => checkBackendStatus(), 10000);
         }
       } else {
-        setBackendError('Backend not available - please start the Flask server manually on port 5002');
+        setBackendError('Cannot connect to backend server. Please ensure the Flask server is running on port 5002.');
         // Keep trying in development mode
         setTimeout(() => checkBackendStatus(), 5000);
       }
@@ -884,11 +1003,484 @@ function App() {
     );
   }
 
+  // Settings component
+  const Settings = () => {
+    const [settings, setSettings] = useState(null);
+    const [hyperInfo, setHyperInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+    const [initialized, setInitialized] = useState(false);
+    const [activeCategory, setActiveCategory] = useState('bayesian');
+
+    // Default settings values to use if API fails
+    const defaultSettings = useMemo(() => ({
+      // Bayesian parameters
+      prior_alpha: 1.0,
+      prior_beta: 1.0,
+      global_decay: 0.03,
+      target_recall: 0.7,
+      n_samples: 3000,
+      history_window: 5,
+      
+      // Scheduler parameters
+      backlog_limit: 50,
+      max_reviews_per_card: 2,
+      new_cards_per_session: 3,
+      mature_cards_per_session: 5,
+      
+      // User experience parameters
+      pomodoro_length: 25,
+      break_length: 5,
+      easy_mode: false
+    }), []);
+
+    // Default hyperparameter info to use if API fails
+    const defaultHyperInfo = useMemo(() => ({
+      bayesian: {
+        prior_alpha: {
+          description: 'Beta distribution prior for successes (higher = optimistic)',
+          type: 'float',
+          default: 1.0,
+          min: 0.1,
+          max: 10.0
+        },
+        prior_beta: {
+          description: 'Beta distribution prior for failures (higher = pessimistic)',
+          type: 'float',
+          default: 1.0,
+          min: 0.1,
+          max: 10.0
+        },
+        global_decay: {
+          description: 'Memory decay rate (higher = faster forgetting)',
+          type: 'float',
+          default: 0.03,
+          min: 0.001,
+          max: 0.1
+        },
+        target_recall: {
+          description: 'Target recall probability (0.7 = 70% success rate)',
+          type: 'float',
+          default: 0.7,
+          min: 0.5,
+          max: 0.95
+        },
+        n_samples: {
+          description: 'Monte Carlo samples for interval prediction',
+          type: 'integer',
+          default: 3000,
+          min: 1000,
+          max: 10000
+        },
+        history_window: {
+          description: 'Number of recent reviews to consider for adaptive decay',
+          type: 'integer',
+          default: 5,
+          min: 3,
+          max: 20
+        }
+      },
+      scheduler: {
+        backlog_limit: {
+          description: 'Maximum number of urgent cards to review',
+          type: 'integer',
+          default: 50,
+          min: 10,
+          max: 200
+        },
+        max_reviews_per_card: {
+          description: 'Maximum reviews per card per session',
+          type: 'integer',
+          default: 2,
+          min: 1,
+          max: 5
+        },
+        new_cards_per_session: {
+          description: 'New cards introduced per session',
+          type: 'integer',
+          default: 3,
+          min: 1,
+          max: 20
+        },
+        mature_cards_per_session: {
+          description: 'Mature cards reviewed per session',
+          type: 'integer',
+          default: 5,
+          min: 1,
+          max: 50
+        }
+      },
+      experience: {
+        pomodoro_length: {
+          description: 'Study session length in minutes',
+          type: 'integer',
+          default: 25,
+          min: 5,
+          max: 60
+        },
+        break_length: {
+          description: 'Break length in minutes',
+          type: 'integer',
+          default: 5,
+          min: 1,
+          max: 30
+        },
+        easy_mode: {
+          description: 'Enable easy mode (shorter intervals, 80% win rate)',
+          type: 'boolean',
+          default: false
+        }
+      }
+    }), []);
+
+    // Helper to group settings by category
+    const groupedSettings = useMemo(() => {
+      // Use settings from API or fallback to defaults
+      const settingsData = settings || defaultSettings;
+      const hyperInfoData = hyperInfo || defaultHyperInfo;
+      
+      const grouped = {
+        bayesian: {},
+        scheduler: {},
+        experience: {}
+      };
+
+      // Group the settings by their category safely
+      if (settingsData && hyperInfoData) {
+        // Make sure we're safely accessing keys on objects that exist
+        const keys = Object.keys(settingsData || {});
+        keys.forEach(key => {
+          if (hyperInfoData.bayesian && key in hyperInfoData.bayesian) {
+            grouped.bayesian[key] = settingsData[key];
+          } else if (hyperInfoData.scheduler && key in hyperInfoData.scheduler) {
+            grouped.scheduler[key] = settingsData[key];
+          } else if (hyperInfoData.experience && key in hyperInfoData.experience) {
+            grouped.experience[key] = settingsData[key];
+          }
+        });
+        
+        // Ensure all hyperparameter categories have their settings, even if not in settingsData
+        Object.keys(hyperInfoData).forEach(category => {
+          if (hyperInfoData[category]) {
+            Object.keys(hyperInfoData[category]).forEach(key => {
+              if (!(key in grouped[category])) {
+                // Use default value from hyperInfo if setting is missing
+                grouped[category][key] = hyperInfoData[category][key].default;
+              }
+            });
+          }
+        });
+      }
+
+      return grouped;
+    }, [settings, hyperInfo, defaultSettings, defaultHyperInfo]);
+
+    // Load user settings and hyperparameter info
+    useEffect(() => {
+      // Only run this effect once
+      if (initialized) return;
+      
+      const loadSettingsData = async () => {
+        setLoading(true);
+        setError(null);
+        
+        try {
+          // Initialize with defaults first to ensure we have something to work with
+          setHyperInfo(defaultHyperInfo);
+          
+          let hyperInfoLoaded = false;
+          let settingsLoaded = false;
+          
+          // Get hyperparameter info (descriptions, ranges, etc.)
+          try {
+            const infoResponse = await axios.get(`${API}/hyperparameters/info`);
+            if (infoResponse.data && infoResponse.data.hyperparameters) {
+              setHyperInfo(infoResponse.data.hyperparameters);
+              hyperInfoLoaded = true;
+            } else {
+              console.warn('Using default hyperparameter info due to invalid response format');
+            }
+          } catch (infoError) {
+            console.error('Error loading hyperparameter info:', infoError);
+          }
+          
+          // Get current user settings
+          try {
+            const settingsResponse = await axios.get(`${API}/users/${DEFAULT_USER}/settings`);
+            if (settingsResponse.data && settingsResponse.data.settings) {
+              setSettings(settingsResponse.data.settings);
+              settingsLoaded = true;
+            } else {
+              console.warn('Using default settings due to invalid response format');
+              setSettings(defaultSettings);
+            }
+          } catch (settingsError) {
+            console.error('Error loading user settings:', settingsError);
+            setSettings(defaultSettings);
+          }
+          
+          if (!hyperInfoLoaded) {
+            setHyperInfo(defaultHyperInfo);
+          }
+          
+          if (!settingsLoaded) {
+            setSettings(defaultSettings);
+          }
+          
+        } catch (error) {
+          console.error('Error in loadSettingsData:', error);
+          setError('Failed to load some settings from the server. Using default values.');
+          // Make sure we still have defaults if loading failed
+          if (!hyperInfo) setHyperInfo(defaultHyperInfo);
+          if (!settings) setSettings(defaultSettings);
+        } finally {
+          setLoading(false);
+          setInitialized(true);
+        }
+      };
+
+      loadSettingsData();
+    }, [defaultHyperInfo, defaultSettings, initialized]);
+
+    // Handle saving settings
+    const handleSaveSettings = async () => {
+      setSaving(true);
+      setError(null);
+      setSuccess(null);
+      
+      try {
+        // Use settings data or fallback to defaults
+        const settingsData = settings || defaultSettings;
+        
+        if (!settingsData) {
+          throw new Error('No settings data available to save');
+        }
+        
+        const response = await axios.put(`${API}/users/${DEFAULT_USER}/settings`, settingsData);
+        if (response.data && response.data.success) {
+          setSuccess('Settings saved successfully');
+          
+          // Update settings with the returned values if available
+          if (response.data.settings) {
+            setSettings(response.data.settings);
+          }
+          
+          setTimeout(() => setSuccess(null), 3000); // Clear success message after 3 seconds
+        } else {
+          setError('Failed to save settings: ' + (response.data?.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error saving settings:', error);
+        setError('Failed to save settings. Please try again.');
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    // Handle input change
+    const handleInputChange = (category, key, value) => {
+      try {
+        // Create a deep copy of settings, using defaults if needed
+        const newSettings = {...(settings || defaultSettings)};
+        
+        // Use hyperInfo or default hyperInfo
+        const hyperInfoData = hyperInfo || defaultHyperInfo;
+        
+        // Convert to appropriate type based on hyperInfo
+        if (hyperInfoData && hyperInfoData[category] && hyperInfoData[category][key]) {
+          if (hyperInfoData[category][key].type === 'float') {
+            newSettings[key] = parseFloat(value) || 0;
+          } else if (hyperInfoData[category][key].type === 'integer') {
+            newSettings[key] = parseInt(value, 10) || 0;
+          } else if (hyperInfoData[category][key].type === 'boolean') {
+            newSettings[key] = Boolean(value);
+          } else {
+            newSettings[key] = value;
+          }
+        } else {
+          // Fallback for unknown parameters
+          const numValue = parseFloat(value);
+          newSettings[key] = isNaN(numValue) ? value : numValue;
+        }
+        
+        setSettings(newSettings);
+      } catch (error) {
+        console.error('Error updating setting:', error);
+        // Don't update settings if there's an error
+      }
+    };
+
+    // Category descriptions for the menu
+    const categoryDescriptions = {
+      bayesian: "Controls how the system models your memory",
+      scheduler: "Controls when and how cards are presented",
+      experience: "Controls study sessions and user experience"
+    };
+
+    // Navigation between settings categories
+    const renderCategoryNav = () => (
+      <div className="settings-categories">
+        <div className="category-buttons">
+          <button 
+            className={`category-button ${activeCategory === 'bayesian' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('bayesian')}
+          >
+            Bayesian Parameters
+          </button>
+          <button 
+            className={`category-button ${activeCategory === 'scheduler' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('scheduler')}
+          >
+            Scheduler Parameters
+          </button>
+          <button 
+            className={`category-button ${activeCategory === 'experience' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('experience')}
+          >
+            Experience Parameters
+          </button>
+        </div>
+        <p className="category-description">
+          {categoryDescriptions[activeCategory] || "Adjust your flashcard system settings"}
+        </p>
+      </div>
+    );
+
+    // Render settings for the current active category
+    const renderCategorySettings = () => {
+      if (!hyperInfo || !settings || !activeCategory || !hyperInfo[activeCategory]) {
+        return <p>No settings available for this category</p>;
+      }
+
+      return (
+        <div className="settings-section">
+          <h3>{activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)} Parameters</h3>
+          
+          {Object.keys(hyperInfo[activeCategory]).map(key => {
+            const info = hyperInfo[activeCategory][key];
+            const currentValue = settings && key in settings ? settings[key] : info.default;
+            
+            return (
+              <div className="setting-item" key={key} title={info.description}>
+                <label htmlFor={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
+                <div className="setting-controls">
+                  {info.type === 'boolean' ? (
+                    <div className="checkbox-control">
+                      <input
+                        type="checkbox"
+                        id={key}
+                        checked={Boolean(currentValue)}
+                        onChange={(e) => handleInputChange(activeCategory, key, e.target.checked)}
+                      />
+                      <span className="setting-value">{currentValue ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type={info.type === 'integer' ? 'number' : 'range'}
+                        id={key}
+                        value={currentValue}
+                        onChange={(e) => handleInputChange(activeCategory, key, e.target.value)}
+                        min={info.min}
+                        max={info.max}
+                        step={info.type === 'float' ? 0.01 : 1}
+                      />
+                      <span className="setting-value">{currentValue}</span>
+                    </>
+                  )}
+                </div>
+                <p className="setting-description">{info.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      );
+    };
+
+    // Render loading state
+    if (loading) {
+      return (
+        <div className="settings-container loading">
+          <h2>Loading Settings...</h2>
+          <div className="spinner"></div>
+        </div>
+      );
+    }
+
+    // Render error state
+    if (error && !settings && !hyperInfo) {
+      return (
+        <div className="settings-container error">
+          <h2>Error Loading Settings</h2>
+          <p className="error-message">{error}</p>
+          <button onClick={() => {
+            setInitialized(false);
+            setLoading(true);
+          }} className="retry-button">
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    // Render settings form - only if we have settings and hyperInfo (or defaults)
+    if (!settings || !hyperInfo) {
+      return (
+        <div className="settings-container loading">
+          <h2>Preparing Settings...</h2>
+          <div className="spinner"></div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="settings-container">
+        <h2>Flashcard System Settings</h2>
+        <p className="settings-description">
+          These settings control how the Bayesian flashcard system schedules and optimizes your learning.
+          Select a category below to adjust its settings.
+        </p>
+        
+        {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
+        
+        {renderCategoryNav()}
+        
+        <div className="settings-grid">
+          {renderCategorySettings()}
+        </div>
+        
+        <div className="settings-actions">
+          <button 
+            onClick={handleSaveSettings} 
+            className="save-settings-button"
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+          <button 
+            onClick={() => {
+              setSettings(defaultSettings);
+              setError(null);
+              setSuccess('Reset to default values. Click Save to apply.');
+            }} 
+            className="reset-button"
+          >
+            Reset to Defaults
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="app-container">
       <NavigationBar />
       
       {view === 'decks' && <DeckView />}
+      {view === 'settings' && <Settings />}
       {view === 'add' && (
         <div className="card-editor">
           <div className="editor-header">
@@ -1059,6 +1651,44 @@ function App() {
             startStudySession(name);
             setShowStudySessionModal(false);
           }}
+        />
+      )}
+
+      {/* Delete deck confirmation modal */}
+      {showDeleteConfirmModal && deckToDelete && (
+        <>
+          {console.log("Rendering delete confirmation modal for:", deckToDelete)}
+          <ConfirmDeleteModal
+            onClose={() => {
+              console.log("Delete modal onClose called");
+              setShowDeleteConfirmModal(false);
+              setDeckToDelete(null);
+            }}
+            onConfirm={confirmDeleteDeck}
+            deckName={deckToDelete}
+          />
+        </>
+      )}
+
+      {/* Delete session confirmation modal */}
+      {showDeleteSessionModal && sessionToDelete && (
+        <ConfirmDeleteSessionModal
+          onClose={() => {
+            setShowDeleteSessionModal(false);
+            setSessionToDelete(null);
+          }}
+          onConfirm={confirmDeleteSession}
+          sessionName={sessionToDelete.name}
+          sessionDate={new Date(sessionToDelete.start_time).toLocaleDateString()}
+        />
+      )}
+
+      {/* End session confirmation modal */}
+      {showEndSessionModal && currentSession && (
+        <ConfirmEndSessionModal
+          onClose={cancelEndSession}
+          onConfirm={confirmEndSession}
+          sessionName={currentSession.name}
         />
       )}
 
