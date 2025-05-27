@@ -1,3 +1,5 @@
+// This file can be deleted - it's only used for debugging
+
 // Debugging patch for startStudySession in App.js
 const startStudySessionWithLogging = async () => {
   try {

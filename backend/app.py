@@ -3,15 +3,15 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, User, Deck, Card, Session, Review
 import json
-
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
 import matplotlib
-matplotlib.use('Agg')  # Use Agg backend which is thread-safe
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy.stats
 import os
+import sys
 from io import BytesIO
 
 # ------------------- BAYESIAN MODEL -------------------
@@ -184,32 +184,7 @@ CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*", "met
 # Add a health check endpoint
 @app.route('/api/health', methods=['GET', 'HEAD'])
 def health_check():
-    try:
-        # Simple health check that doesn't require database access
-        return jsonify({"status": "ok", "service": "running"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-# Add a database health check endpoint  
-@app.route('/api/health/db', methods=['GET'])
-def db_health_check():
-    try:
-        # Check if we can query the database
-        with app.app_context():
-            user_count = User.query.count()
-            deck_count = Deck.query.count()
-            return jsonify({
-                "status": "ok", 
-                "database": "connected",
-                "users": user_count,
-                "decks": deck_count
-            })
-    except Exception as e:
-        return jsonify({
-            "status": "error", 
-            "database": "disconnected",
-            "message": str(e)
-        }), 500
+    return jsonify({"status": "ok", "service": "running"})
 
 # Database configuration
 def get_database_path():
@@ -230,9 +205,7 @@ def get_database_path():
         # Running in development mode
         return os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'flashcards.db'))
 
-db_path = get_database_path()
-print(f"Using database at: {db_path}")
-app.config['SQLALCHEMY_DATABASE_URI'] = db_path
+app.config['SQLALCHEMY_DATABASE_URI'] = get_database_path()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy with the Flask app
@@ -853,122 +826,6 @@ def update_card(deck, card_id):
         db.session.rollback()
         print(f"Error updating card: {str(e)}")
         return jsonify({'error': f'Failed to update card: {str(e)}'}), 500
-
-# ------------------- DIAGNOSTIC ENDPOINTS -------------------
-
-@app.route('/api/diagnostic/deck/<deck>', methods=['GET'])
-def diagnostic_deck(deck):
-    try:
-        # Get deck
-        deck_obj = Deck.query.filter_by(name=deck).first()
-        if not deck_obj:
-            return jsonify({
-                "error": f"Deck '{deck}' not found",
-                "available_decks": [d.name for d in Deck.query.all()]
-            }), 404
-            
-        # Get cards
-        cards = deck_obj.cards
-        
-        return jsonify({
-            "success": True,
-            "deck_info": {
-                "id": deck_obj.id,
-                "name": deck_obj.name,
-                "date_created": deck_obj.date_created.isoformat(),
-                "card_count": len(cards),
-                "cards": [{
-                    "id": card.id,
-                    "front": card.front,
-                    "back": card.back,
-                    "front_image": card.front_image,
-                    "back_image": card.back_image,
-                    "card_type": card.card_type,
-                    "date_added": card.date_added.isoformat(),
-                    "review_count": len(card.reviews),
-                    "is_mature": card.is_mature,
-                    "mature_streak": card.mature_streak,
-                    "last_wrong": card.last_wrong.isoformat() if card.last_wrong else None,
-                    "last_review": (max((r.timestamp for r in card.reviews), default=None).isoformat() if card.reviews else None)
-                } for card in cards]
-            }
-        })
-    except Exception as e:
-        print(f"Error in diagnostic endpoint: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/diagnostic/session/<user>', methods=['GET'])
-def diagnostic_session(user):
-    try:
-        # Get user
-        user_obj = User.query.filter_by(username=user).first()
-        if not user_obj:
-            return jsonify({
-                "error": f"User '{user}' not found",
-                "available_users": [u.username for u in User.query.all()]
-            }), 404
-            
-        # Get active session if any
-        active_session = None
-        if user_obj.active_session_id:
-            active_session = Session.query.get(user_obj.active_session_id)
-        
-        return jsonify({
-            "success": True,
-            "user_info": {
-                "id": user_obj.id,
-                "username": user_obj.username,
-                "global_decay": user_obj.global_decay,
-                "pomodoro_length": user_obj.pomodoro_length,
-                "active_session_id": user_obj.active_session_id,
-                "active_session": {
-                    "id": active_session.id,
-                    "name": active_session.name,
-                    "start_time": active_session.start_time.isoformat(),
-                    "end_time": active_session.end_time.isoformat() if active_session.end_time else None,
-                    "review_count": len(active_session.reviews)
-                } if active_session else None,
-                "recall_history": user_obj.get_recall_history()
-            }
-        })
-    except Exception as e:
-        print(f"Error in diagnostic endpoint: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/diagnostic/db', methods=['GET'])
-def diagnostic_db():
-    try:
-        return jsonify({
-            "success": True,
-            "database_info": {
-                "decks": [{
-                    "id": deck.id,
-                    "name": deck.name,
-                    "card_count": len(deck.cards)
-                } for deck in Deck.query.all()],
-                "users": [{
-                    "id": user.id,
-                    "username": user.username,
-                    "active_session_id": user.active_session_id
-                } for user in User.query.all()],
-                "sessions": [{
-                    "id": session.id,
-                    "name": session.name,
-                    "user": session.user_profile.username,
-                    "deck": session.deck_info.name,
-                    "review_count": len(session.reviews)
-                } for session in Session.query.all()]
-            }
-        })
-    except Exception as e:
-        print(f"Error in diagnostic endpoint: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
 
 # ------------------- DB INITIALIZATION -------------------
 

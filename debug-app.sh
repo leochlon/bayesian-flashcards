@@ -140,3 +140,5 @@ fi
 echo ""
 echo -e "${GREEN}=== Debug Complete ===${NC}"
 echo "Run this script with: chmod +x debug-app.sh && ./debug-app.sh"
+
+# This file can be deleted - it's only used for debugging

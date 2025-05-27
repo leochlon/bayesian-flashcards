@@ -13,6 +13,8 @@
     "backend:dev": "cd backend && python app.py",
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
     "build": "npm run frontend:build && npm run bundle:python && npm run tauri:build",
+    "build:debug": "npm run frontend:build && npm run bundle:python && npm run tauri:build:debug",
+    "test:build": "node scripts/test-build.js",
     "setup": "npm run install:frontend && npm run install:backend && npm run install:tauri",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && pip install -r requirements.txt",

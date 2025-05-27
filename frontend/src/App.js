@@ -4,37 +4,51 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import './App.css';
 
-// Tauri API imports
 const { invoke } = window.__TAURI__ ? window.__TAURI__.tauri : { invoke: () => Promise.resolve() };
 
-const API_BASE = "http://localhost:5002";
+// Updated API configuration for better compatibility
+const getApiBase = () => {
+  if (window.__TAURI__) {
+    // Running in Tauri - use localhost
+    return "http://127.0.0.1:5002";
+  } else {
+    // Running in browser development
+    return "http://localhost:5002";
+  }
+};
+
+const API_BASE = getApiBase();
 const API = `${API_BASE}/api`;
 const DEFAULT_USER = "default";
 
-// Custom CreateDeckModal component
+// Add missing format definitions for ReactQuill
+const formats = [
+  'header', 'bold', 'italic', 'underline',
+  'link', 'list', 'bullet'
+];
+
+// Add missing toolbar ID for ReactQuill
+const toolbarId = 'toolbar-container';
+
+// Add missing toolbar options
+const toolbarOptions = [
+  [{ 'header': [1, 2, false] }],
+  ['bold', 'italic', 'underline'],
+  ['link'],
+  [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+];
+
+// Simplified modal components
 const CreateDeckModal = ({ onClose, onSubmit }) => {
   const [deckName, setDeckName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!deckName.trim()) {
-      setError('Please enter a deck name');
-      return;
-    }
-    
+    if (!deckName.trim()) return;
     setIsSubmitting(true);
-    setError('');
-    
-    // Track request status
-    console.log(`Attempting to create deck: "${deckName}"`);
-    
     try {
       onSubmit(deckName.trim());
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setError('Error submitting form');
     } finally {
       setIsSubmitting(false);
     }
@@ -45,7 +59,6 @@ const CreateDeckModal = ({ onClose, onSubmit }) => {
       <div className="modal-content create-deck-modal" onClick={e => e.stopPropagation()}>
         <h2>Create New Deck</h2>
         <form onSubmit={handleSubmit}>
-          {error && <div className="error-message">{error}</div>}
           <input
             type="text"
             value={deckName}
@@ -66,7 +79,6 @@ const CreateDeckModal = ({ onClose, onSubmit }) => {
   );
 };
 
-// ZoomableImage component for any image that should be enlargeable
 const ZoomableImage = ({ src, alt, className }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -89,30 +101,8 @@ const ZoomableImage = ({ src, alt, className }) => {
   );
 };
 
-// TimerModal component for displaying "Time's up!" notification
-const TimerModal = ({ onClose }) => {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content timer-modal-content" onClick={e => e.stopPropagation()}>
-        <h2>Time's Up!</h2>
-        <p>Your review session timer has ended.</p>
-        <button className="timer-btn continue-btn" onClick={onClose}>Continue</button>
-      </div>
-    </div>
-  );
-};
-
 const ImageDropZone = ({ onDrop, image, onRemove, side }) => {
   const [isDragActive, setIsDragActive] = useState(false);
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragActive(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragActive(false);
-  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -127,8 +117,8 @@ const ImageDropZone = ({ onDrop, image, onRemove, side }) => {
 
   return (
     <div className={`image-drop-zone ${isDragActive ? 'drag-active' : ''}`}
-         onDragOver={handleDragOver}
-         onDragLeave={handleDragLeave}
+         onDragOver={(e) => { e.preventDefault(); setIsDragActive(true); }}
+         onDragLeave={() => setIsDragActive(false)}
          onDrop={handleDrop}>
       {image ? (
         <div className="image-preview-container">
@@ -142,22 +132,12 @@ const ImageDropZone = ({ onDrop, image, onRemove, side }) => {
   );
 };
 
-// StudySessionModal component for entering session name
 const StudySessionModal = ({ onClose, onSubmit }) => {
   const [sessionName, setSessionName] = useState(`Session ${new Date().toLocaleString()}`);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      onSubmit(sessionName.trim() || `Session ${new Date().toLocaleString()}`);
-    } catch (error) {
-      console.error("Error submitting session name:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    onSubmit(sessionName.trim() || `Session ${new Date().toLocaleString()}`);
   };
   
   return (
@@ -165,9 +145,7 @@ const StudySessionModal = ({ onClose, onSubmit }) => {
       <div className="modal-content create-deck-modal" onClick={e => e.stopPropagation()}>
         <h2>New Study Session</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="session-name">Enter a name for this study session:</label>
           <input
-            id="session-name"
             type="text"
             value={sessionName}
             onChange={(e) => setSessionName(e.target.value)}
@@ -177,9 +155,7 @@ const StudySessionModal = ({ onClose, onSubmit }) => {
           />
           <div className="modal-buttons">
             <button type="button" onClick={onClose} className="cancel-button">Cancel</button>
-            <button type="submit" className="create-button" disabled={isSubmitting}>
-              {isSubmitting ? 'Starting...' : 'Start Session'}
-            </button>
+            <button type="submit" className="create-button">Start Session</button>
           </div>
         </form>
       </div>
@@ -190,7 +166,7 @@ const StudySessionModal = ({ onClose, onSubmit }) => {
 function App() {
   const [decks, setDecks] = useState([]);
   const [currentDeck, setCurrentDeck] = useState(null);
-  const [view, setView] = useState('decks'); // 'decks', 'add', 'review', 'stats', 'manage'
+  const [view, setView] = useState('decks');
   const [deck, setDeck] = useState([]);
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
@@ -200,111 +176,32 @@ function App() {
   const [showBack, setShowBack] = useState(false);
   const [rating, setRating] = useState(10);
   const [cardType, setCardType] = useState("Basic");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
   const [showStudySessionModal, setShowStudySessionModal] = useState(false);
-
-  const [timer, setTimer] = useState(60); // 1 minute default
+  const [timer, setTimer] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
-  
-  // Session management
   const [currentSession, setCurrentSession] = useState(null);
   const [sessions, setSessions] = useState([]);
-  const [statsType, setStatsType] = useState('user'); // 'user', 'deck', 'session'
+  const [statsType, setStatsType] = useState('user');
   const [selectedSession, setSelectedSession] = useState(null);
+  const [manageTab, setManageTab] = useState('cards');
 
-  // Adding state to control which tab is active in the Manage view
-  const [manageTab, setManageTab] = useState('cards'); // 'cards' or 'sessions'
-
-  const toolbarId = 'toolbar';
-  const formats = ['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link'];
   const modules = {
-    toolbar: {
-      container: '#' + toolbarId,
-      handlers: {}
-    }
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline'],
+      ['link'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+    ]
   };
-  
-  const toolbarOptions = [
-    [{ 'header': [1, 2, false] }],
-    ['bold', 'italic', 'underline'],
-    ['link'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
-  ];
 
-  // Load all decks
-  
-  // Handle URL parameters and postMessage events
+  // Load decks
   useEffect(() => {
-    // Function to handle URL parameters
-    const handleUrlParams = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const deckParam = urlParams.get('deck');
-      
-      // If deck parameter is present, set the current deck and switch to add view
-      if (deckParam) {
-        console.log('URL parameter found, deck:', deckParam);
-        // Check if the deck exists in our list
-        if (decks.includes(deckParam)) {
-          setCurrentDeck(deckParam);
-          setView('add');
-        } else {
-          console.warn('Deck specified in URL not found:', deckParam);
-        }
-      }
-    };
-    
-    // Handle URL parameters on load
-    handleUrlParams();
-    
-    // Function to handle postMessage events from the native app
-    const handlePostMessage = (event) => {
-      console.log('Received postMessage:', event.data);
-      try {
-        const data = JSON.parse(event.data);
-        
-        // Handle OPEN_ADD_CARD message type
-        if (data.type === 'OPEN_ADD_CARD' && data.deck) {
-          console.log('Opening add card view for deck:', data.deck);
-          // Check if the deck exists in our list
-          if (decks.includes(data.deck)) {
-            setCurrentDeck(data.deck);
-            setView('add');
-          } else {
-            console.warn('Deck specified in message not found:', data.deck);
-          }
-        }
-      } catch (error) {
-        console.error('Error parsing postMessage data:', error);
-      }
-    };
-    
-    // Add event listener for postMessage
-    window.addEventListener('message', handlePostMessage);
-    
-    // Expose functions to window for direct access from WebView
-    window.setView = setView;
-    window.setCurrentDeck = setCurrentDeck;
-    
-    // Clean up event listener
-    return () => {
-      window.removeEventListener('message', handlePostMessage);
-    };
-  }, [decks]); // Re-run when decks list changes
-  
-  useEffect(() => {
-    console.log("Component mounted, loading decks...");
-    console.log("API URL:", `${API}/decks`);
     axios.get(`${API}/decks`)
-      .then(res => {
-        console.log("Decks loaded successfully:", res.data);
-        setDecks(res.data);
-      })
-      .catch(error => {
-        console.error("Error loading decks:", error);
-      });
+      .then(res => setDecks(res.data))
+      .catch(error => console.error("Error loading decks:", error));
   }, []);
 
   // Load deck cards when deck changes
@@ -328,6 +225,23 @@ function App() {
     setTimer(60);
   }, [stopTimer]);
 
+  const startTimer = () => {
+    if (!isTimerRunning) {
+      setIsTimerRunning(true);
+      const interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setIsTimerRunning(false);
+            return 60;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      setTimerInterval(interval);
+    }
+  };
+
   // Cleanup timer when changing views
   useEffect(() => {
     if (view !== 'review') {
@@ -336,77 +250,32 @@ function App() {
     }
   }, [view, stopTimer, resetTimer]);
 
-  // Session management functions
+  // Session management
   const startStudySession = async (sessionName) => {
     try {
-      // Check if currentDeck is valid
       if (!currentDeck) {
         alert("Please select a deck before studying.");
         return;
       }
       
-      console.log("About to make API call with data:", {
-        deck: currentDeck,
-        user: DEFAULT_USER,
-        name: sessionName || undefined
-      });
-      
-      // Show loading indicator or message in console
-      console.log("Creating study session...");
-      
       const response = await axios.post(`${API}/sessions`, {
         deck: currentDeck,
         user: DEFAULT_USER,
-        name: sessionName || undefined
+        name: sessionName
       });
       
-      console.log("API response for session creation:", response.data);
-      
       if (response.data.success) {
-        console.log("Session created successfully, data:", response.data.session);
         setCurrentSession(response.data.session);
-        
-        // Wait a moment for the session to be properly registered in the backend
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         setView('review');
         resetTimer();
-        
-        // Get the first card with retry logic
-        try {
-          await getNextCard();
-          startTimer();
-        } catch (cardError) {
-          console.error("Failed to get first card, retrying once:", cardError);
-          // Wait a bit longer and try again
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          await getNextCard();
-          startTimer();
-        }
+        await getNextCard();
+        startTimer();
       } else {
-        console.error("Session creation failed, response:", response.data);
         alert(`Failed to create study session: ${response.data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error creating study session:", error);
-      let errorMsg = "Failed to create study session. Please try again.";
-      
-      if (error.response) {
-        console.error("Error response:", error.response.data);
-        if (error.response.data && error.response.data.error) {
-          errorMsg = `Failed to create study session: ${error.response.data.error}`;
-          
-          // Provide more specific guidance based on error message
-          if (error.response.data.error.includes("no cards")) {
-            errorMsg = "This deck has no cards. Please add some cards before studying.";
-          }
-        }
-      } else if (error.request) {
-        errorMsg = "Failed to create study session: No response from server. Is the backend running?";
-      }
-      
-      alert(errorMsg);
-      // Return to decks view on error as well
+      alert("Failed to create study session. Please try again.");
       setView('decks');
     }
   };
@@ -416,12 +285,6 @@ function App() {
     
     try {
       await axios.post(`${API}/sessions/${currentSession.id}/end`);
-      
-      // Notify Tauri that session ended
-      if (window.__TAURI__) {
-        await invoke('end_session');
-      }
-      
       setCurrentSession(null);
       setView('stats');
       loadSessions();
@@ -439,112 +302,17 @@ function App() {
     }
   }, [currentDeck]);
   
-  // Load sessions when component mounts or when current deck changes
   useEffect(() => {
     loadSessions();
   }, [currentDeck, loadSessions]);
 
-  const startTimer = () => {
-    if (!isTimerRunning) {
-      setIsTimerRunning(true);
-      const interval = setInterval(() => {
-        setTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            setIsTimerRunning(false);
-            // Show timer modal when time is up
-            setIsModalOpen(true);
-            return 60; // Reset to 1 minute
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      setTimerInterval(interval);
-    }
-  };
-
-  (function() {
-  console.log('Navigation patch loading...');
-  
-  // Add global navigation guard
-  window.addEventListener('beforeunload', async (event) => {
-    if (window.electronAPI && window.electronAPI.checkActiveSession) {
-      const hasActiveSession = await window.electronAPI.checkActiveSession();
-      if (hasActiveSession) {
-        event.preventDefault();
-        event.returnValue = '';
-        
-        const shouldNavigate = await window.electronAPI.confirmNavigation();
-        if (shouldNavigate) {
-          // Allow navigation after confirmation
-          window.electronAPI.endSession();
-          return;
-        }
-        
-        return false;
-      }
-    }
-  });
-  
-  // Patch navigation links
-  document.addEventListener('click', async (event) => {
-    // Find closest anchor or button
-    const link = event.target.closest('a, button');
-    
-    if (!link) return;
-    
-    // Check if we have an active session
-    if (window.electronAPI && window.electronAPI.checkActiveSession) {
-      const hasActiveSession = await window.electronAPI.checkActiveSession();
-      if (hasActiveSession) {
-        // Prevent default navigation
-        event.preventDefault();
-        
-        // Show confirmation
-        const shouldNavigate = await window.electronAPI.confirmNavigation();
-        if (shouldNavigate) {
-          // End session and continue
-          await window.electronAPI.endSession();
-          
-          // If it was a link, follow it
-          if (link.href) {
-            window.location.href = link.href;
-          }
-        }
-      }
-    }
-  });
-  
-  console.log('Navigation patch loaded');
-})();
-
-  // Navigation bar component
+  // Navigation bar
   const NavigationBar = () => (
     <div className="nav-bar">
-      <button 
-        className={`nav-button ${view === 'decks' ? 'active' : ''}`} 
-        onClick={() => setView('decks')}
-      >
-        Decks
-      </button>
-      <button 
-        className={`nav-button ${view === 'add' ? 'active' : ''}`} 
-        onClick={() => setView('add')}
-      >
-        Add
-      </button>
-      <button 
-        className={`nav-button ${view === 'manage' ? 'active' : ''}`} 
-        onClick={() => setView('manage')}
-      >
-        Manage
-      </button>
-      <button 
-        className={`nav-button ${view === 'stats' ? 'active' : ''}`} 
-        onClick={() => setView('stats')}
-      >
-        Stats
-      </button>
+      <button className={`nav-button ${view === 'decks' ? 'active' : ''}`} onClick={() => setView('decks')}>Decks</button>
+      <button className={`nav-button ${view === 'add' ? 'active' : ''}`} onClick={() => setView('add')}>Add</button>
+      <button className={`nav-button ${view === 'manage' ? 'active' : ''}`} onClick={() => setView('manage')}>Manage</button>
+      <button className={`nav-button ${view === 'stats' ? 'active' : ''}`} onClick={() => setView('stats')}>Stats</button>
       {view === 'review' && (
         <div className="timer-container">
           <span className="timer-display">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
@@ -557,7 +325,7 @@ function App() {
     </div>
   );
 
-  // Add new card
+  // Card operations
   const handleAddCard = async () => {
     if (!currentDeck) {
       alert("Please select a deck first");
@@ -577,108 +345,95 @@ function App() {
     axios.get(`${API}/cards/${currentDeck}`).then(res => setDeck(res.data));
   };
 
-  // Create new deck 
   const handleCreateDeck = async (name) => {
     try {
       console.log(`Creating deck: ${name}`);
-      console.log(`API URL: ${API}/decks`);
+      const response = await axios.post(`${API}/decks`, 
+        { deck: name },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 15000  // Increased timeout
+        }
+      );
       
-      // Make the API call using Axios like other functions in the app
-      const response = await axios.post(`${API}/decks`, { deck: name });
       console.log('Create deck response:', response.data);
       
       if (response.data.success) {
-        // Refresh the decks list
         const decksResponse = await axios.get(`${API}/decks`);
-        console.log('Updated decks list:', decksResponse.data);
         setDecks(decksResponse.data);
-        setCurrentDeck(name); // Select the newly created deck
+        setCurrentDeck(name);
         alert(response.data.message || 'Deck created successfully!');
       } else {
-        console.error('Create deck failed:', response.data);
         alert(`Failed to create deck: ${response.data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error creating deck:", error);
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        alert(`Failed to create deck: ${error.response.data.error || error.message}`);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('No response received:', error.request);
-        alert('Failed to create deck: No response from server');
+      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error') || error.code === 'ECONNABORTED') {
+        // Backend connection failed - try to restart
+        setBackendError('Backend connection lost. Attempting to restart...');
+        setIsBackendReady(false);
+        
+        if (window.__TAURI__) {
+          try {
+            await invoke('start_backend');
+            // Wait longer for backend to restart
+            setTimeout(async () => {
+              try {
+                await checkBackendStatus();
+                if (isBackendReady) {
+                  alert('Backend restarted successfully. Please try creating the deck again.');
+                } else {
+                  alert('Backend restart failed. Please restart the application.');
+                }
+              } catch (restartError) {
+                console.error('Backend restart verification failed:', restartError);
+                alert('Backend restart verification failed. Please restart the application.');
+              }
+            }, 5000);
+          } catch (restartError) {
+            console.error('Failed to restart backend:', restartError);
+            alert('Failed to restart backend. Please restart the application or check if Python is properly installed.');
+          }
+        } else {
+          alert('Cannot connect to backend server. Please ensure the Flask server is running on port 5002.');
+        }
       } else {
-        // Something happened in setting up the request that triggered an Error
         alert(`Failed to create deck: ${error.message}`);
       }
     }
   };
 
-  // Get next card to review
   const getNextCard = async () => {
     if (!currentDeck) return;
     try {
-      console.log(`Getting next card for deck: ${currentDeck} and user: ${DEFAULT_USER}`);
-      
-      // Add a timestamp to prevent caching issues
-      const timestamp = new Date().getTime();
-      const res = await axios.post(`${API}/next_card/${currentDeck}/${DEFAULT_USER}?_=${timestamp}`);
-      console.log("Next card response:", res.data);
-      
+      const res = await axios.post(`${API}/next_card/${currentDeck}/${DEFAULT_USER}`);
       if (res.data && res.data.success && res.data.next_card) {
         setReviewCard(res.data.next_card);
         setShowBack(false);
         setRating(10);
       } else {
-        console.error("Invalid response format:", res.data);
-        alert("Error: Could not load next card. The response format was invalid.");
-        // Go back to decks view
+        alert("Error: Could not load next card.");
         setView('decks');
       }
     } catch (error) {
       console.error("Error getting next card:", error);
-      let errorMsg = error.message;
-      
-      // Extract the specific error message if available
-      if (error.response && error.response.data && error.response.data.error) {
-        errorMsg = error.response.data.error;
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-      }
-      
-      alert(`Error getting next card: ${errorMsg}`);
-      // Go back to decks view on error
+      alert(`Error getting next card: ${error.message}`);
       setView('decks');
-      
-      // Rethrow the error to allow the caller to handle it if needed
       throw error;
     }
   };
 
-  // Submit review
   const handleReview = async () => {
     try {
-        console.log('Submitting review:', { 
-            id: reviewCard.id, 
-            rating: rating,
-            session_id: currentSession ? currentSession.id : null
-        });
-        
-        // Add a timestamp to prevent caching issues
-        const timestamp = new Date().getTime();
-        const response = await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}?_=${timestamp}`, {
+        const response = await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}`, {
             id: reviewCard.id,
             rating: rating,
             session_id: currentSession ? currentSession.id : null
         });
         
-        console.log('Review response:', response.data);
-        
         if (response.data.success && response.data.next_card) {
-            console.log('Setting next card:', response.data.next_card);
             stopTimer();
             resetTimer();
             setReviewCard(response.data.next_card);
@@ -686,32 +441,15 @@ function App() {
             setRating(10);
             startTimer();
         } else {
-            console.error('Invalid response format:', response.data);
-            // Try to extract a more detailed error message if available
             const errorMsg = response.data.error || 'Could not load next card. Please try again.';
             alert(`Error: ${errorMsg}`);
-            
-            // If the error indicates no more cards, go back to decks view
             if (response.data.error && response.data.error.includes('No more cards')) {
-                alert('You have completed all available cards in this deck!');
                 setView('decks');
             }
         }
     } catch (error) {
         console.error("Error submitting review:", error);
-        let errorMsg = 'Error submitting review. Please try again.';
-        
-        if (error.response && error.response.data) {
-            console.error('Error response:', error.response.data);
-            errorMsg = error.response.data.error || errorMsg;
-        }
-        
-        alert(errorMsg);
-        
-        // If there's a critical error, go back to decks view
-        if (error.response && error.response.status >= 500) {
-            setView('decks');
-        }
+        alert('Error submitting review. Please try again.');
     }
   };
 
@@ -800,7 +538,7 @@ function App() {
     }
   };
   
-  // Render deck selection view
+  // Render views
   const DeckView = () => (
     <div className="deck-view">
       <div className="deck-header">
@@ -823,11 +561,7 @@ function App() {
           <div 
             key={deck}
             className={`deck-card ${currentDeck === deck ? 'selected' : ''}`}
-            onClick={() => {
-              setCurrentDeck(deck);
-              // Stay on the deck view after selecting a deck
-              // This allows the Study button to highlight without starting a session
-            }}
+            onClick={() => setCurrentDeck(deck)}
           >
             <h3>{deck}</h3>
             <p>{deck.length || 0} cards</p>
@@ -835,12 +569,7 @@ function App() {
         ))}
         <div 
           className="deck-card new-deck"
-          onClick={() => {
-            console.log("Create New Deck button clicked");
-            console.log("Current showCreateDeckModal state:", showCreateDeckModal);
-            setShowCreateDeckModal(true);
-            console.log("Updated showCreateDeckModal state:", true);
-          }}
+          onClick={() => setShowCreateDeckModal(true)}
         >
           <h3>+ Create New Deck</h3>
         </div>
@@ -848,7 +577,6 @@ function App() {
     </div>
   );
 
-  // Render stats view
   const StatsView = () => (
     <div className="stats-view">
       <h2>Statistics</h2>
@@ -882,42 +610,6 @@ function App() {
                 </option>
               ))}
             </select>
-          </div>
-        )}
-      </div>
-      
-      <div className="session-list">
-        {statsType === 'session' && sessions.length > 0 && (
-          <div className="sessions-container">
-            <h3>Study Sessions</h3>
-            <table className="sessions-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Date</th>
-                  <th>Duration</th>
-                  <th>Cards Studied</th>
-                  <th>Success Rate</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map(session => (
-                  <tr key={session.id} className={selectedSession === session.id ? 'selected-row' : ''}>
-                    <td>{session.name}</td>
-                    <td>{new Date(session.start_time).toLocaleDateString()}</td>
-                    <td>{Math.round(session.duration)} minutes</td>
-                    <td>{session.cards_studied}</td>
-                    <td>{Math.round(session.success_rate * 100)}%</td>
-                    <td>
-                      <button onClick={() => setSelectedSession(session.id)}>
-                        View Stats
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         )}
       </div>
@@ -1108,27 +800,45 @@ function App() {
 
   const checkBackendStatus = useCallback(async () => {
     try {
-      const response = await axios.get(`${API}/health`);
+      console.log(`Checking backend status at ${API}/health`);
+      const response = await axios.get(`${API}/health`, {
+        timeout: 10000,  // Increased timeout
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (response.status === 200) {
+        console.log('Backend is ready');
         setIsBackendReady(true);
         setBackendError(null);
+        return true;
       }
     } catch (error) {
-      console.error('Backend not ready, attempting to start...', error);
-      setBackendError('Starting backend...');
+      console.error('Backend not ready:', error);
       
       if (window.__TAURI__) {
+        setBackendError('Starting backend server...');
+        
         try {
-          await invoke('start_backend');
-          // Wait a moment then check again
-          setTimeout(() => checkBackendStatus(), 2000);
+          console.log('Attempting to start backend via Tauri...');
+          const result = await invoke('start_backend');
+          console.log('Backend start result:', result);
+          
+          // Wait longer for backend to start in production
+          setTimeout(() => checkBackendStatus(), 8000);
         } catch (startError) {
           console.error('Failed to start backend:', startError);
-          setBackendError(`Failed to start backend: ${startError}`);
+          setBackendError(`Failed to start backend: ${startError}. Please ensure Python 3.10+ is installed.`);
+          // Keep trying periodically
+          setTimeout(() => checkBackendStatus(), 10000);
         }
       } else {
-        setBackendError('Backend not available and not running in Tauri');
+        setBackendError('Backend not available - please start the Flask server manually on port 5002');
+        // Keep trying in development mode
+        setTimeout(() => checkBackendStatus(), 5000);
       }
+      return false;
     }
   }, []);
 
@@ -1178,6 +888,7 @@ function App() {
     <div className="app-container">
       <NavigationBar />
       
+      {view === 'decks' && <DeckView />}
       {view === 'add' && (
         <div className="card-editor">
           <div className="editor-header">
@@ -1321,10 +1032,6 @@ function App() {
         </div>
       )}
       
-      {view === 'decks' && (
-        <DeckView />
-      )}
-      
       {view === 'stats' && currentDeck && (
         <StatsView />
       )}
@@ -1333,14 +1040,9 @@ function App() {
         <ManageView />
       )}
 
-      {/* Timer modal for review session end notification */}
-      {view === 'review' && isModalOpen && (
-        <TimerModal onClose={() => setIsModalOpen(false)} />
-      )}
-
       {/* Create deck modal */}
       {showCreateDeckModal && (
-        <CreateDeckModal 
+        <CreateDeckModal
           onClose={() => setShowCreateDeckModal(false)}
           onSubmit={(name) => {
             handleCreateDeck(name);
@@ -1351,7 +1053,7 @@ function App() {
 
       {/* Study session modal */}
       {showStudySessionModal && (
-        <StudySessionModal 
+        <StudySessionModal
           onClose={() => setShowStudySessionModal(false)}
           onSubmit={(name) => {
             startStudySession(name);

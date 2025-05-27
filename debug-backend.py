@@ -221,3 +221,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# This file can be deleted - it's only used for debugging
