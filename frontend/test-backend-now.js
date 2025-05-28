@@ -1,1 +1,0 @@
-console.log("Testing backend..."); fetch("http://localhost:5002/api/stats/user?user=default&t=" + Date.now()).then(r => console.log("Status:", r.status, "OK:", r.ok)).catch(e => console.error("Error:", e));

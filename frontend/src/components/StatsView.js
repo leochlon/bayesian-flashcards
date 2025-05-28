@@ -3,8 +3,9 @@ import { API, DEFAULT_USER } from '../api';
 import '../styles/views/stats.css';
 import FixedZoomableImage from './FixedZoomableImage';
 
+// Using optimized version that fixes infinite loop issues
 const StatsView = ({
-  statsType,
+  statsType, 
   setStatsType,
   currentDeck,
   setCurrentDeck,
