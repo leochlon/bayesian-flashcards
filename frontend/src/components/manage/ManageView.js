@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import '../../styles/views/manage.css';
 
 // Import config
 import { API } from '../../api';

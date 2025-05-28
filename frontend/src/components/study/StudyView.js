@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/views/review.css';
 import ZoomableImage from '../FixedZoomableImage';
 
 const StudyView = ({

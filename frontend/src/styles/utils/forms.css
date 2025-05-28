@@ -1,0 +1,78 @@
+/* Form Utility Styles */
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  transition: var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.2);
+}
+
+.form-select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.2);
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  resize: vertical;
+  transition: var(--transition-fast);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.2);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: var(--font-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.form-help {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+  margin-top: var(--spacing-xs);
+}

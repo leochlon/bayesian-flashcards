@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { API, DEFAULT_USER } from '../api';
+import '../styles/views/stats.css';
 import FixedZoomableImage from './FixedZoomableImage';
 
 const StatsView = ({ 

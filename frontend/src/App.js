@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from 'axios';
-import './App.css';
+import './styles/base/app.css';
 
 // Import hooks
 import { useBackendStatus } from './hooks/useBackendStatus';

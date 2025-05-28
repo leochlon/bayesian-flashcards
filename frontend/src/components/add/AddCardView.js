@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
 import "react-quill/dist/quill.snow.css";
 import axios from 'axios';
+import '../../styles/views/editor.css';
 
 // Import components
 import ImageDropZone from '../ImageDropZone';

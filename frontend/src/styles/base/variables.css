@@ -1,0 +1,46 @@
+/* CSS Variables for consistent theming */
+:root {
+  /* Color palette */
+  --bg-primary: #2f2f31;
+  --bg-secondary: #373737;
+  --bg-tertiary: #404040;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
+  
+  /* Interactive colors */
+  --accent-primary: #61dafb;
+  --accent-secondary: #4a9eff;
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  
+  /* Borders */
+  --border-color: #555555;
+  --border-radius: 8px;
+  --border-radius-small: 4px;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Font sizes */
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-md: 16px;
+  --font-lg: 18px;
+  --font-xl: 24px;
+  --font-xxl: 32px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}

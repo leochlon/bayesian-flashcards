@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import '../styles/views/settings.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5002';
 const DEFAULT_USER = 'user1';

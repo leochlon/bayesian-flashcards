@@ -1,3 +1,4 @@
+import '../styles/views/deck-view.css';
 import React from 'react';
 
 const DeckView = ({ 

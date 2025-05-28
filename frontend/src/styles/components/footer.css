@@ -1,0 +1,38 @@
+/* Footer Component Styles */
+.footer-masthead {
+  margin-top: var(--spacing-xl) var(--spacing-lg);
+  padding: var(--spacing-md) 0;
+  text-align: center;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  font-size: var(--font-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-masthead .app-name {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+}
+
+.footer-masthead .author {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Standard Footer Masthead (lines 1338-1350) */
+.footer-masthead {
+  margin-top: 40px;
+  padding: 15px 0;
+  text-align: center;
+  color: #878787;
+  border-top: 1px solid #484848;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

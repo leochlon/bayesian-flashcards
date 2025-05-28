@@ -1,0 +1,53 @@
+/* Image upload zone styles */
+.image-drop-zone {
+  border: 2px dashed #484848;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 15px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.image-drop-zone.drag-active {
+  border-color: #2496dc;
+  background-color: rgba(36, 150, 220, 0.1);
+}
+
+.image-drop-zone p {
+  color: #999;
+  margin: 0;
+  font-size: 14px;
+}
+
+.image-preview-container {
+  margin-top: 15px;
+  position: relative;
+  display: inline-block;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  display: block;
+}
+
+.remove-image {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

@@ -1,3 +1,4 @@
+import '../styles/components/modal.css';
 import React, { useState } from 'react';
 
 const ZoomableImage = ({ src, alt, className }) => {

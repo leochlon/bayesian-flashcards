@@ -1,3 +1,4 @@
+import '../styles/components/footer.css';
 import React from 'react';
 
 const FooterMasthead = () => {

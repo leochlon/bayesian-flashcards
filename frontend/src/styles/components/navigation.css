@@ -1,0 +1,73 @@
+/* Navigation Bar Styles */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--bg-secondary);
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  flex-wrap: nowrap;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-button {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-small);
+  cursor: pointer;
+  font-size: var(--font-md);
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  flex: 1 1 0;
+  margin: 0 var(--spacing-xs);
+  min-width: 0;
+  text-align: center;
+}
+
+.nav-button:hover {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+}
+
+.nav-button.active {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Standard Navigation Bar (lines 439-470) */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Changed from center to space-between */
+  padding: 10px 15px; /* Reduced padding */
+  background-color: #373737;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  flex-wrap: nowrap;
+  overflow: hidden; /* Prevent overflow */
+  width: 100%; /* Ensure it takes full width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.nav-button {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #484848;
+  padding: 10px 15px; /* Reduced padding */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px; /* Reduced from 18px */
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex: 1 1 0; /* Allow buttons to grow/shrink equally */
+  margin: 0 4px; /* Add small margins between buttons */
+  min-width: 0; /* Allow buttons to shrink below content size if needed */
+  text-align: center;
+  position: relative; /* Allow absolute positioning of badge */
+}

@@ -1,3 +1,4 @@
+import '../styles/components/image-drop-zone.css';
 import React, { useState, useCallback } from 'react';
 
 const ImageDropZone = ({ 

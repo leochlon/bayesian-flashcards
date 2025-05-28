@@ -1,0 +1,207 @@
+/* Stats View */
+.stats-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.stats-view h2 {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.stats-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stats-selector {
+  background-color: #2f2f31;
+  color: #ffffff;
+  padding: 10px 16px;
+  border: 1px solid #484848;
+  border-radius: 4px;
+  font-size: 16px;
+  min-width: 200px;
+  height: 42px;
+}
+
+.session-list {
+  margin-bottom: 10px;
+}
+
+.sessions-container {
+  background-color: #373737;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+}
+
+.sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: fixed; /* Fixed layout for better column control */
+}
+
+.sessions-table th:nth-child(1) { width: 20%; } /* Name */
+.sessions-table th:nth-child(2) { width: 12%; } /* Deck */
+.sessions-table th:nth-child(3) { width: 12%; } /* Date */
+.sessions-table th:nth-child(4) { width: 10%; } /* Duration */
+.sessions-table th:nth-child(5) { width: 12%; } /* Cards Studied */
+.sessions-table th:nth-child(6) { width: 12%; } /* Success Rate */
+.sessions-table th:nth-child(7) { width: 10%; } /* Status */
+.sessions-table th:nth-child(8) { width: 15%; } /* Actions - increased width */
+
+.sessions-table th,
+.sessions-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #484848;
+}
+
+.sessions-table th {
+  background-color: #2f2f31;
+  font-weight: 500;
+}
+
+.sessions-table tr:last-child td {
+  border-bottom: none;
+}
+
+.sessions-table tr:hover {
+  background-color: #444;
+}
+
+.sessions-table tr.selected-row {
+  background-color: rgba(36, 150, 220, 0.2);
+}
+
+.sessions-table button {
+  background-color: #2496dc;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 80px; /* Ensure consistent button width */
+  margin-right: 12px; /* Increased space between buttons */
+  margin-bottom: 8px; /* Add vertical space between buttons */
+  display: inline-block; /* Ensure proper spacing */
+}
+
+.sessions-table button:last-child {
+  margin-right: 0; /* Remove margin from last button */
+}
+
+.sessions-table td:nth-child(8) {
+  padding-left: 30px; /* Increased from 20px to 30px for more space */
+}
+
+.sessions-table th:nth-child(8) {
+  padding-left: 30px; /* Also apply to header for alignment */
+}
+
+.sessions-table button:hover {
+  background-color: #1a7bb9;
+}
+
+.sessions-table button.delete-button {
+  background-color: #ff4444;
+  min-width: 80px; /* Same width as other buttons */
+}
+
+.sessions-table button.delete-button:hover {
+  background-color: #e53e3e;
+}
+
+.stats-container {
+  background-color: #373737;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.stats-image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 600px;
+  display: block;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+/* Active Session Info */
+.active-session-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #373737;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-details h3 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  color: #2496dc;
+}
+
+.session-details p {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.end-session-btn {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.end-session-btn:hover {
+  background-color: #e53e3e;
+}
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: zoom-in; /* This makes the cursor a magnifying glass */
+  overflow: hidden;
+}
+
+.image-wrapper::after {
+  content: none;
+}

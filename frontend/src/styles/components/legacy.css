@@ -1,0 +1,482 @@
+/* Legacy Navigation Bar for Study View */
+.legacy-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #373737;
+  border-radius: 8px;
+  padding: 10px 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.legacy-nav-group {
+  display: flex;
+  gap: 14px;
+}
+.legacy-nav-button {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid #484848;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.legacy-nav-button.active, .legacy-nav-button:hover {
+  background: #2496dc;
+  color: #fff;
+  border-color: #2496dc;
+}
+.legacy-session-timer-group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.legacy-timer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.legacy-timer-display {
+  font-size: 1.4rem;
+  font-family: monospace;
+  color: #fff;
+  font-weight: 700;
+  background: #232323;
+  border-radius: 6px;
+  padding: 6px 18px;
+  margin-right: 6px;
+}
+.legacy-timer-button {
+  background: #2496dc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background 0.2s;
+}
+.legacy-timer-button:hover {
+  background: #1a7bb9;
+}
+.legacy-session-name {
+  font-size: 1.1rem;
+  color: #2496dc;
+  font-weight: 600;
+  margin-left: 18px;
+  letter-spacing: 0.5px;
+}
+
+/* Legacy deck details styles for HomeView */
+.legacy-deck-details {
+  background: #232323;
+  border-radius: 10px;
+  margin-top: 32px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  padding: 32px 32px 24px 32px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.legacy-deck-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.legacy-deck-title {
+  font-size: 2rem;
+  color: #fff;
+  margin: 0;
+  font-weight: 700;
+}
+.legacy-deck-actions-buttons {
+  display: flex;
+  gap: 18px;
+}
+.legacy-action-button {
+  font-size: 1rem;
+  padding: 10px 26px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.legacy-action-button.study-action {
+  background: #2496dc;
+  color: #fff;
+}
+.legacy-action-button.study-action:hover {
+  background: #1a7bb9;
+}
+.legacy-action-button.manage-action {
+  background: #555;
+  color: #fff;
+}
+.legacy-action-button.manage-action:hover {
+  background: #666;
+}
+.legacy-action-button.add-action {
+  background: #27ae60;
+  color: #fff;
+}
+.legacy-action-button.add-action:hover {
+  background: #219150;
+}
+.legacy-deck-cards-preview {
+  margin-top: 30px;
+}
+.legacy-preview-title {
+  color: #2496dc;
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+  font-weight: 600;
+}
+.legacy-cards-preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.legacy-card-preview-item {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  background: #181818;
+  border-radius: 8px;
+  border: 1px solid #333;
+  padding: 16px 18px;
+  align-items: stretch;
+}
+.legacy-preview-card-front, .legacy-preview-card-back {
+  flex: 1 1 0;
+  min-width: 0;
+  background: #232323;
+  border-radius: 6px;
+  padding: 12px 14px;
+  border: 1px solid #444;
+}
+.legacy-preview-card-front h5, .legacy-preview-card-back h5 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #2496dc;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.legacy-preview-card-content {
+  max-height: 80px;
+  overflow: hidden;
+  font-size: 14px;
+  color: #fff;
+}
+.legacy-preview-card-image {
+  max-width: 100%;
+  max-height: 48px;
+  object-fit: contain;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+.legacy-more-cards-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #232323;
+  border-radius: 8px;
+  padding: 18px;
+  border: 2px dashed #484848;
+  text-align: center;
+}
+.legacy-more-cards-indicator p {
+  margin: 0 0 10px 0;
+  color: #999;
+  font-size: 15px;
+}
+.legacy-view-all-button {
+  background: #2496dc;
+  color: #fff;
+  border: none;
+  padding: 7px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+.legacy-view-all-button:hover {
+  background: #1a7bb9;
+}
+.legacy-no-cards-preview {
+  background: #181818;
+  border-radius: 8px;
+  padding: 18px;
+  color: #aaa;
+  text-align: center;
+  font-size: 15px;
+}
+
+.legacy-study-session-modal {
+  /* Ensures legacy modal style is applied if needed for specificity */
+}
+
+/* Legacy End Session Modal Styles */
+.legacy-end-session-modal {
+  background-color: #373737 !important;
+  max-width: 500px !important;
+  width: 90% !important;
+  padding: 28px 32px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.5) !important;
+  color: #fff !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.legacy-modal-title {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #484848;
+  padding-bottom: 10px;
+  width: 100%;
+}
+.legacy-end-session-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 18px;
+  width: 100%;
+}
+.legacy-end-session-label {
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 500;
+}
+.legacy-session-name-highlight {
+  color: #2496dc;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.legacy-end-session-info {
+  font-size: 1rem;
+  color: #aaa;
+  background: #232323;
+  border-radius: 6px;
+  padding: 10px 18px;
+  margin-left: 10px;
+}
+.legacy-modal-buttons-row {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  margin-top: 18px;
+  width: 100%;
+  justify-content: flex-end;
+}
+.legacy-cancel-button {
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.legacy-cancel-button:hover {
+  background: #666;
+}
+.legacy-end-button {
+  background: #2496dc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.legacy-end-button:hover {
+  background: #1a7bb9;
+}
+
+/* Legacy Study Page Styles */
+.legacy-review-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 70vh;
+}
+.legacy-active-session-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: #232323;
+  border-radius: 8px;
+  padding: 12px 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.legacy-session-label {
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 600;
+}
+.legacy-session-name {
+  color: #2496dc;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.legacy-session-controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+}
+.legacy-easy-mode-toggle {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #aaa;
+  margin-right: 10px;
+}
+.legacy-easy-mode-label {
+  margin-left: 6px;
+  font-weight: 500;
+}
+.legacy-easy-mode-indicator {
+  color: #27ae60;
+  font-weight: 700;
+  margin-left: 6px;
+}
+.legacy-end-session-btn {
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 26px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.legacy-end-session-btn:hover {
+  background: #e53e3e;
+}
+.legacy-review-card {
+  background: #181818;
+  border-radius: 10px;
+  padding: 36px 32px 32px 32px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 340px;
+}
+.legacy-card-content {
+  width: 100%;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #fff;
+  margin-bottom: 18px;
+}
+.legacy-card-text {
+  font-size: 1.2rem;
+  color: #fff;
+  margin-bottom: 18px;
+  word-break: break-word;
+}
+.legacy-card-image {
+  max-width: 80%;
+  max-height: 260px;
+  object-fit: contain;
+  margin: 18px 0 0 0;
+  border-radius: 4px;
+}
+.legacy-back-content {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #484848;
+  width: 100%;
+  text-align: center;
+}
+.legacy-rating-controls-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 18px;
+  margin-top: 18px;
+  justify-content: center;
+}
+.legacy-rating-label {
+  color: #999;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.legacy-rating-slider {
+  width: 220px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #484848;
+  border-radius: 3px;
+  outline: none;
+  margin: 0 10px;
+}
+.legacy-rating-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #2496dc;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.legacy-submit-button {
+  background: #2496dc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 26px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.legacy-submit-button:hover {
+  background: #1a7bb9;
+}
+.legacy-show-answer {
+  background: #2496dc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 32px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 18px;
+  transition: background 0.2s;
+}
+.legacy-show-answer:hover {
+  background: #1a7bb9;
+}
+.legacy-loading-card {
+  color: #aaa;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-top: 60px;
+}
