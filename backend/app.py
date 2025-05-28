@@ -772,8 +772,10 @@ def get_stats(stat_type):
     else:
         # FIXED: Show expected success rate from Bayesian prior when no data
         target_rate = 0.7  # Target success rate
-        prior_expected = 2 / (2 + 1)  # α/(α+β) = 2/3 ≈ 0.67
-        
+        # Use the user's saved prior_alpha and prior_beta for the prior plot
+        alpha = getattr(user, 'prior_alpha', 2)
+        beta = getattr(user, 'prior_beta', 1)
+        prior_expected = alpha / (alpha + beta) if (alpha + beta) != 0 else 0.5
         ax1.axhline(y=target_rate, color='r', linestyle='--', linewidth=1, label='Target (70%)')
         ax1.axhline(y=prior_expected, color='#2496dc', linestyle='-', linewidth=2, label=f'Prior Expected ({prior_expected:.1%})')
         ax1.set_xlabel('Review #', fontsize=9, color='white')
@@ -783,40 +785,33 @@ def get_stats(stat_type):
         ax1.grid(True, alpha=0.2)
         ax1.tick_params(axis='both', which='major', labelsize=8, colors='white')
         ax1.set_ylim(0, 1.05)
-        ax1.set_xlim(0, 10)  # Show a reasonable x-axis range
-        
-        # Add explanatory text
+        ax1.set_xlim(0, 10)
         ax1.text(0.02, 0.95, 'No review data yet.\nShowing expected rates\nbased on Bayesian priors.',
                 ha='left', va='top', transform=ax1.transAxes,
                 fontsize=9, color='yellow', alpha=0.8)
-    
+
     # Plot 2: Performance distribution - more compact with minimal elements
     if data:
         successes = sum(s for _, s in data)
         failures = len(data) - successes
         alpha = 2 + successes  # Adding prior
         beta = 1 + failures    # Adding prior
-        
-        xs = np.linspace(0, 1, 100)  # Reduced number of points
+        xs = np.linspace(0, 1, 100)
         ys = [scipy.stats.beta.pdf(x, alpha, beta) for x in xs]
-        
         ax2.plot(xs, ys, linewidth=1.5, color='#2496dc', label=f'α={alpha:.1f}, β={beta:.1f}')
         ax2.axvline(x=alpha/(alpha+beta), color='r', linestyle='--', linewidth=1, label='Mean')
         ax2.set_xlabel('Success Rate', fontsize=9, color='white')
         ax2.set_ylabel('Density', fontsize=9, color='white')
         ax2.set_title('Performance', fontsize=11, color='white', fontweight='bold')
-        # Move legend outside the plot to save space
         ax2.legend(fontsize=8, loc='upper right')
         ax2.grid(True, alpha=0.2)
         ax2.tick_params(axis='both', which='major', labelsize=8, colors='white')
     else:
-        # FIXED: Generate Bayesian prior plot even with no data (α=2, β=1)
-        alpha = 2  # Prior for successes
-        beta = 1   # Prior for failures
-        
+        # Use the user's saved prior_alpha and prior_beta for the prior plot
+        alpha = getattr(user, 'prior_alpha', 2)
+        beta = getattr(user, 'prior_beta', 1)
         xs = np.linspace(0, 1, 100)
         ys = [scipy.stats.beta.pdf(x, alpha, beta) for x in xs]
-        
         ax2.plot(xs, ys, linewidth=1.5, color='#2496dc', label=f'Prior: α={alpha}, β={beta}')
         ax2.axvline(x=alpha/(alpha+beta), color='r', linestyle='--', linewidth=1, label='Mean')
         ax2.set_xlabel('Success Rate', fontsize=9, color='white')
@@ -825,8 +820,6 @@ def get_stats(stat_type):
         ax2.legend(fontsize=8, loc='upper right')
         ax2.grid(True, alpha=0.2)
         ax2.tick_params(axis='both', which='major', labelsize=8, colors='white')
-        
-        # Add explanatory text
         ax2.text(0.02, 0.95, 'No review data yet.\nShowing initial\nBayesian prior belief.',
                 ha='left', va='top', transform=ax2.transAxes,
                 fontsize=9, color='yellow', alpha=0.8)

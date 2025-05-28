@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchUserSettings } from '../../api';
+import axios from 'axios';
+import { fetchUserSettings, API, DEFAULT_USER } from '../../api';
 
 const SettingsView = () => {
   const [settings, setSettings] = useState(null);
@@ -95,13 +96,11 @@ const SettingsView = () => {
     setError(null);
     setSuccess(null);
     try {
-      // Simulate API call
-      setTimeout(() => {
-        setSaving(false);
-        setSuccess('Settings saved!');
-      }, 800);
+      await axios.put(`${API}/users/${DEFAULT_USER}/settings`, settings);
+      setSuccess('Settings saved!');
     } catch (error) {
       setError('Failed to save settings. Please try again.');
+    } finally {
       setSaving(false);
     }
   };
