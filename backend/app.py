@@ -10,9 +10,11 @@ import traceback
 import numpy as np
 import scipy.stats
 import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend to prevent threading issues
 import matplotlib.pyplot as plt
 from io import BytesIO
 from datetime import datetime, timedelta
+import math
 
 # ------------------- BAYESIAN MODEL -------------------
 
@@ -313,7 +315,14 @@ def decks():
         
     if request.method == 'GET':
         try:
-            decks = [deck.name for deck in Deck.query.all()]
+            decks = []
+            for deck in Deck.query.all():
+                deck_data = {
+                    'name': deck.name,
+                    'card_count': len(deck.cards),
+                    'date_created': deck.date_created.isoformat() if deck.date_created else None
+                }
+                decks.append(deck_data)
             return jsonify(decks)
         except Exception as e:
             print(f"Error getting decks: {str(e)}")
@@ -651,59 +660,105 @@ def get_stats(stat_type):
     user = User.query.filter_by(username=user_name).first()
     if not user:
         return jsonify({'error': 'User not found'}), 404
-    
-    # Set global style for plots with dark background and light text
-    plt.style.use('dark_background')
-    plt.rcParams['figure.dpi'] = 100
-    plt.rcParams['text.color'] = 'white'
-    plt.rcParams['axes.labelcolor'] = 'white'
-    plt.rcParams['axes.edgecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = '#2f2f31'
-    plt.rcParams['axes.titlecolor'] = 'white'
-    plt.rcParams['xtick.color'] = 'white'
-    plt.rcParams['ytick.color'] = 'white'
-    
-    # Create figure with two subplots side by side
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
-    fig.set_facecolor('#2f2f31')
-    
-    title_prefix = ""
+
+    # Get data based on stat type
+    data = []
     if stat_type == "user":
-        title_prefix = f"User: {user_name}"
+        # First try to get data from the user's recall history
         data = user.get_recall_history()
+        print(f"[DEBUG] user.get_recall_history() returned {len(data)} items: {data[:10]}")
+        
+        # If recall_history is empty but user has sessions, rebuild from all reviews
+        if not data:
+            all_user_reviews = Review.query.join(Session).filter(Session.user_id == user.id).all()
+            print(f"[DEBUG] all_user_reviews found: {len(all_user_reviews)}")
+            
+            if all_user_reviews:
+                # Rebuild the data from all user's reviews
+                data = [(0, 1 if review.rating >= 7 else 0) for review in all_user_reviews]
+                print(f"[DEBUG] rebuilt data from reviews: {len(data)} items: {data[:10]}")
+        
+        # If still no data, return a proper error
+        if not data:
+            print("[DEBUG] No review data available for this user")
+            return jsonify({'error': 'No review data available for this user'}), 404
+            
     elif stat_type == "deck" and deck_name:
-        title_prefix = f"Deck: {deck_name}"
-        # Get the deck
         deck = Deck.query.filter_by(name=deck_name).first()
         if not deck:
             return jsonify({'error': 'Deck not found'}), 404
             
-        # Get all reviews for cards in this deck
-        data = []
+        print(f"[DEBUG] Getting stats for deck: {deck_name}")
+        reviews = []
         for card in deck.cards:
-            for review in card.reviews:
-                data.append((0, 1 if review.rating >= 7 else 0))
+            card_reviews = Review.query.filter_by(card_id=card.id).all()
+            reviews.extend(card_reviews)
+            
+        print(f"[DEBUG] Found {len(reviews)} reviews for deck")
+        
+        if reviews:
+            data = [(0, 1 if review.rating >= 7 else 0) for review in reviews]
+            print(f"[DEBUG] Processed {len(data)} data points for deck")
+        
+        if not data:
+            print("[DEBUG] No review data available for this deck")
+            return jsonify({'error': 'No review data available for this deck'}), 404
     elif stat_type == "session" and session_id:
-        # Get the session
         session = Session.query.get(session_id)
         if not session:
             return jsonify({'error': 'Session not found'}), 404
-            
-        title_prefix = f"Session: {session.name}"
         data = [(0, 1 if review.rating >= 7 else 0) for review in session.reviews]
+        if not data:
+            return jsonify({'error': 'No review data available for this session'}), 404
     else:
         return jsonify({'error': 'Invalid stat type or missing parameters'}), 400
+    
+    # Clear any existing plots first to prevent fragmentation
+    plt.clf()
+    plt.close('all')
+    
+    # Reset matplotlib to default state and then configure
+    matplotlib.rcdefaults()
+    
+    # Set global style for plots with dark background and light text
+    plt.style.use('dark_background')
+    
+    # Create figure with two subplots side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), facecolor='#2f2f31')
+    
+    # Configure plot styling after figure creation
+    fig.patch.set_facecolor('#2f2f31')
+    ax1.set_facecolor('#2f2f31')
+    ax2.set_facecolor('#2f2f31')
+    
+    # Set title prefix for the plot
+    if stat_type == "user":
+        title_prefix = f"User: {user_name}"
+    elif stat_type == "deck":
+        title_prefix = f"Deck: {deck_name}"
+    elif stat_type == "session":
+        session = Session.query.get(session_id)
+        title_prefix = f"Session: {session.name}"
     
     # Plot 1: Success rate - more compact with minimal elements
     if data:
         review_indices = list(range(1, len(data) + 1))
         cumulative_success = [sum(1 for _, s in data[:i+1] if s == 1) / (i+1) for i in range(len(data))]
         
-        ax1.plot(review_indices, cumulative_success, '-', linewidth=2, color='#2496dc', label='Success')
-        ax1.axhline(y=0.7, color='r', linestyle='--', linewidth=1, label='Target')
+        # Check if all reviews are failures and adjust display accordingly
+        if all(rate == 0 for rate in cumulative_success):
+            ax1.plot(review_indices, cumulative_success, '-', linewidth=2, color='#ff6b6b', label='Success Rate')
+            ax1.text(0.5, 0.5, 'All reviews marked as failures\n(Rating < 7)\nTry using higher ratings!',
+                    ha='center', va='center', transform=ax1.transAxes,
+                    fontsize=10, color='yellow',
+                    bbox=dict(boxstyle="round,pad=0.3", facecolor='red', alpha=0.4))
+        else:
+            ax1.plot(review_indices, cumulative_success, '-', linewidth=2, color='#2496dc', label='Success Rate')
+        
+        ax1.axhline(y=0.7, color='r', linestyle='--', linewidth=1, label='Target (70%)')
         ax1.set_xlabel('Review #', fontsize=9, color='white')
-        ax1.set_ylabel('Rate', fontsize=9, color='white')
-        ax1.set_title('Success Rate', fontsize=11, color='white', fontweight='bold')
+        ax1.set_ylabel('Success Rate', fontsize=9, color='white')
+        ax1.set_title('Success Rate Over Time', fontsize=11, color='white', fontweight='bold')
         ax1.legend(fontsize=8, loc='lower right')
         ax1.grid(True, alpha=0.2)
         ax1.tick_params(axis='both', which='major', labelsize=8, colors='white')
@@ -713,6 +768,11 @@ def get_stats(stat_type):
         if len(review_indices) > 10:
             step = max(1, len(review_indices) // 10)
             ax1.set_xticks(review_indices[::step])
+    else:
+        ax1.text(0.5, 0.5, 'No data available\nComplete some reviews first',
+                ha='center', va='center', transform=ax1.transAxes,
+                fontsize=12, color='white')
+        ax1.set_title('Success Rate', fontsize=11, color='white', fontweight='bold')
     
     # Plot 2: Performance distribution - more compact with minimal elements
     if data:
@@ -733,16 +793,30 @@ def get_stats(stat_type):
         ax2.legend(fontsize=8, loc='upper right')
         ax2.grid(True, alpha=0.2)
         ax2.tick_params(axis='both', which='major', labelsize=8, colors='white')
+    else:
+        ax2.text(0.5, 0.5, 'No data available\nComplete some reviews first',
+                ha='center', va='center', transform=ax2.transAxes,
+                fontsize=12, color='white')
+        ax2.set_title('Performance', fontsize=11, color='white', fontweight='bold')
     
     # Remove excess whitespace around plots
     plt.tight_layout(pad=1.0)
     
     # Save plot to bytes - using the dark background color and higher quality
     buf = BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', facecolor='#2f2f31', dpi=120)
-    plt.close(fig)  # Close the figure to free up memory
-    buf.seek(0)
-    return send_file(buf, mimetype='image/png')
+    try:
+        plt.savefig(buf, format='png', bbox_inches='tight', facecolor='#2f2f31', dpi=120)
+        buf.seek(0)
+        return send_file(buf, mimetype='image/png')
+    except Exception as e:
+        print("Error generating stats plot:", e)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Failed to generate statistics plot', 'details': str(e)}), 500
+    finally:
+        plt.close(fig)
+        plt.close('all')
+        # Do NOT close buf here, as send_file needs it open
 
 @app.route('/api/cards/<deck>/<card_id>', methods=['DELETE'])
 def delete_card(deck, card_id):
@@ -813,9 +887,38 @@ def get_user_settings(username):
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
+    # Get the raw settings
+    settings = user.get_hyperparameters()
+    
+    # Clean up any invalid JSON values (like Infinity or NaN)
+    cleaned_settings = {}
+    for key, value in settings.items():
+        if isinstance(value, float):
+            if math.isinf(value) or math.isnan(value):
+                # Replace invalid values with reasonable defaults
+                if 'decay' in key.lower():
+                    cleaned_settings[key] = 0.03
+                elif 'alpha' in key.lower() or 'beta' in key.lower():
+                    cleaned_settings[key] = 1.0
+                elif 'recall' in key.lower():
+                    cleaned_settings[key] = 0.7
+                else:
+                    cleaned_settings[key] = 1.0
+                print(f"Warning: Cleaned invalid value for {key}: {value} -> {cleaned_settings[key]}")
+            else:
+                cleaned_settings[key] = value
+        else:
+            cleaned_settings[key] = value
+    
+    # Update the database if we had to clean anything
+    if cleaned_settings != settings:
+        user.update_hyperparameters(cleaned_settings)
+        db.session.commit()
+        print(f"Cleaned invalid settings for user {username}")
+    
     response = jsonify({
         'success': True,
-        'settings': user.get_hyperparameters()
+        'settings': cleaned_settings
     })
     
     # Add cache headers to prevent repeated requests
@@ -1016,8 +1119,10 @@ def delete_deck(deck_name):
         # Delete all sessions for this deck
         Session.query.filter_by(deck_id=deck.id).delete()
         
-        # Delete all cards in the deck
-        Card.query.filter(Card.deck_id == deck.id).delete()
+        # Delete all cards in the deck (using the many-to-many relationship)
+        cards_to_delete = list(deck.cards)  # Get a copy of the cards list
+        for card in cards_to_delete:
+            db.session.delete(card)
         
         # Delete the deck itself
         db.session.delete(deck)

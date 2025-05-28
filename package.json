@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.5.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.5.0",
