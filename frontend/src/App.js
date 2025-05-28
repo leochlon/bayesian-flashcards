@@ -63,6 +63,7 @@ function App() {
     currentDeck,
     setCurrentDeck,
     deck,
+    setDeck, // <-- add this line
     sessions,
     currentSession,
     selectedSession,
@@ -367,6 +368,7 @@ function App() {
             handleEditCardSetup={handleEditCardSetup}
             handleDeleteSession={handleDeleteSession}
             deck={deck}
+            setDeck={setDeck} // <-- pass setDeck
             manageTab={manageTab}
             setManageTab={setManageTab}
             setSessionToDelete={setSessionToDelete}

@@ -18,6 +18,7 @@ const ManageView = ({
   handleEditCardSetup,
   handleDeleteSession,
   deck,
+  setDeck, // <-- add this prop
   manageTab = 'cards',
   setManageTab,
   setSessionToDelete,
@@ -173,7 +174,7 @@ const ManageView = ({
               await axios.delete(`${API}/cards/${currentDeck}/${cardToDelete}`);
               // Refresh the cards list
               const response = await axios.get(`${API}/cards/${currentDeck}`);
-              deck = response.data;
+              setDeck && setDeck(response.data); // <-- update state if provided
               setCardToDelete(null);
               loadSessions && loadSessions();
             } catch (error) {

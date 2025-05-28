@@ -25,6 +25,23 @@ const AddCardView = ({
   const [backImage, setBackImage] = useState(editingCard?.backImage || null);
   const [cardType, setCardType] = useState(editingCard?.type || "Basic");
 
+  // Utility to convert File to base64 string
+  const fileToBase64 = (file, cb) => {
+    const reader = new window.FileReader();
+    reader.onload = (e) => cb(e.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  // Handlers for image drop
+  const handleFrontImage = (file) => {
+    if (!file) return setFrontImage(null);
+    fileToBase64(file, setFrontImage);
+  };
+  const handleBackImage = (file) => {
+    if (!file) return setBackImage(null);
+    fileToBase64(file, setBackImage);
+  };
+
   // Handle card addition
   const handleAddCard = async () => {
     if (!currentDeck) {
@@ -133,7 +150,7 @@ const AddCardView = ({
           className="editor-field"
         />
         <ImageDropZone
-          onDrop={setFrontImage}
+          onImageDrop={handleFrontImage}
           image={frontImage}
           onRemove={() => setFrontImage(null)}
           side="front"
@@ -150,7 +167,7 @@ const AddCardView = ({
           className="editor-field"
         />
         <ImageDropZone
-          onDrop={setBackImage}
+          onImageDrop={handleBackImage}
           image={backImage}
           onRemove={() => setBackImage(null)}
           side="back"
