@@ -2,7 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { fetchUserSettings, API, DEFAULT_USER } from '../../api';
 
-const SettingsView = () => {
+const SettingsView = ({ onSettingsSaved }) => {
+  console.log('SettingsView: onSettingsSaved prop received:', typeof onSettingsSaved, onSettingsSaved);
+  
   const [settings, setSettings] = useState(null);
   const [hyperInfo, setHyperInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -103,6 +105,13 @@ const SettingsView = () => {
       const updatedSettings = await fetchUserSettings();
       setSettings(updatedSettings);
       setSuccess('Settings saved!');
+      // Trigger stats refresh by calling the callback
+      if (onSettingsSaved) {
+        console.log('SettingsView: Calling onSettingsSaved to refresh stats');
+        onSettingsSaved();
+      } else {
+        console.log('SettingsView: onSettingsSaved function not available');
+      }
     } catch (error) {
       setError('Failed to save settings. Please try again.');
     } finally {

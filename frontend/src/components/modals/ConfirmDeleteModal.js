@@ -14,18 +14,18 @@ const ConfirmDeleteModal = ({ onClose, onConfirm, deckName }) => {
               This action cannot be undone and will permanently delete all associated content.
             </p>
           </div>
-          <div className="modal-buttons-row">
+          <div className="modal-buttons">
             <button 
               type="button" 
               onClick={onClose} 
-              className="modal-cancel-button"
+              className="btn-secondary"
             >
               Cancel
             </button>
             <button 
               type="button" 
               onClick={onConfirm} 
-              className="modal-confirm-button modal-delete-button"
+              className="btn-danger"
             >
               Delete
             </button>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import './styles/base/app.css';
 
 // Import hooks
 import { useBackendStatus } from './hooks/useBackendStatus';
@@ -47,6 +46,9 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState(null);
   const [deckToDelete, setDeckToDelete] = useState(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+
+  // Global stats refresh trigger
+  const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
 
   // State for study/review functionality
   const [reviewCard, setReviewCard] = useState(null);
@@ -322,6 +324,7 @@ function App() {
             setSelectedSession={setSelectedSession}
             sessions={sessions}
             loadSessions={loadSessions}
+            statsRefreshTrigger={statsRefreshTrigger}
           />
         )}
         
@@ -377,7 +380,12 @@ function App() {
         )}
         
         {view === 'settings' && (
-          <SettingsView />
+          <SettingsView 
+            onSettingsSaved={() => {
+              console.log('App: Settings saved, triggering stats refresh');
+              setStatsRefreshTrigger(prev => prev + 1);
+            }}
+          />
         )}
       </main>
 

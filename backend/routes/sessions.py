@@ -76,11 +76,25 @@ def delete_session(session_id):
     if not session:
         return jsonify({'error': 'Session not found', 'success': False}), 404
     try:
+        # Get the user before deleting the session
+        user = session.user_profile
+        
+        print(f"[SESSION DELETE] Deleting session {session_id} for user {user.username}")
+        
         # Delete the session and all its reviews
         Review.query.filter_by(session_id=session.id).delete()
         db.session.delete(session)
+        
+        # Rebuild user's recall history from remaining reviews
+        if user:
+            print(f"[SESSION DELETE] Rebuilding recall history for user {user.username}")
+            user.rebuild_recall_history_from_current_reviews()
+        
         db.session.commit()
+        
+        print(f"[SESSION DELETE] Session deleted and recall history rebuilt")
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()
+        print(f"[SESSION DELETE] Error deleting session: {str(e)}")
         return jsonify({'error': str(e), 'success': False}), 500

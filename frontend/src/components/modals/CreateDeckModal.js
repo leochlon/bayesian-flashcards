@@ -31,9 +31,9 @@ const CreateDeckModal = ({ onClose, onSubmit }) => {
             autoFocus
           />
           {error && <div className="error-message modal-error">{error}</div>}
-          <div className="modal-buttons-row">
-            <button type="button" onClick={onClose} className="modal-cancel-button">Cancel</button>
-            <button type="submit" className="modal-confirm-button" disabled={!deckName.trim()}>
+          <div className="modal-buttons">
+            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="submit" className="btn-primary" disabled={!deckName.trim()}>
               Create Deck
             </button>
           </div>

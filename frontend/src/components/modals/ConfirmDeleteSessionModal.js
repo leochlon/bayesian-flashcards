@@ -17,18 +17,18 @@ const ConfirmDeleteSessionModal = ({ onClose, onConfirm, sessionName, sessionDat
               and recompute your learning progress.
             </p>
           </div>
-          <div className="modal-buttons-row">
+          <div className="modal-buttons">
             <button 
               type="button" 
               onClick={onClose} 
-              className="modal-cancel-button"
+              className="btn-secondary"
             >
               Cancel
             </button>
             <button 
               type="button" 
               onClick={onConfirm} 
-              className="modal-confirm-button modal-delete-button"
+              className="btn-danger"
             >
               Delete Session
             </button>

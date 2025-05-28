@@ -45,8 +45,21 @@ def update_user_settings(username):
         return jsonify({'error': 'User not found', 'success': False}), 404
     try:
         settings = request.json
+        print(f"[SETTINGS DEBUG] Updating settings for user {username}: {settings}")
+        
+        # Show before values
+        old_alpha = getattr(user, 'prior_alpha', 'not set')
+        old_beta = getattr(user, 'prior_beta', 'not set')
+        print(f"[SETTINGS DEBUG] Before update: prior_alpha={old_alpha}, prior_beta={old_beta}")
+        
         user.update_hyperparameters(settings)
         db.session.commit()
+        
+        # Show after values
+        new_alpha = getattr(user, 'prior_alpha', 'not set')
+        new_beta = getattr(user, 'prior_beta', 'not set')
+        print(f"[SETTINGS DEBUG] After update: prior_alpha={new_alpha}, prior_beta={new_beta}")
+        
         return jsonify({
             'success': True,
             'settings': user.get_hyperparameters()

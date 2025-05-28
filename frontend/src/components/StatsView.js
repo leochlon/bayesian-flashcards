@@ -12,12 +12,14 @@ const StatsView = ({
   selectedSession,
   setSelectedSession,
   sessions,
-  loadSessions
+  loadSessions,
+  statsRefreshTrigger
 }) => {
   console.log('=== StatsView Component Rendering ===');
   console.log('Initial statsType:', statsType);
   console.log('Initial currentDeck:', currentDeck);
   console.log('Initial selectedSession:', selectedSession);
+  console.log('Received statsRefreshTrigger prop:', statsRefreshTrigger);
   console.log('Available decks:', decks);
 
   // Local state for the selected deck and stats type in the stats view
@@ -79,7 +81,8 @@ const StatsView = ({
   const statsUrl = useMemo(() => {
     if (!localStatsType || !hasValidSelection || backendError) return null;
     
-    const timestamp = Date.now(); // FIXED: Use current timestamp instead of refreshKey
+    // Include statsRefreshTrigger in timestamp to force refresh when settings change
+    const timestamp = `${Date.now()}-${statsRefreshTrigger}`;
     let url = null;
     
     if (localStatsType === 'session' && selectedSession) {
@@ -94,9 +97,9 @@ const StatsView = ({
       url = `${API}/stats/user?user=${DEFAULT_USER}&t=${timestamp}`;
     }
     
-    console.log('StatsView: Generated statsUrl:', url);
+    console.log('StatsView: Generated statsUrl:', url, 'statsRefreshTrigger:', statsRefreshTrigger);
     return url;
-  }, [localStatsType, statsDeck, selectedSession, decks, hasValidSelection, backendError]);
+  }, [localStatsType, statsDeck, selectedSession, decks, hasValidSelection, backendError, statsRefreshTrigger]);
 
   // FIXED: Simple refresh trigger when selection changes
   useEffect(() => {
@@ -116,6 +119,12 @@ const StatsView = ({
   console.log('StatsView: localStatsType for rendering:', localStatsType);
   console.log('StatsView: imageStatus:', imageStatus);
   console.log('StatsView: backendError:', backendError);
+  console.log('StatsView: statsRefreshTrigger:', statsRefreshTrigger);
+
+  // Debug: Track statsRefreshTrigger changes
+  useEffect(() => {
+    console.log('StatsView: statsRefreshTrigger changed to:', statsRefreshTrigger);
+  }, [statsRefreshTrigger]);
 
   // FIXED: Stable callback functions
   const handleImageLoad = useCallback(() => {
@@ -301,7 +310,7 @@ const StatsView = ({
               )}
             </div>
             <FixedZoomableImage
-              key={`stats-${refreshKey}-${localStatsType}-${statsDeck || selectedSession || 'user'}`}
+              key={`stats-${refreshKey}-${statsRefreshTrigger}-${localStatsType}-${statsDeck || selectedSession || 'user'}`}
               src={statsUrl}
               alt="Performance Statistics"
               className="stats-image"

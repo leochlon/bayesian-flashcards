@@ -73,6 +73,24 @@ class User(db.Model):
     def end_session(self):
         self.active_session_id = None
     
+    def rebuild_recall_history_from_current_reviews(self):
+        """Rebuild recall history from all current reviews in the database"""
+        from models import Review, Session
+        
+        # Get all reviews for this user from current sessions
+        all_user_reviews = Review.query.join(Session).filter(Session.user_id == self.id).all()
+        
+        # Rebuild recall history
+        new_history = []
+        for review in all_user_reviews:
+            # Simple mapping - using interval=0 as placeholder
+            new_history.append([0, 1 if review.rating >= 7 else 0])
+        
+        self.recall_history = json.dumps(new_history)
+        self.update_decay()
+        
+        print(f"[REBUILD] Rebuilt recall history for user {self.username}: {len(new_history)} reviews")
+
     def get_hyperparameters(self):
         """Return all tunable hyperparameters as a dictionary"""
         return {

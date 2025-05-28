@@ -196,6 +196,7 @@ export const useAppData = () => {
     currentDeck,
     setCurrentDeck,
     deck,
+    setDeck,
     sessions,
     currentSession,
     selectedSession,
