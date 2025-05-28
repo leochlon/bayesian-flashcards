@@ -96,7 +96,12 @@ const SettingsView = () => {
     setError(null);
     setSuccess(null);
     try {
-      await axios.put(`${API}/users/${DEFAULT_USER}/settings`, settings);
+      // Always send a full settings object (merge with defaults)
+      const settingsToSave = { ...defaultSettings, ...settings };
+      await axios.put(`${API}/users/${DEFAULT_USER}/settings`, settingsToSave);
+      // Reload settings from backend to ensure UI matches backend
+      const updatedSettings = await fetchUserSettings();
+      setSettings(updatedSettings);
       setSuccess('Settings saved!');
     } catch (error) {
       setError('Failed to save settings. Please try again.');
