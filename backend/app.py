@@ -678,10 +678,10 @@ def get_stats(stat_type):
                 data = [(0, 1 if review.rating >= 7 else 0) for review in all_user_reviews]
                 print(f"[DEBUG] rebuilt data from reviews: {len(data)} items: {data[:10]}")
         
-        # If still no data, return a proper error
+        # If still no data, use empty list to generate Bayesian prior plot
         if not data:
-            print("[DEBUG] No review data available for this user")
-            return jsonify({'error': 'No review data available for this user'}), 404
+            print("[DEBUG] No review data available - will generate Bayesian prior plot")
+            data = []  # Empty data will generate prior α=2, β=1 plot
             
     elif stat_type == "deck" and deck_name:
         deck = Deck.query.filter_by(name=deck_name).first()
@@ -701,15 +701,16 @@ def get_stats(stat_type):
             print(f"[DEBUG] Processed {len(data)} data points for deck")
         
         if not data:
-            print("[DEBUG] No review data available for this deck")
-            return jsonify({'error': 'No review data available for this deck'}), 404
+            print("[DEBUG] No review data available for this deck - will generate Bayesian prior plot")
+            data = []  # Empty data will generate prior α=2, β=1 plot
     elif stat_type == "session" and session_id:
         session = Session.query.get(session_id)
         if not session:
             return jsonify({'error': 'Session not found'}), 404
         data = [(0, 1 if review.rating >= 7 else 0) for review in session.reviews]
         if not data:
-            return jsonify({'error': 'No review data available for this session'}), 404
+            print("[DEBUG] No review data available for this session - will generate Bayesian prior plot")
+            data = []  # Empty data will generate prior α=2, β=1 plot
     else:
         return jsonify({'error': 'Invalid stat type or missing parameters'}), 400
     
@@ -769,10 +770,25 @@ def get_stats(stat_type):
             step = max(1, len(review_indices) // 10)
             ax1.set_xticks(review_indices[::step])
     else:
-        ax1.text(0.5, 0.5, 'No data available\nComplete some reviews first',
-                ha='center', va='center', transform=ax1.transAxes,
-                fontsize=12, color='white')
-        ax1.set_title('Success Rate', fontsize=11, color='white', fontweight='bold')
+        # FIXED: Show expected success rate from Bayesian prior when no data
+        target_rate = 0.7  # Target success rate
+        prior_expected = 2 / (2 + 1)  # α/(α+β) = 2/3 ≈ 0.67
+        
+        ax1.axhline(y=target_rate, color='r', linestyle='--', linewidth=1, label='Target (70%)')
+        ax1.axhline(y=prior_expected, color='#2496dc', linestyle='-', linewidth=2, label=f'Prior Expected ({prior_expected:.1%})')
+        ax1.set_xlabel('Review #', fontsize=9, color='white')
+        ax1.set_ylabel('Success Rate', fontsize=9, color='white')
+        ax1.set_title('Expected Success Rate', fontsize=11, color='white', fontweight='bold')
+        ax1.legend(fontsize=8, loc='lower right')
+        ax1.grid(True, alpha=0.2)
+        ax1.tick_params(axis='both', which='major', labelsize=8, colors='white')
+        ax1.set_ylim(0, 1.05)
+        ax1.set_xlim(0, 10)  # Show a reasonable x-axis range
+        
+        # Add explanatory text
+        ax1.text(0.02, 0.95, 'No review data yet.\nShowing expected rates\nbased on Bayesian priors.',
+                ha='left', va='top', transform=ax1.transAxes,
+                fontsize=9, color='yellow', alpha=0.8)
     
     # Plot 2: Performance distribution - more compact with minimal elements
     if data:
@@ -794,10 +810,26 @@ def get_stats(stat_type):
         ax2.grid(True, alpha=0.2)
         ax2.tick_params(axis='both', which='major', labelsize=8, colors='white')
     else:
-        ax2.text(0.5, 0.5, 'No data available\nComplete some reviews first',
-                ha='center', va='center', transform=ax2.transAxes,
-                fontsize=12, color='white')
-        ax2.set_title('Performance', fontsize=11, color='white', fontweight='bold')
+        # FIXED: Generate Bayesian prior plot even with no data (α=2, β=1)
+        alpha = 2  # Prior for successes
+        beta = 1   # Prior for failures
+        
+        xs = np.linspace(0, 1, 100)
+        ys = [scipy.stats.beta.pdf(x, alpha, beta) for x in xs]
+        
+        ax2.plot(xs, ys, linewidth=1.5, color='#2496dc', label=f'Prior: α={alpha}, β={beta}')
+        ax2.axvline(x=alpha/(alpha+beta), color='r', linestyle='--', linewidth=1, label='Mean')
+        ax2.set_xlabel('Success Rate', fontsize=9, color='white')
+        ax2.set_ylabel('Density', fontsize=9, color='white')
+        ax2.set_title('Bayesian Prior Belief', fontsize=11, color='white', fontweight='bold')
+        ax2.legend(fontsize=8, loc='upper right')
+        ax2.grid(True, alpha=0.2)
+        ax2.tick_params(axis='both', which='major', labelsize=8, colors='white')
+        
+        # Add explanatory text
+        ax2.text(0.02, 0.95, 'No review data yet.\nShowing initial\nBayesian prior belief.',
+                ha='left', va='top', transform=ax2.transAxes,
+                fontsize=9, color='yellow', alpha=0.8)
     
     # Remove excess whitespace around plots
     plt.tight_layout(pad=1.0)

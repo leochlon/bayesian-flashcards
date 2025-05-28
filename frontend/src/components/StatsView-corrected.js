@@ -3,7 +3,7 @@ import { API, DEFAULT_USER } from '../api';
 import '../styles/views/stats.css';
 import FixedZoomableImage from './FixedZoomableImage';
 
-const StatsView = ({
+const StatsView = ({ 
   statsType,
   setStatsType,
   currentDeck,
@@ -12,7 +12,7 @@ const StatsView = ({
   selectedSession,
   setSelectedSession,
   sessions,
-  loadSessions
+  loadSessions 
 }) => {
   console.log('=== StatsView Component Rendering ===');
   console.log('Initial statsType:', statsType);
@@ -27,8 +27,6 @@ const StatsView = ({
   const [refreshKey, setRefreshKey] = useState(0);
   // Track stats image loading status
   const [imageStatus, setImageStatus] = useState({loading: false, error: null, success: false});
-  // Add backend availability check state
-  const [backendError, setBackendError] = useState(null);
   
   // Initialize component on mount - FIXED: Removed circular dependencies
   useEffect(() => {
@@ -36,22 +34,20 @@ const StatsView = ({
     
     // Initialize with safe defaults based on current state
     if (localStatsType === 'deck' && !statsDeck && decks.length > 0) {
-      const firstDeckName = typeof decks[0] === 'object' ? decks[0].name : decks[0];
-      console.log('Setting default deck to first available:', firstDeckName);
-      setStatsDeck(firstDeckName);
+      console.log('Setting default deck to first available:', decks[0]);
+      setStatsDeck(decks[0]);
+      // FIXED: Removed setCurrentDeck call to prevent circular dependency
     }
   }, []); // FIXED: Empty dependency array - only run on mount
   
   // FIXED: Separated currentDeck sync logic with proper dependencies
   useEffect(() => {
     console.log('currentDeck changed to:', currentDeck);
-    // Handle both string decks and object decks
-    const deckNames = decks.map(deck => typeof deck === 'object' ? deck.name : deck);
-    if (currentDeck && deckNames.includes(currentDeck) && currentDeck !== statsDeck) {
+    if (currentDeck && decks.includes(currentDeck) && currentDeck !== statsDeck) {
       console.log('Updating statsDeck from:', statsDeck, 'to:', currentDeck);
       setStatsDeck(currentDeck);
     }
-  }, [currentDeck, decks, statsDeck]); // FIXED: Include statsDeck for proper comparison
+  }, [currentDeck, decks]); // FIXED: Removed statsDeck and setCurrentDeck from dependencies
   
   // FIXED: Separated statsType sync logic
   useEffect(() => {
@@ -59,63 +55,54 @@ const StatsView = ({
     if (statsType && statsType !== localStatsType) {
       setLocalStatsType(statsType);
     }
-  }, [statsType, localStatsType]); // FIXED: Include localStatsType for proper comparison
+  }, [statsType]); // FIXED: Removed localStatsType from dependencies
 
   // FIXED: Pure validation function using useMemo instead of state
   const hasValidSelection = useMemo(() => {
     if (localStatsType === 'user') {
       return true;
     } else if (localStatsType === 'deck') {
-      // Handle both string decks and object decks
-      const deckNames = decks.map(deck => typeof deck === 'object' ? deck.name : deck);
-      return statsDeck && deckNames.includes(statsDeck);
+      return statsDeck && decks.includes(statsDeck);
     } else if (localStatsType === 'session') {
       return !!selectedSession;
     }
     return false;
   }, [localStatsType, statsDeck, decks, selectedSession]);
 
-  // FIXED: Memoized URL generation with backend validation
+  // FIXED: Memoized URL generation - NO FETCH LOGIC HERE
   const statsUrl = useMemo(() => {
-    if (!localStatsType || !hasValidSelection || backendError) return null;
+    if (!localStatsType || !hasValidSelection) return null;
     
-    const timestamp = Date.now(); // FIXED: Use current timestamp instead of refreshKey
+    const timestamp = refreshKey;
     let url = null;
     
     if (localStatsType === 'session' && selectedSession) {
       url = `${API}/stats/session?session=${selectedSession}&user=${DEFAULT_USER}&t=${timestamp}`;
-    } else if (localStatsType === 'deck' && statsDeck) {
-      // Handle both string decks and object decks
-      const deckNames = decks.map(deck => typeof deck === 'object' ? deck.name : deck);
-      if (deckNames.includes(statsDeck)) {
-        url = `${API}/stats/deck?deck=${encodeURIComponent(statsDeck)}&user=${DEFAULT_USER}&t=${timestamp}`;
-      }
+    } else if (localStatsType === 'deck' && statsDeck && decks.includes(statsDeck)) {
+      url = `${API}/stats/deck?deck=${encodeURIComponent(statsDeck)}&user=${DEFAULT_USER}&t=${timestamp}`;
     } else if (localStatsType === 'user') {
       url = `${API}/stats/user?user=${DEFAULT_USER}&t=${timestamp}`;
     }
     
     console.log('StatsView: Generated statsUrl:', url);
     return url;
-  }, [localStatsType, statsDeck, selectedSession, decks, hasValidSelection, backendError]);
+  }, [refreshKey, localStatsType, statsDeck, selectedSession, decks, hasValidSelection]);
 
-  // FIXED: Simple refresh trigger when selection changes
+  // FIXED: Separate effect for triggering refresh - NO URL generation here
   useEffect(() => {
-    if (!hasValidSelection) {
+    if (hasValidSelection) {
+      console.log('Selection changed, triggering refresh');
+      setRefreshKey(rk => rk + 1);
+      setImageStatus({loading: true, error: null, success: false});
+    } else if (!hasValidSelection) {
       setImageStatus({loading: false, error: 'Invalid selection', success: false});
-      return;
     }
-
-    console.log('StatsView: Selection changed, triggering refresh');
-    setImageStatus({loading: true, error: null, success: false});
-    setBackendError(null);
-    setRefreshKey(prev => prev + 1);
   }, [localStatsType, statsDeck, selectedSession, hasValidSelection]);
   
   // Log the stats URL for debugging
   console.log('StatsView: Final statsUrl for rendering:', statsUrl);
   console.log('StatsView: localStatsType for rendering:', localStatsType);
   console.log('StatsView: imageStatus:', imageStatus);
-  console.log('StatsView: backendError:', backendError);
 
   // FIXED: Stable callback functions
   const handleImageLoad = useCallback(() => {
@@ -132,15 +119,11 @@ const StatsView = ({
   const handleStatsTypeChange = useCallback((newType) => {
     console.log('Stats type changed from', localStatsType, 'to', newType);
     
-    // Reset backend error when changing types
-    setBackendError(null);
-    setImageStatus({loading: false, error: null, success: false});
-    
     // Reset selections when changing type
     if (newType === 'deck') {
       // When switching to deck stats, ensure we have a valid deck selected
       if (!statsDeck && decks.length > 0) {
-        const defaultDeck = typeof decks[0] === 'object' ? decks[0].name : decks[0];
+        const defaultDeck = decks[0];
         console.log('Setting default deck to:', defaultDeck);
         setStatsDeck(defaultDeck);
         setCurrentDeck(defaultDeck);
@@ -156,14 +139,12 @@ const StatsView = ({
   }, [localStatsType, statsDeck, decks, setCurrentDeck, loadSessions, setStatsType]);
 
   const handleDeckChange = useCallback((newDeck) => {
-    setBackendError(null); // Reset error when changing deck
     setStatsDeck(newDeck);
     setCurrentDeck(newDeck);
   }, [setCurrentDeck]);
 
   const handleSessionChange = useCallback((newSession) => {
     console.log('Session selected:', newSession);
-    setBackendError(null); // Reset error when changing session
     setSelectedSession(newSession);
   }, [setSelectedSession]);
 
@@ -191,7 +172,7 @@ const StatsView = ({
           <div className="filter-group">
             <label>Deck:</label>
             <select
-              value={statsDeck || (decks.length > 0 ? (typeof decks[0] === 'object' ? decks[0].name : decks[0]) : '')}
+              value={statsDeck || (decks[0] || '')}
               onChange={(e) => handleDeckChange(e.target.value)}
               className="stats-selector"
             >
@@ -241,30 +222,16 @@ const StatsView = ({
           </div>
         )}
         
-        {(imageStatus.error || backendError) && (
+        {imageStatus.error && (
           <div className="error-message">
-            <p>Error: {backendError || imageStatus.error}</p>
-            {localStatsType === 'deck' ? (
-              <div>
-                <p>This deck has no review data yet.</p>
-                <p><strong>Solution:</strong> Study some cards from the "{statsDeck}" deck to generate statistics.</p>
-              </div>
-            ) : localStatsType === 'session' ? (
-              <div>
-                <p>This session has no review data yet.</p>
-                <p><strong>Solution:</strong> Complete some reviews in this session to generate statistics.</p>
-              </div>
-            ) : (
-              <div>
-                <p>Please check your connection and try again.</p>
-                <p>This could be because:</p>
-                <ul>
-                  <li>The backend service is not running</li>
-                  <li>There was a network issue loading the image</li>
-                  <li>The backend encountered an error generating the plot</li>
-                </ul>
-              </div>
-            )}
+            <p>Error: {imageStatus.error}</p>
+            <p>Please check your selection and try again.</p>
+            <p>This could be because:</p>
+            <ul>
+              <li>The selected deck doesn't have enough data to generate statistics</li>
+              <li>The backend encountered an error generating the image</li>
+              <li>There was a network issue loading the image</li>
+            </ul>
           </div>
         )}
         

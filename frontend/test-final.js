@@ -1,0 +1,1 @@
+fetch("http://localhost:5002/api/stats/user?user=default&t=" + Date.now()).then(r => { console.log("Status:", r.status, "OK:", r.ok, "Type:", r.headers.get("content-type")); return r.ok ? "SUCCESS - Image returned!" : r.text(); }).then(result => console.log("Result:", result)).catch(e => console.error("Error:", e));
