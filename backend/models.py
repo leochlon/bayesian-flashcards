@@ -198,6 +198,15 @@ class Card(db.Model):
     def time_since_added(self):
         return (datetime.now() - self.date_added).total_seconds() / 60
     
+    def is_urgent(self):
+        """Check if the card is urgent to review based on last wrong answer."""
+        if not self.last_wrong:
+            return False
+        
+        days_since_wrong = (datetime.now() - self.last_wrong).total_seconds() / (60 * 60 * 24)
+        # A card is urgent if it was wrong in the last 3 days
+        return days_since_wrong < 3
+    
     def to_dict(self):
         latest_review = max((r.timestamp for r in self.reviews), default=None) if self.reviews else None
         return {

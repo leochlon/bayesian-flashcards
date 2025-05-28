@@ -1,9 +1,3 @@
-"""
-Database initialization and management module
-Handles table creation and initial setup
-"""
-
-import os
 from models import db, User
 
 def create_default_user(app):

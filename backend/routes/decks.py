@@ -41,3 +41,26 @@ def decks():
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
+
+@decks_bp.route('/api/decks/<deck_name>', methods=['DELETE'])
+def delete_deck(deck_name):
+    from models import Review, Session, Card  # avoid circular import
+    deck = Deck.query.filter_by(name=deck_name).first()
+    if not deck:
+        return jsonify({'error': 'Deck not found', 'success': False}), 404
+    try:
+        # Delete all reviews for cards in this deck first
+        for card in deck.cards:
+            Review.query.filter_by(card_id=card.id).delete()
+        # Delete all sessions for this deck
+        Session.query.filter_by(deck_id=deck.id).delete()
+        # Delete all cards in the deck (using the many-to-many relationship)
+        cards_to_delete = list(deck.cards)
+        for card in cards_to_delete:
+            db.session.delete(card)
+        db.session.delete(deck)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e), 'success': False}), 500

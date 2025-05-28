@@ -46,9 +46,11 @@ def sample_next_review(card, user_profile, target_recall=None, n_samples=None):
         if n_samples is None:
             n_samples = user_profile.n_samples
         easy_mode = getattr(user_profile, 'easy_mode', False)
-        from .model import bayesian_posterior, adaptive_decay
+        
+        # Calculate locally rather than importing to avoid circular imports
         alpha, beta = bayesian_posterior(card, user_profile)
         decay = adaptive_decay(card, user_profile)
+        
         if easy_mode:
             target_recall = min(0.8, target_recall + 0.1)
             decay = decay * 1.2

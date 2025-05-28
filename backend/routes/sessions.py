@@ -48,3 +48,39 @@ def create_session():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e), 'success': False}), 500
+
+@sessions_bp.route('/api/sessions/<session_id>/end', methods=['POST'])
+def end_session(session_id):
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({'error': 'Session not found', 'success': False}), 404
+    
+    session.end_session()
+    
+    # Update user profile
+    user = session.user_profile
+    if user:
+        user.end_session()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'session': session.to_dict()
+    })
+
+@sessions_bp.route('/api/sessions/<session_id>', methods=['DELETE'])
+def delete_session(session_id):
+    from models import Review
+    session = Session.query.get(session_id)
+    if not session:
+        return jsonify({'error': 'Session not found', 'success': False}), 404
+    try:
+        # Delete the session and all its reviews
+        Review.query.filter_by(session_id=session.id).delete()
+        db.session.delete(session)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e), 'success': False}), 500
