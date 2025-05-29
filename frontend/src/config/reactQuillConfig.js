@@ -13,5 +13,6 @@ export const formats = [
   'header',
   'bold', 'italic', 'underline',
   'list', 'bullet',
-  'link'
+  'link',
+  'image' // <-- add image support
 ];

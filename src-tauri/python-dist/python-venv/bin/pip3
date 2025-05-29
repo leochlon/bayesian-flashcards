@@ -1,4 +1,4 @@
-#!/Users/leo/bayesFlashcards/src-tauri/python-dist/python-venv/bin/python3.13
+#!/Users/leo/bayesFlashcards/src-tauri/python-dist/python-venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -63,10 +63,17 @@ def next_card(deck, user):
     
     print(f"Found {len(deck_obj.cards)} cards in deck {deck}")
     
+    # Get max_reviews_per_card from query param if provided
+    try:
+        max_reviews_per_card = request.args.get('max_reviews_per_card', type=int)
+    except Exception:
+        max_reviews_per_card = None
     # Use the scheduler to get the next card
     try:
         scheduler = Scheduler(user_obj, deck_obj.cards)
-        next_card = scheduler.select_next_card()
+        next_card = scheduler.select_next_card(
+            max_reviews_per_card=max_reviews_per_card
+        )
         
         if not next_card:
             return jsonify({'error': 'No more cards to review', 'success': False}), 404
@@ -149,10 +156,14 @@ def review_card(deck, user):
         if not deck_obj:
             return jsonify({'error': 'Deck not found', 'success': False}), 404
         
+        # Get max_reviews_per_card from POST body if provided
+        max_reviews_per_card = data.get('max_reviews_per_card') if data else None
         # Get next card using scheduler
         print(f"Getting next card after review")
         scheduler = Scheduler(user_obj, deck_obj.cards)
-        next_card = scheduler.select_next_card()
+        next_card = scheduler.select_next_card(
+            max_reviews_per_card=max_reviews_per_card
+        )
         
         if not next_card:
             return jsonify({'error': 'No more cards to review', 'success': False}), 404

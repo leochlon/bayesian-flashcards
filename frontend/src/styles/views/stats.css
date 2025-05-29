@@ -1,19 +1,40 @@
 /* Stats View */
 .stats-view {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 10px;
+  padding: 38px 32px 32px 32px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  animation: modal-pop-in 0.28s cubic-bezier(0.4,0,0.2,1);
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+@keyframes modal-pop-in {
+  from { transform: scale(0.97) translateY(20px); opacity: 0.7; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .stats-view h2 {
-  margin-top: 5px;
-  margin-bottom: 10px;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  text-align: left;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .stats-filters {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 18px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
@@ -24,58 +45,62 @@
 }
 
 .filter-group label {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-secondary);
 }
 
 .stats-selector {
-  background-color: #2f2f31;
-  color: #ffffff;
-  padding: 10px 16px;
-  border: 1px solid #484848;
-  border-radius: 4px;
-  font-size: 16px;
-  min-width: 200px;
-  height: 42px;
+  background: var(--bg-primary);
+  color: var(--white);
+  padding: 10px 18px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 7px;
+  font-size: 1.1rem;
+  min-width: 220px;
+  height: 44px;
+  font-family: inherit;
 }
 
 .session-list {
   margin-bottom: 10px;
 }
 
+.sessions-container, .stats-container {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 .sessions-container {
-  background-color: #373737;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 10px;
-  overflow-x: auto;
-}
-
-.sessions-table {
+  background: rgba(60, 64, 80, 0.92);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10), 0 1.5px 8px rgba(97,218,251,0.06);
+  border: 1.2px solid rgba(97,218,251,0.09);
+  padding: 32px 18px 24px 18px;
+  margin-bottom: 24px;
   width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed; /* Fixed layout for better column control */
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.sessions-table th:nth-child(1) { width: 20%; } /* Name */
-.sessions-table th:nth-child(2) { width: 12%; } /* Deck */
-.sessions-table th:nth-child(3) { width: 12%; } /* Date */
-.sessions-table th:nth-child(4) { width: 10%; } /* Duration */
-.sessions-table th:nth-child(5) { width: 12%; } /* Cards Studied */
-.sessions-table th:nth-child(6) { width: 12%; } /* Success Rate */
-.sessions-table th:nth-child(7) { width: 10%; } /* Status */
-.sessions-table th:nth-child(8) { width: 15%; } /* Actions - increased width */
-
-.sessions-table th,
-.sessions-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #484848;
+.sessions-table, .modular-sessions-table {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  border: 1.2px solid var(--border-color);
 }
 
-.sessions-table th {
-  background-color: #2f2f31;
-  font-weight: 500;
+.sessions-table th, .sessions-table td, .modular-sessions-table th, .modular-sessions-table td {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+}
+
+.sessions-table th, .modular-sessions-table th {
+  color: var(--text-secondary);
 }
 
 .sessions-table tr:last-child td {
@@ -83,63 +108,42 @@
 }
 
 .sessions-table tr:hover {
-  background-color: #444;
+  background: var(--bg-secondary);
 }
 
 .sessions-table tr.selected-row {
-  background-color: rgba(36, 150, 220, 0.2);
+  background: rgba(255,255,255,0.07);
+  color: var(--text-primary);
 }
 
 .sessions-table button {
-  background-color: #2496dc;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--text-primary);
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 8px 20px;
+  border-radius: 7px;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
-  font-size: 14px;
-  min-width: 80px; /* Ensure consistent button width */
-  margin-right: 12px; /* Increased space between buttons */
-  margin-bottom: 8px; /* Add vertical space between buttons */
-  display: inline-block; /* Ensure proper spacing */
+  margin-right: 8px;
+  margin-bottom: 8px;
+  display: inline-block;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: var(--shadow-sm);
 }
 
 .sessions-table button:last-child {
-  margin-right: 0; /* Remove margin from last button */
+  margin-right: 0;
 }
 
-.sessions-table td:nth-child(8) {
-  padding-left: 30px; /* Increased from 20px to 30px for more space */
+.sessions-table button.delete-button, .end-session-btn {
+  background: var(--danger);
+  color: var(--text-primary);
 }
 
-.sessions-table th:nth-child(8) {
-  padding-left: 30px; /* Also apply to header for alignment */
-}
-
-.sessions-table button:hover {
-  background-color: #1a7bb9;
-}
-
-.sessions-table button.delete-button {
-  background-color: #ff4444;
-  min-width: 80px; /* Same width as other buttons */
-}
-
-.sessions-table button.delete-button:hover {
-  background-color: #e53e3e;
-}
-
-.stats-container {
-  background-color: #373737;
-  padding: 10px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10px;
+.sessions-table button.delete-button:hover, .end-session-btn:hover {
+  background: var(--danger);
+  color: var(--text-primary);
 }
 
 .stats-image {
@@ -157,7 +161,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #373737;
+  background-color: var(--bg-tertiary);
   padding: 10px 15px;
   border-radius: 8px;
   margin-bottom: 10px;
@@ -171,18 +175,18 @@
 .session-details h3 {
   margin: 0 0 5px 0;
   font-size: 18px;
-  color: #2496dc;
+  color: var(--accent-secondary);
 }
 
 .session-details p {
   margin: 0;
-  color: #999;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
 .end-session-btn {
-  background-color: #ff4444;
-  color: white;
+  background: var(--danger);
+  color: var(--text-primary);
   border: none;
   padding: 10px 16px;
   border-radius: 4px;
@@ -192,7 +196,8 @@
 }
 
 .end-session-btn:hover {
-  background-color: #e53e3e;
+  background: var(--danger);
+  color: var(--text-primary);
 }
 
 .image-wrapper {
@@ -204,4 +209,67 @@
 
 .image-wrapper::after {
   content: none;
+}
+
+.stats-main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background: none;
+}
+
+.stats-header {
+  flex: 0 0 auto;
+  padding: 24px 0 0 0;
+}
+
+.stats-container {
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 0 0 24px 0;
+}
+
+.stats-outer {
+  max-width: 1100px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  background: rgba(44, 48, 60, 0.92);
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(97,218,251,0.08);
+  border: 1.5px solid rgba(97,218,251,0.13);
+  padding: 32px 32px 24px 32px;
+  min-height: 0;
+}
+
+.stats-outer h2 {
+  margin-bottom: 18px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stats-graphs-row {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.stats-graph-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  padding: 18px 18px 12px 18px;
+  overflow: auto;
 }

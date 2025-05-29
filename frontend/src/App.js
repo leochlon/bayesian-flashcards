@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useBackendStatus } from './hooks/useBackendStatus';
 import { useAppData } from './hooks/useAppData';
 import useShowDeleteDeckModal from './components/modals/useShowDeleteDeckModal';
-import { API, DEFAULT_USER } from './api';
+import { API, DEFAULT_USER, fetchUserSettings } from './api';
 
 // Import all components
 import {
@@ -26,7 +26,8 @@ import {
   StudySessionModal,
   ConfirmDeleteModal,
   ConfirmDeleteSessionModal,
-  ConfirmEndSessionModal
+  ConfirmEndSessionModal,
+  StatsModal
 } from './components';
 
 function App() {
@@ -46,6 +47,8 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState(null);
   const [deckToDelete, setDeckToDelete] = useState(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  // Stats modal state
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   // Global stats refresh trigger
   const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
@@ -57,6 +60,13 @@ function App() {
   const [timer, setTimer] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
+
+  // State for add card modal fields (for modal actions)
+  const [front, setFront] = useState("");
+  const [back, setBack] = useState("");
+  const [frontImage, setFrontImage] = useState(null);
+  const [backImage, setBackImage] = useState(null);
+  const [cardType, setCardType] = useState("Basic");
 
   // Custom hooks
   const { isBackendReady, backendError, checkBackendStatus } = useBackendStatus();
@@ -123,9 +133,14 @@ function App() {
   // Get next card for review
   const getNextCard = async () => {
     if (!currentDeck) return;
-    
     try {
-      const response = await axios.get(`${API}/next_card/${currentDeck}/${DEFAULT_USER}`);
+      // Fetch latest user settings
+      const userSettings = await fetchUserSettings();
+      const maxReviewsPerCard = userSettings.max_reviews_per_card || 2;
+      const response = await axios.get(
+        `${API}/next_card/${currentDeck}/${DEFAULT_USER}` +
+        `?max_reviews_per_card=${maxReviewsPerCard}`
+      );
       if (response.data && response.data.success) {
         setReviewCard(response.data.next_card);
         setShowBack(false);
@@ -144,17 +159,18 @@ function App() {
   // Handle card review submission
   const handleReview = async () => {
     if (!reviewCard || !currentSession) return;
-    
     try {
+      // Fetch latest user settings
+      const userSettings = await fetchUserSettings();
+      const maxReviewsPerCard = userSettings.max_reviews_per_card || 2;
       await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}`, {
         id: reviewCard.id,
         rating: rating,
-        session_id: currentSession.id
+        session_id: currentSession.id,
+        max_reviews_per_card: maxReviewsPerCard
       });
-      
       // Get next card
       await getNextCard();
-      
       // Restart timer for next card
       resetTimer();
       startTimer();
@@ -310,10 +326,11 @@ function App() {
             currentDeck={currentDeck}
             onDeleteDeck={onDeleteDeck}
             deck={deck}
+            setShowStatsModal={setShowStatsModal} // pass to HomeView
           />
         )}
 
-        {view === 'stats' && (
+        {view === 'stats' && !showStatsModal && (
           <StatsView 
             statsType={statsType}
             setStatsType={setStatsType}
@@ -380,12 +397,18 @@ function App() {
         )}
         
         {view === 'settings' && (
-          <SettingsView 
-            onSettingsSaved={() => {
-              console.log('App: Settings saved, triggering stats refresh');
-              setStatsRefreshTrigger(prev => prev + 1);
-            }}
-          />
+          <div className="settings-viewport-wrapper">
+            <SettingsView 
+              onSettingsSaved={async () => {
+                // After saving, reload user settings to ensure all parameters are up to date
+                const updatedSettings = await fetchUserSettings();
+                // Optionally, update any global state or context here if needed
+                // For now, just log for debug
+                console.log('Settings reloaded after save:', updatedSettings);
+                setStatsRefreshTrigger(prev => prev + 1);
+              }}
+            />
+          </div>
         )}
       </main>
 
@@ -451,6 +474,103 @@ function App() {
           onConfirm={confirmDeleteDeck}
           deckName={deckToDelete}
         />
+      )}
+
+      {showStatsModal && (
+        <StatsModal onClose={() => setShowStatsModal(false)}>
+          {/* Card preview and deck actions panel */}
+          {view === 'decks' && currentDeck && (
+            <div className="deck-details">
+              <div className="deck-details-header">
+                <h3>{currentDeck}</h3>
+                <div className="deck-actions-buttons">
+                  <button 
+                    className="action-button study-action"
+                    onClick={() => {
+                      setShowStatsModal(false);
+                      setShowStudySessionModal(true);
+                    }}
+                  >
+                    Study
+                  </button>
+                  <button 
+                    className="action-button manage-action"
+                    onClick={() => {
+                      setShowStatsModal(false);
+                      setManageTab('cards');
+                      setView('manage');
+                    }}
+                  >
+                    Manage Cards
+                  </button>
+                  <button 
+                    className="action-button add-action"
+                    onClick={() => {
+                      setShowStatsModal(false);
+                      setEditingCard(null);
+                      setFront("");
+                      setBack("");
+                      setFrontImage(null);
+                      setBackImage(null);
+                      setCardType("Basic");
+                      setView('add');
+                    }}
+                  >
+                    Add Cards
+                  </button>
+                </div>
+              </div>
+              <div className="deck-cards-preview">
+                <h4>Card Preview</h4>
+                {deck.length === 0 ? (
+                  <div className="no-cards-preview">
+                    <p>No cards in this deck yet. Click "Add Cards" to create your first card.</p>
+                  </div>
+                ) : (
+                  <div className="cards-preview-grid">
+                    {deck.slice(0, 3).map(card => (
+                      <div key={card.id} className="card-preview-item">
+                        <div className="preview-card-front">
+                          <h5>Front</h5>
+                          <div className="preview-card-content">
+                            <div dangerouslySetInnerHTML={{ __html: card.front }} />
+                            {card.frontImage && (
+                              <img src={card.frontImage} alt="Front" className="preview-card-image" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="preview-card-back">
+                          <h5>Back</h5>
+                          <div className="preview-card-content">
+                            <div dangerouslySetInnerHTML={{ __html: card.back }} />
+                            {card.backImage && (
+                              <img src={card.backImage} alt="Back" className="preview-card-image" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {deck.length > 3 && (
+                      <div className="more-cards-indicator">
+                        <p>+ {deck.length - 3} more cards</p>
+                        <button 
+                          className="view-all-button"
+                          onClick={() => {
+                            setShowStatsModal(false);
+                            setManageTab('cards');
+                            setView('manage');
+                          }}
+                        >
+                          View All
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </StatsModal>
       )}
     </div>
   );

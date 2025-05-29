@@ -1,6 +1,11 @@
-/* Base application styles */
+/* Base application styles - Modern dark theme */
+* {
+  box-sizing: border-box;
+}
+
 .App {
   text-align: center;
+  font-family: var(--font-family);
 }
 
 .App-logo {
@@ -15,18 +20,25 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: var(--bg-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--text-primary);
+  font-family: var(--font-family);
 }
 
 .App-link {
   color: var(--accent-primary);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.App-link:hover {
+  color: var(--accent-secondary);
 }
 
 @keyframes App-logo-spin {
@@ -43,4 +55,10 @@
   background-color: var(--bg-primary);
   color: var(--text-primary);
   padding: var(--spacing-lg);
+  font-family: var(--font-family);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }

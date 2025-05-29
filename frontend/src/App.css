@@ -1,5 +1,13 @@
 /* Main App.css - Cleaned up with styles extracted to modular files */
 
+html, body, #root {
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .App {
   text-align: center;
 }
@@ -16,18 +24,18 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: var(--bg-secondary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--white);
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--info);
 }
 
 @keyframes App-logo-spin {
@@ -41,7 +49,12 @@
 
 .app-container {
   min-height: 100vh;
-  background-color: #2f2f31;
-  color: #ffffff;
-  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--font-family);
 }

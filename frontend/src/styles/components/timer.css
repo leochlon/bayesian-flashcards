@@ -73,10 +73,10 @@
   align-items: center;
   gap: 8px; /* Reduced gap */
   margin-left: 10px;
-  background-color: #2f2f31;
+  background-color: var(--bg-secondary);
   padding: 6px 10px; /* Reduced padding */
   border-radius: 6px;
-  border: 1px solid #484848;
+  border: 1px solid var(--border-color);
   white-space: nowrap;
   flex-shrink: 0; /* Prevent timer from shrinking */
 }
@@ -84,15 +84,15 @@
 .timer-display {
   font-size: 24px; /* Reduced from 32px */
   font-weight: 600;
-  color: #fff;
+  color: var(--white);
   font-family: monospace;
   min-width: 70px; /* Reduced from 90px */
   text-align: center;
 }
 
 .timer-button {
-  background-color: #2496dc;
-  color: #fff;
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
   border: none;
   border-radius: 4px;
   width: 32px; /* Reduced from 42px */

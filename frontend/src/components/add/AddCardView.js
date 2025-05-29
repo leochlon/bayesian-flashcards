@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import "react-quill/dist/quill.snow.css";
 import axios from 'axios';
 import '../../styles/views/editor.css';
-
-// Import components
-import ImageDropZone from '../ImageDropZone';
 
 // Import config
 import { API } from '../../api';
@@ -21,26 +18,69 @@ const AddCardView = ({
   // State for the editor
   const [front, setFront] = useState(editingCard?.front || "");
   const [back, setBack] = useState(editingCard?.back || "");
-  const [frontImage, setFrontImage] = useState(editingCard?.frontImage || null);
-  const [backImage, setBackImage] = useState(editingCard?.backImage || null);
   const [cardType, setCardType] = useState(editingCard?.type || "Basic");
 
-  // Utility to convert File to base64 string
-  const fileToBase64 = (file, cb) => {
+  // Refs for ReactQuill
+  const frontQuillRef = useRef();
+  const backQuillRef = useRef();
+
+  // Stable drop handlers for each editor
+  const handleFrontDrop = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      insertImageToQuill(frontQuillRef, file);
+    }
+  }, []);
+  const handleBackDrop = React.useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      insertImageToQuill(backQuillRef, file);
+    }
+  }, []);
+
+  // Utility to convert File to base64 string and insert into Quill
+  const insertImageToQuill = (quillRef, file) => {
     const reader = new window.FileReader();
-    reader.onload = (e) => cb(e.target.result);
+    reader.onload = (e) => {
+      const quill = quillRef.current.getEditor();
+      const range = quill.getSelection(true);
+      quill.insertEmbed(range ? range.index : 0, 'image', e.target.result, 'user');
+    };
     reader.readAsDataURL(file);
   };
 
-  // Handlers for image drop
-  const handleFrontImage = (file) => {
-    if (!file) return setFrontImage(null);
-    fileToBase64(file, setFrontImage);
-  };
-  const handleBackImage = (file) => {
-    if (!file) return setBackImage(null);
-    fileToBase64(file, setBackImage);
-  };
+  useEffect(() => {
+    const addDropListener = (quillRef, handler) => {
+      const editor = quillRef.current && quillRef.current.getEditor && quillRef.current.getEditor();
+      if (editor) {
+        const editorElem = editor.root;
+        if (editorElem) {
+          editorElem.addEventListener('drop', handler);
+          editorElem.addEventListener('dragover', (e) => { e.preventDefault(); });
+        }
+      }
+    };
+    const removeDropListener = (quillRef, handler) => {
+      const editor = quillRef.current && quillRef.current.getEditor && quillRef.current.getEditor();
+      if (editor) {
+        const editorElem = editor.root;
+        if (editorElem) {
+          editorElem.removeEventListener('drop', handler);
+          // dragover is anonymous, so can't remove, but it's harmless
+        }
+      }
+    };
+    addDropListener(frontQuillRef, handleFrontDrop);
+    addDropListener(backQuillRef, handleBackDrop);
+    return () => {
+      removeDropListener(frontQuillRef, handleFrontDrop);
+      removeDropListener(backQuillRef, handleBackDrop);
+    };
+  }, [handleFrontDrop, handleBackDrop]);
 
   // Handle card addition
   const handleAddCard = async () => {
@@ -53,16 +93,12 @@ const AddCardView = ({
       await axios.post(`${API}/cards/${currentDeck}`, {
         front,
         back,
-        frontImage,
-        backImage,
         type: cardType
       });
 
       // Clear form
       setFront("");
       setBack("");
-      setFrontImage(null);
-      setBackImage(null);
       setCardType("Basic");
 
       // Reload cards
@@ -85,16 +121,12 @@ const AddCardView = ({
       await axios.put(`${API}/cards/${currentDeck}/${editingCard.id}`, {
         front,
         back,
-        frontImage,
-        backImage,
         type: cardType
       });
       
       // Clear form
       setFront("");
       setBack("");
-      setFrontImage(null);
-      setBackImage(null);
       setCardType("Basic");
       
       // Return to manage view
@@ -132,46 +164,57 @@ const AddCardView = ({
             );
           })}
         </select>
+        {/* Render toolbar HTML for Quill to use */}
         <div id={toolbarId} className="toolbar-only">
-          <ReactQuill
-            modules={{ toolbar: toolbarOptions }}
-            className="toolbar-only"
+          <span className="ql-formats">
+            <select className="ql-header" defaultValue="">
+              <option value="1"></option>
+              <option value="2"></option>
+              <option value=""></option>
+            </select>
+          </span>
+          <span className="ql-formats">
+            <button className="ql-bold"></button>
+            <button className="ql-italic"></button>
+            <button className="ql-underline"></button>
+          </span>
+          <span className="ql-formats">
+            <button className="ql-link"></button>
+          </span>
+          <span className="ql-formats">
+            <button className="ql-list" value="ordered"></button>
+            <button className="ql-list" value="bullet"></button>
+          </span>
+          <span className="ql-formats">
+            <button className="ql-image"></button>
+          </span>
+        </div>
+      </div>
+
+      <div className="card-side">
+        <h3 className="card-side-label">Front</h3>
+        <div className="editor-field quill-wrapper">
+          <ReactQuill 
+            ref={frontQuillRef}
+            value={front} 
+            onChange={setFront}
+            modules={{ toolbar: { container: `#${toolbarId}` } }}
+            formats={formats}
           />
         </div>
       </div>
 
       <div className="card-side">
-        <h3>Front</h3>
-        <ReactQuill 
-          value={front} 
-          onChange={setFront}
-          modules={modules}
-          formats={formats}
-          className="editor-field"
-        />
-        <ImageDropZone
-          onImageDrop={handleFrontImage}
-          image={frontImage}
-          onRemove={() => setFrontImage(null)}
-          side="front"
-        />
-      </div>
-
-      <div className="card-side">
-        <h3>Back</h3>
-        <ReactQuill 
-          value={back} 
-          onChange={setBack}
-          modules={modules}
-          formats={formats}
-          className="editor-field"
-        />
-        <ImageDropZone
-          onImageDrop={handleBackImage}
-          image={backImage}
-          onRemove={() => setBackImage(null)}
-          side="back"
-        />
+        <h3 className="card-side-label">Back</h3>
+        <div className="editor-field quill-wrapper">
+          <ReactQuill 
+            ref={backQuillRef}
+            value={back} 
+            onChange={setBack}
+            modules={{ toolbar: { container: `#${toolbarId}` } }}
+            formats={formats}
+          />
+        </div>
       </div>
 
       <div className="editor-footer">
@@ -183,8 +226,6 @@ const AddCardView = ({
                 // Clear form and return to manage view
                 setFront("");
                 setBack("");
-                setFrontImage(null);
-                setBackImage(null);
                 setCardType("Basic");
                 navigateTo('manage');
               }} 

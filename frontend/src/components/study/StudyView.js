@@ -20,6 +20,13 @@ const StudyView = ({
 }) => {
   return (
     <div className="legacy-review-container">
+      {/* Easy Mode Banner */}
+      {easyMode && (
+        <div className="easy-mode-banner">
+          <span role="img" aria-label="sparkles" className="easy-mode-icon">✨</span>
+          <span className="easy-mode-text">Easy Mode Active</span>
+        </div>
+      )}
       {currentSession && (
         <div className="legacy-active-session-row">
           <div className="legacy-session-label">Session: <span className="legacy-session-name">{currentSession.name}</span></div>

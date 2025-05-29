@@ -1,5 +1,6 @@
 import '../styles/views/deck-view.css';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import DeckView from './DeckView'; // Import DeckView component
 
 const HomeView = ({
   decks,
@@ -10,8 +11,22 @@ const HomeView = ({
   setCurrentDeck,
   currentDeck,
   onDeleteDeck,
-  deck
+  deck,
+  setShowStatsModal // <-- add this prop
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter decks based on search term
+  const filteredDecks = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return decks;
+    }
+    return decks.filter(deck => {
+      const deckName = typeof deck === 'object' ? deck.name : deck;
+      return deckName.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  }, [decks, searchTerm]);
+
   // Pick the first deck as default if none is selected
   const selectedDeck = currentDeck || (decks.length > 0 ? (typeof decks[0] === 'object' ? decks[0].name : decks[0]) : null);
   const selectedDeckObj = decks.find(d => (typeof d === 'object' ? d.name === selectedDeck : d === selectedDeck));
@@ -24,32 +39,49 @@ const HomeView = ({
     <div className="deck-view">
       <div className="deck-header">
         <h2>Your Decks</h2>
-        <button 
-          className="study-button"
-          onClick={() => {
-            if (selectedDeck) {
-              setShowStudySessionModal(true);
-            } else {
-              alert("Please select a deck first");
-            }
-          }}
-        >
-          Study
-        </button>
+        <div className="search-container">
+          <div className="search-input-wrapper">
+            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search decks..."
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="clear-search"
+                onClick={() => setSearchTerm('')}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="deck-grid">
-        {decks.map(deck => (
+      <div className="deck-grid three-column">
+        {filteredDecks.map(deck => (
           <div 
             key={typeof deck === 'object' ? deck.name : deck}
             className={`deck-card ${selectedDeck === (typeof deck === 'object' ? deck.name : deck) ? 'selected' : ''}`}
-            onClick={() => setCurrentDeck(typeof deck === 'object' ? deck.name : deck)}
+            onClick={() => {
+              setCurrentDeck(typeof deck === 'object' ? deck.name : deck);
+              setShowStatsModal(true);
+            }}
           >
             <h3>{typeof deck === 'object' ? deck.name : deck}</h3>
             <p>{typeof deck === 'object' ? deck.card_count : (deckCards && deckCards.length ? deckCards.length : 0)} cards</p>
             <button 
               className="delete-deck-button"
-              onClick={e => onDeleteDeck(typeof deck === 'object' ? deck.name : deck, e)}
+              onClick={e => {
+                e.stopPropagation(); // Prevent deck click
+                onDeleteDeck(typeof deck === 'object' ? deck.name : deck, e);
+              }}
             >
               🗑️
             </button>
@@ -62,79 +94,6 @@ const HomeView = ({
           <h3>+ Create New Deck</h3>
         </div>
       </div>
-
-      {/* Deck Details View - always visible if a deck is selected */}
-      {selectedDeck && (
-        <div className="deck-details legacy-deck-details">
-          <div className="deck-details-header legacy-deck-details-header">
-            <h3 className="legacy-deck-title">{selectedDeck}</h3>
-            <div className="deck-actions-buttons legacy-deck-actions-buttons">
-              <button 
-                className="action-button study-action legacy-action-button"
-                onClick={() => setShowStudySessionModal(true)}
-              >
-                Study
-              </button>
-              <button 
-                className="action-button manage-action legacy-action-button"
-                onClick={() => navigateTo('manage')}
-              >
-                Manage Cards
-              </button>
-              <button 
-                className="action-button add-action legacy-action-button"
-                onClick={() => navigateTo('add')}
-              >
-                Add Cards
-              </button>
-            </div>
-          </div>
-          <div className="deck-cards-preview legacy-deck-cards-preview">
-            <h4 className="legacy-preview-title">Card Preview</h4>
-            {deckCards.length === 0 ? (
-              <div className="no-cards-preview legacy-no-cards-preview">
-                <p>No cards in this deck yet. Click "Add Cards" to create your first card.</p>
-              </div>
-            ) : (
-              <div className="cards-preview-grid legacy-cards-preview-grid">
-                {deckCards.slice(0, 3).map(card => (
-                  <div key={card.id} className="card-preview-item legacy-card-preview-item">
-                    <div className="preview-card-front legacy-preview-card-front">
-                      <h5>Front</h5>
-                      <div className="preview-card-content legacy-preview-card-content">
-                        <div dangerouslySetInnerHTML={{ __html: card.front }} />
-                        {card.frontImage && (
-                          <img src={card.frontImage} alt="Front" className="preview-card-image legacy-preview-card-image" />
-                        )}
-                      </div>
-                    </div>
-                    <div className="preview-card-back legacy-preview-card-back">
-                      <h5>Back</h5>
-                      <div className="preview-card-content legacy-preview-card-content">
-                        <div dangerouslySetInnerHTML={{ __html: card.back }} />
-                        {card.backImage && (
-                          <img src={card.backImage} alt="Back" className="preview-card-image legacy-preview-card-image" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {deckCards.length > 3 && (
-                  <div className="more-cards-indicator legacy-more-cards-indicator">
-                    <p>+ {deckCards.length - 3} more cards</p>
-                    <button 
-                      className="view-all-button legacy-view-all-button"
-                      onClick={() => navigateTo('manage')}
-                    >
-                      View All
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Study status */}
       {currentSession && (

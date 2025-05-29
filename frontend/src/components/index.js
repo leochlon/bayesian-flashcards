@@ -23,3 +23,4 @@ export { default as ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 export { default as ConfirmDeleteSessionModal } from './modals/ConfirmDeleteSessionModal';
 export { default as ConfirmEndSessionModal } from './modals/ConfirmEndSessionModal';
 export { default as useShowDeleteDeckModal } from './modals/useShowDeleteDeckModal';
+export { default as StatsModal } from './modals/StatsModal';

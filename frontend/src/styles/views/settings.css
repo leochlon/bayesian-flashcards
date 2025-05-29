@@ -1,211 +1,313 @@
 /* Settings View Styles (from App.js.new & App.css.settings-styles) */
+
+/* Base styles for the settings container */
+html, body, #root {
+  height: 100%;
+  min-height: 100vh;
+}
+
+.settings-viewport-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+}
+
 .settings-container {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  color: #222;
+  padding: 38px 32px 32px 32px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  animation: modal-pop-in 0.28s cubic-bezier(0.4,0,0.2,1);
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
 }
 
+/* Keyframes for modal pop-in animation */
+@keyframes modal-pop-in {
+  from { transform: scale(0.97) translateY(20px); opacity: 0.7; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Header styles within the settings container */
 .settings-container h2 {
-  color: #333;
-  margin-bottom: 15px;
-  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  text-align: left;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
+/* Description styles within the settings container */
 .settings-description {
-  color: #666;
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 0.95rem;
+  color: var(--text-secondary);
+  text-align: left;
+  margin-bottom: 28px;
+  font-size: 1.08rem;
+  font-weight: 500;
 }
 
+/* Category section styles */
 .settings-categories {
-  margin-bottom: 20px;
-  text-align: center;
+  margin-bottom: 24px;
+  text-align: left;
 }
 
+/* Button styles for category selection */
 .category-buttons {
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 10px;
+  justify-content: flex-start;
+  gap: 18px;
+  margin-bottom: 12px;
 }
 
+/* Individual category button styles */
 .category-button {
-  background: #f5f5f5;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px 24px;
-  font-size: 16px;
-  font-weight: 500;
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  border: 1.5px solid var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+  border-radius: 7px;
+  padding: 10px 28px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border 0.2s;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
 }
 
+/* Active and hover state styles for category buttons */
 .category-button.active, .category-button:hover {
-  background: #3498db;
-  color: #fff;
-  border-color: #3498db;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
 }
 
+/* Description styles for categories */
 .category-description {
-  color: #888;
-  font-size: 15px;
+  color: var(--text-muted);
+  font-size: 1rem;
   margin-top: 0;
   margin-bottom: 0;
 }
 
+/* Grid layout for settings sections */
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 32px;
 }
 
+/* Individual settings section styles */
 .settings-section {
-  background-color: #f9f9f9;
-  padding: 22px 22px 12px 22px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  border: 1.2px solid var(--border-color);
+  margin-bottom: 18px;
+  transition: box-shadow 0.18s, border 0.18s;
+}
+
+/* Hover effects for settings sections */
+.settings-section:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+}
+
+/* Header styles within each settings section */
+.settings-section h3 {
+  color: var(--accent-secondary);
+  margin-top: 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Description styles for settings sections */
+.section-description {
+  color: var(--text-secondary);
+  font-size: 1rem;
   margin-bottom: 18px;
 }
 
-.settings-section h3 {
-  color: #2c3e50;
-  margin-top: 0;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-  font-size: 20px;
-}
-
-.section-description {
-  color: #666;
-  font-size: 0.92rem;
-  margin-bottom: 15px;
-}
-
+/* Individual setting item styles */
 .setting-item {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
+/* Label styles for setting items */
 .setting-item label {
   display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #444;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--accent-primary);
   text-transform: capitalize;
+  letter-spacing: 0.01em;
 }
 
+/* Control styles for setting items */
 .setting-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* Range input styles */
 .setting-controls input[type="range"] {
   flex: 1;
-  height: 6px;
-  background: #e0e0e0;
+  height: 7px;
+  background: var(--bg-tertiary);
   outline: none;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: background 0.18s;
 }
 
+/* Thumb styles for range inputs */
 .setting-controls input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #3498db;
+  background: var(--accent-primary);
   cursor: pointer;
+  box-shadow: 0 1.5px 6px rgba(97,218,251,0.13);
+  border: 2px solid var(--bg-secondary);
+  transition: background 0.18s, border 0.18s;
 }
 
+/* Focus styles for range input thumbs */
+.setting-controls input[type="range"]:focus::-webkit-slider-thumb {
+  border: 2px solid var(--accent-secondary);
+}
+
+/* Number input styles */
 .setting-controls input[type="number"] {
   width: 70px;
-  padding: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #fff;
-  color: #222;
+  padding: 7px 8px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border 0.18s, box-shadow 0.18s;
 }
 
+/* Focus styles for number inputs */
+.setting-controls input[type="number"]:focus {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Setting value display styles */
 .setting-value {
   min-width: 40px;
-  font-weight: bold;
-  color: #3498db;
+  font-weight: 700;
+  color: var(--accent-primary);
   text-align: center;
+  font-size: 1.08rem;
 }
 
+/* Description styles for individual settings */
 .setting-description {
-  font-size: 0.8rem;
-  color: #777;
-  margin-top: 5px;
+  font-size: 0.97rem;
+  color: var(--text-muted);
+  margin-top: 7px;
 }
 
+/* Action button styles within the settings container */
 .settings-actions {
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1.5px solid rgba(97,218,251,0.10);
 }
 
-.save-settings-button, .reset-button {
-  padding: 10px 20px;
+/* General button styles */
+.save-settings-button, .reset-button, .retry-button {
+  padding: 12px 28px;
   border: none;
-  border-radius: 4px;
+  border-radius: 7px;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  transition: background-color 0.2s;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: var(--shadow-sm);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
+/* Save button specific styles */
 .save-settings-button {
-  background-color: #3498db;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
+/* Save button hover effects */
 .save-settings-button:hover {
-  background-color: #2980b9;
+  background: var(--accent-secondary);
+  color: var(--bg-primary);
 }
 
+/* Disabled state for save button */
 .save-settings-button:disabled {
-  background-color: #95a5a6;
+  background: var(--text-muted);
+  color: var(--text-secondary);
   cursor: not-allowed;
 }
 
+/* Reset button specific styles */
 .reset-button {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  border: 1.5px solid var(--accent-primary);
 }
 
+/* Hover effects for reset button */
 .reset-button:hover {
-  background-color: #dde4e6;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
+/* Error message styles */
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  text-align: center;
+  background: rgba(220,53,69,0.13);
+  color: var(--danger);
+  padding: 12px;
+  border-radius: 7px;
+  margin-bottom: 22px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
+/* Success message styles */
 .success-message {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  text-align: center;
+  background: rgba(40,167,69,0.13);
+  color: var(--success);
+  padding: 12px;
+  border-radius: 7px;
+  margin-bottom: 22px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
+/* Loading and error state styles for the container */
 .settings-container.loading, .settings-container.error {
   min-height: 300px;
   display: flex;
@@ -214,35 +316,43 @@
   align-items: center;
 }
 
+/* Spinner styles for loading indication */
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(97,218,251,0.13);
   border-radius: 50%;
-  border-left-color: #3498db;
+  border-left-color: var(--accent-primary);
   animation: spin 1s linear infinite;
   margin: 0 auto;
 }
 
+/* Keyframes for spinner rotation */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+/* Retry button specific styles */
 .retry-button {
   margin-top: 15px;
-  padding: 8px 16px;
-  background-color: #3498db;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
   border: none;
-  border-radius: 4px;
+  border-radius: 7px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 1.5px 6px rgba(97,218,251,0.06);
+  padding: 10px 24px;
 }
 
+/* Retry button hover effects */
 .retry-button:hover {
-  background-color: #2980b9;
+  background: var(--accent-secondary);
+  color: var(--bg-primary);
 }
 
 /* Responsive adjustments */
@@ -251,6 +361,7 @@
     grid-template-columns: 1fr;
   }
   .settings-container {
-    padding: 15px;
+    max-height: calc(100vh - 8px);
+    padding: 8px;
   }
 }

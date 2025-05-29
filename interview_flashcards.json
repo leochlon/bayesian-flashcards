@@ -1,0 +1,677 @@
+[
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Contains Duplicate",
+    "Back": "Use a hash set to track seen numbers. Iterate through the array and check each element. If an element is already in the set, you have found a duplicate and can return true. If not, add the element to the set. Continue until the end. If no duplicates are found, return false. This solution runs in O(n) time with O(n) space."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Valid Anagram",
+    "Back": "Count the frequency of each letter in the first string and compare it to the frequency in the second string. One efficient method is to use a hash map or an array of length 26 (for letters). Increment counts for letters in s and decrement for letters in t. In the end, if all counts return to zero, the strings are anagrams. This uses O(n) time and O(1) extra space."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Two Sum",
+    "Back": "Use a hash map to find complements in one pass. Iterate through the array, and for each number x, compute the complement target - x. Check if the complement is already in the map (meaning we have seen a number that together with x sums to target). If it is, return the indices. If not, store x in the map with its index and continue. This approach finds the two sum in O(n) time."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Group Anagrams",
+    "Back": "Use a hash map to categorize words by a signature (like sorted letters or a character count). For each word, compute its key (e.g., sorted string of its letters) and append the word to the list for that key in the map. At the end, the hash map's values are lists of anagrams. This runs in O(n * m log m) time (for sorting each word of length m) or using counting for O(n * m)."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Top K Frequent Elements",
+    "Back": "Count the frequency of each element using a hash map. Then use a min-heap of size k to keep track of the k most frequent elements (pushing frequencies). Alternatively, use bucket sort: create an array where index represents frequency and each bucket holds elements with that frequency. Then iterate from highest frequency down until k elements are collected. Either approach yields O(n) or O(n log k) time."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Product of Array Except Self",
+    "Back": "Compute the product of all elements except self without division by using prefix and suffix products. First pass: build an array of prefix products where prefix[i] = product of all numbers up to i (exclusive). Second pass: iterate from end with a running suffix product and multiply it with corresponding prefix to get result. This yields O(n) time and O(1) extra space (output array not counting)."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Valid Sudoku",
+    "Back": "Use three sets (or arrays of booleans) to track seen numbers in each row, each column, and each 3x3 subgrid. Iterate through each cell; if it's not empty, check the corresponding row, column, and subgrid set for duplicates. If the number is already present in any, the board is invalid; otherwise add it. This validates the board in O(81) \u2248 O(1) time."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Encode and Decode Strings",
+    "Back": "For encoding, prepend each string with its length and a special delimiter (for example, \"5#hello\" for \"hello\"). Join all encoded strings together. For decoding, iterate through the encoded string, reading the length up to the delimiter, then extract that many characters as one original string. This way we can encode/decode an arbitrary list of strings without ambiguity."
+  },
+  {
+    "Category": "Arrays & Hashing",
+    "Front": "Longest Consecutive Sequence",
+    "Back": "Use a hash set of all numbers to achieve O(n) time. For each number, only attempt to build a sequence from it if it's the start of a sequence (i.e., no predecessor number present). Then count upwards (num+1, num+2, ...) as long as the numbers exist in the set. Track the length of the longest sequence found. This yields the length of the longest consecutive run."
+  },
+  {
+    "Category": "Two Pointers",
+    "Front": "Valid Palindrome",
+    "Back": "Use two pointers starting at the beginning and end of the string. Move each pointer inward, skipping characters that are not alphanumeric. Compare the characters (in lowercase) at both pointers. If any mismatch occurs, it's not a palindrome. If pointers cross without mismatches, the string is a palindrome. This check runs in O(n) time."
+  },
+  {
+    "Category": "Two Pointers",
+    "Front": "Two Sum II - Input Array Is Sorted",
+    "Back": "Use two pointers at the start (left) and end (right) of the sorted array. Compute the sum of values at both pointers. If the sum is greater than target, decrement the right pointer (to reduce sum); if sum is less, increment the left pointer (to increase sum). If equal, you found the two indices (1-indexed as per problem). This finds the pair in O(n) time."
+  },
+  {
+    "Category": "Two Pointers",
+    "Front": "3Sum",
+    "Back": "First sort the array to use two-pointer technique. Then, for each number i, use two pointers (left, right) to find pairs that sum to -nums[i]. Skip duplicate values for i to avoid repeated triplets. Move the pointers inward: if the three-number sum is too low, increase left; if too high, decrease right; if exactly zero, record the triplet and move both pointers past duplicates. Overall time is O(n^2)."
+  },
+  {
+    "Category": "Two Pointers",
+    "Front": "Container With Most Water",
+    "Back": "Use two pointers, one at each end of the height array. Compute area = min(height[left], height[right]) * (right - left). Track the maximum area. Then move the pointer with the smaller height inward (since moving the taller one cannot increase area). Repeat until pointers meet. This greedy 3 approach finds the maximum area in O(n) time."
+  },
+  {
+    "Category": "Two Pointers",
+    "Front": "Trapping Rain Water",
+    "Back": "Use two pointers scanning inward with tracking of leftMax and rightMax. Initialize left = 0, right = end. While left < right, compare height[left] and height[right]. If height[left] < height[right], then leftMax is the limiting height: water at left = max(0, leftMax - height[left]); update leftMax and left++. Similarly, if height[right] <= height[left], compute water at right using rightMax, update rightMax and right--. Sum all trapped water. This yields O(n) time."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Best Time to Buy and Sell Stock",
+    "Back": "Keep track of the minimum price seen so far while iterating through prices. For each price, compute the profit if sold at this price (price - minPriceSoFar) and update the maximum profit. Update minPriceSoFar if a lower price is encountered. This one-pass algorithm yields O(n) time."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Longest Substring Without Repeating Characters",
+    "Back": "Maintain a sliding window using a set or hash map. Expand the window by moving a right pointer. If a new character causes a duplicate, shrink the window from the left until no duplicates. Keep track of the maximum window length. Using a hash map from character to index allows adjusting the left pointer in one step when a duplicate is seen. Complexity: O(n)."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Longest Repeating Character Replacement",
+    "Back": "Use a sliding window and track the frequency of characters in the window. Maintain a variable maxCount for the count of the most frequent char in the window. Expand the window (move right pointer) and update maxCount. If window length minus maxCount > k (meaning too many characters would need replacement), shrink the window from left. The largest window size achieved during this process is the answer. Runs in O(n) time."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Permutation in String",
+    "Back": "Use a sliding window of length len(s1) over s2 and a frequency count. Count characters of s1. Then iterate through s2 with two pointers, expanding the window and maintaining counts of characters in the window. If the window size exceeds len(s1), remove the leftmost character. At each step, check if the window\u2019s character frequency matches s1\u2019s frequency. If it matches, you found a permutation of s1 in s2. This can be done in O(n) time."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Minimum Window Substring",
+    "Back": "Use two pointers (left and right) to form a sliding window and a frequency map of characters in t. Expand the window (move right) until it contains all characters of t (match count achieved). Then, try to contract from the left to find a smaller valid window, updating minimum window length if improved. Keep a count of how many characters of t are satisfied in the current window. Move left pointer until the window is no longer valid, then expand again. This yields the minimum covering substring in O(n) time on average."
+  },
+  {
+    "Category": "Sliding Window",
+    "Front": "Sliding Window Maximum",
+    "Back": "Use a deque (double-ended queue) to maintain the indices of useful elements in the current window, such that their values are in decreasing order. As you move the window, pop indices from the back of the deque while their corresponding values are less than the new value (to maintain order). Also pop from front if an index goes out of the window\u2019s range. The deque\u2019s front always holds the index of the current window\u2019s maximum. Append that value to the result for each window position. This runs in O(n) time."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Valid Parentheses",
+    "Back": "Use a stack to ensure each closing bracket matches the most recent unmatched opening bracket. Push opening brackets onto the stack. When a closing bracket is encountered, check the top of the stack: if it\u2019s a matching opening bracket, pop it; otherwise the string is invalid. In the end, if the stack is empty (all brackets matched properly), the string is valid. This runs in O(n) 5 time."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Min Stack",
+    "Back": "Use two stacks in parallel: one normal stack for values and one stack to keep track of the current minimum at each push. When pushing a new value x, also push min(x, currentMin) onto the min-stack. When popping, pop from both stacks. The top of the min-stack always gives the minimum in O(1) time. This allows push, pop, top, and getMin all in O(1)."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Evaluate Reverse Polish Notation",
+    "Back": "Use a stack to evaluate tokens. Iterate through each token: if it\u2019s a number, push it onto the stack; if it\u2019s an operator, pop the top two numbers and apply the operation in the correct order (for subtraction and division, the second popped is the left operand). Push the result back onto the stack. After processing all tokens, the stack\u2019s single value is the result. Each operation is O(1), so overall O(n)."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Generate Parentheses",
+    "Back": "Use backtracking (DFS) to generate all valid combinations. Maintain the current string and counts of how many open and close parentheses have been used. You can add an open parenthesis if openCount < n, and you can add a close parenthesis if closeCount < openCount (to ensure validity). Recurse until the string length is 2*n. This explores all well-formed sequences efficiently."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Daily Temperatures",
+    "Back": "Use a decreasing monotonic stack of indices. Iterate over temperatures: for each day i, while the stack is not empty and current temperature > temperature at stack\u2019s top index, it means we\u2019ve found a warmer day for that index. Pop the index j from stack and record the answer for day j as i - j. Then push the current index i onto the stack. The stack ensures each index is processed at most once, giving O(n) time."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Car Fleet",
+    "Back": "Sort cars by position in descending order (starting from the target). Use a stack to track the time taken for each fleet to reach the target. Compute time = (target - position) / speed for each car in order. If a car\u2019s time is less or equal than the time on top of the stack, it means it catches up to the fleet ahead and becomes part of that fleet (so it doesn\u2019t form a new fleet). If it\u2019s greater, it forms a new fleet (push its time). The number of fleets is the stack size at the end."
+  },
+  {
+    "Category": "Stack",
+    "Front": "Largest Rectangle in Histogram",
+    "Back": "Use a stack to keep indices of bars in increasing height order. Iterate through each bar index i. While the current bar\u2019s height is lower than the height at the stack\u2019s top index, it means the bar at the top can\u2019t extend further right; pop it and calculate area = height[top] * (i - prevStackTopIndex - 1) using the current index as the first smaller bar on the right and the new top as first smaller on left. Continue until stack is in increasing order. Push current index. After processing all bars, pop remaining indices and compute area similarly (using array length as right boundary). Track the maximum area found."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Binary Search",
+    "Back": "Use the classic binary search on a sorted array. Initialize left = 0 and right = n-1. While left <= right, compute mid = left + (right-left)//2. If array[mid] == target, return mid. If array[mid] < target, search the right half (left = mid+1). If array[mid] > target, search the left half (right = mid-1). If the loop ends without finding the target, return -1. This runs in O(log n) time."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Search a 2D Matrix",
+    "Back": "Treat the matrix as a sorted list by mapping 2D indices to 1D. Let m = number of rows, n = number of columns. Use binary search on the range [0, m*n - 1]. For a given mid index, convert to matrix coordinates: row = mid // n, col = mid % n. Check matrix[row][col] against target and adjust the search 7 range accordingly. This finds the target in O(log (m*n)) time."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Koko Eating Bananas",
+    "Back": "Use binary search on the eating speed k (low = 1, high = max pile size). For a candidate speed mid, compute the total hours needed for Koko to finish all piles at that speed (for each pile, hours = ceil(pile/mid)). If the total hours <= H (allowed hours), we can try a smaller speed (move high to mid). If total hours > H, we need a faster speed (move low to mid+1). Continue until low meets high. Low will be the minimum speed that works."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Find Minimum in Rotated Sorted Array",
+    "Back": "Use binary search on the rotated sorted array. At each step, compare the mid element with the rightmost element. If nums[mid] > nums[right], the minimum lies to the right of mid (because the array rotation point is to the right), so set left = mid + 1. Otherwise, the minimum is at mid or to the left, so set right = mid. Continue until left meets right. The minimum is at left (or right). This operates in O(log n) time."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Search in Rotated Sorted Array",
+    "Back": "Use modified binary search. First, determine which portion is sorted by comparing nums[mid] to nums[left]. If the left side is sorted (nums[left] <= nums[mid]), check if target lies in [nums[left], nums[mid]]; if yes, search left half (right = mid - 1), otherwise search right half (left = mid + 1). If the right side is sorted (else case), check if target lies in (nums[mid], nums[right]]; if yes, search right half, else left half. Continue until found or bounds cross. Runs in O(log n)."
+  },
+  {
+    "Category": "Binary Search",
+    "Front": "Median of Two Sorted Arrays",
+    "Back": "Use binary search on the smaller array to partition both arrays. Let total = m+n. We want to cut the combined array into two halves of equal length (or differ by 1 if total is odd) such that all elements on the left are <= all elements on the right. Perform binary search on cut position i in array A (and j = half - i - 2 in array B). Compute LMaxA = A[i] or -\u221e if i < 0, RMinA = A[i+1] or +\u221e if i+1 out of range (similarly LMaxB, RMinB from B). If LMaxA <= RMinB and LMaxB <= RMinA, correct partition found: if total is 8 even, median = (max(LMaxA, LMaxB) + min(RMinA, RMinB)) / 2; if odd, median = min(RMinA, RMinB). If LMaxA > RMinB, move partition A left (high = i-1); else move it right (low = i+1). This finds median in O(log(min(m,n)))."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Reverse Linked List",
+    "Back": "Iteratively, keep a pointer prev (initialize prev = null) and curr = head. While curr is not null: save next = curr.next, set curr.next = prev (reversing the link), then move prev = curr and curr = next. After the loop, prev points to the new head (the original list\u2019s tail). This reverses the list in O(n) time with O(1) space. (Alternatively, use recursion to reverse pointers.)"
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Merge Two Sorted Lists",
+    "Back": "Use a two-pointer approach with a dummy head. Compare the heads of list1 and list2, append the smaller node to the merged list, and advance that list\u2019s pointer. Repeat until one list is exhausted, then append the remaining nodes of the other list. The result is a sorted merged list. This runs in O(n + m) time for lists of lengths n and m."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Reorder List",
+    "Back": "To reorder the list in-place, first find the middle of the list (using slow/fast pointers). Then split and reverse the second half. Finally, merge the two halves by alternating nodes from the first half and the reversed second half. This way nodes from the second half are inserted between nodes of the first half. The entire process is O(n) time and O(1) space."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Remove Nth Node From End of List",
+    "Back": "Use the two-pointer technique. Move one pointer (fast) n steps ahead. Then move both a slow pointer (starting at head) and fast pointer together until fast reaches the end (null). The slow pointer will then be right before the node to remove. Adjust pointers to skip the target node: slow.next = slow.next.next. Handle edge case when removing the first node (n 9 equal to list length)."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Copy List with Random Pointer",
+    "Back": "A solution is to do it in two passes. First pass: create new nodes and interweave them with the original list (for each original node, insert its clone right after it). Second pass: set the random pointers of the cloned nodes: clone.random = original.random.next (since the clone of original.random is next to original.random). Finally, split the lists apart to separate the deep copy from the original. This operates in O(n) time with O(1) extra space."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Add Two Numbers",
+    "Back": "Use a carry and iterate through both linked lists simultaneously (treat missing nodes as 0 once one list ends). For each position, sum the values and the carry from the previous position. Create a new node with value = (sum % 10) and update carry = sum // 10. Continue until both lists and carry exhausted. This produces the sum list in O(max(m, n)) time."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Linked List Cycle",
+    "Back": "Use Floyd\u2019s Tortoise and Hare algorithm. Have one pointer move one step at a time (slow) and another move two steps at a time (fast). If there is a cycle, at some point these pointers will meet inside the cycle. If fast reaches null (end of list), then no cycle. This detection runs in O(n) time and O(1) space."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Find the Duplicate Number",
+    "Back": "Use Floyd's cycle detection by treating the array as a linked structure (with index as 'node' and value as 'next' pointer). Since there is a duplicate, it forms a cycle. First, find the meeting point of slow = nums[slow] and fast = nums[nums[fast]]. Once they meet, find the entrance to the cycle by moving one pointer to the start and advancing both one step at a time; when they meet again, that's the duplicate. This finds the duplicate in 10 O(n) time and O(1) space."
+  },
+  {
+    "Category": "Linked List",
+    "Front": "Merge k Sorted Lists",
+    "Back": "Use a min-heap (priority queue) to efficiently get the smallest current node among the lists. Initially push the head of each list into the min-heap (keyed by node value). Repeatedly extract the minimum node, append it to the merged list, and if that node has a next node, push next into the heap. Continue until heap is empty. This merges k lists in O(N log k) time (N total nodes)."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Invert Binary Tree",
+    "Back": "Swap the left and right children of every node. This can be done via recursion or an iterative BFS/DFS. For each node, store its left, set left = right, right = stored left. Repeat for all nodes (e.g., using a queue or stack). The entire tree gets inverted (mirror image) in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Maximum Depth of Binary Tree",
+    "Back": "Use recursion (DFS) or BFS to compute depth. Recursively: if node is null, depth = 0; otherwise depth = 1 + max(depth(node.left), depth(node.right)). The maximum depth is the longest path from root down to a leaf. Runs in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Diameter of Binary Tree",
+    "Back": "The diameter is the length of the longest path between any two nodes. Compute this by calculating, for each node, the longest path through that node (which is left_height + right_height). Use a helper function to compute node heights and update a global diameter. Height = 1 + max(height(left), height(right)). Update maxDiameter if (height(left) +height(right)) is larger. This yields the diameter in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Balanced Binary Tree",
+    "Back": "A binary tree is balanced if for every node, the height difference between left and right subtree is no more than 1. Use recursion to check heights. If any subtree is unbalanced or height difference > 1, propagate failure. Specifically, compute heights bottom-up; if abs(height(left)-height(right)) > 1 or either subtree is unbalanced, mark unbalanced. Return height = 1+max(left,right) if balanced, else propagate an error (or -1 as a flag). Runs in O(n)."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Same Tree",
+    "Back": "Traverse both trees simultaneously (either DFS or BFS). At each step, compare current nodes: if either is null or values differ, they are not the same. Recursively compare left subtrees and right subtrees. If all corresponding nodes match, the trees are identical. Complexity O(n) where n is number of nodes."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Subtree of Another Tree",
+    "Back": "Traverse the main tree and at each node check if a subtree starting at this node matches the second tree. Use a helper to compare two trees for equality (same structure & values). If a match is found at any node, return true. Otherwise, recursively continue the search in the main tree\u2019s left and right children. An optimization is to serialize both trees and use substring search, but straightforward DFS comparison works in O(m*n) worst case."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Lowest Common Ancestor of a BST",
+    "Back": "Take advantage of BST properties. Start from root. If both p and q are smaller than the current node\u2019s value, LCA lies in the left subtree (move root = root.left). If both are greater, move to root.right. If they split (one on left, one on right) or one equals the current node, then the current node is the LCA. This finds LCA in O(h) time, where h is tree height."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Binary Tree Level Order Traversal",
+    "Back": "Use BFS (a queue) to traverse the tree level by level. Start with 12 root in the queue. While queue not empty, for each level size, dequeue all nodes of that level, record their values, and enqueue their children for the next level. Append each level\u2019s values list to the result. This yields a level-order (breadth-first) traversal in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Binary Tree Right Side View",
+    "Back": "Perform a level order traversal (BFS), but record only the rightmost node at each level. This can be done by noting the last node dequeued in each level loop of BFS. Alternatively, use DFS with a depth counter: traverse the tree, prioritizing the right subtree; if visiting a depth for the first time, record that node\u2019s value. Either method collects the visible values from the right side in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Count Good Nodes in Binary Tree",
+    "Back": "DFS through the tree, carrying the maximum value seen on the path so far. A node is 'good' if its value is >= max_so_far. Start at root (which is always good). Recurse to children, updating the max if current node\u2019s value is greater. Count 1 + (good nodes in left subtree) + (good nodes in right subtree). This visits each node once, O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Validate Binary Search Tree",
+    "Back": "Use DFS with value bounds. Recursively validate each node: each node should be > all values in its left subtree and < all values in its right subtree. Pass down a valid range (min, max) for each node. Initially the range is (-\u221e, +\u221e). When going left, update max bound to current node\u2019s value; when going right, update min bound to current node\u2019s value. If a node violates the bounds, the tree is not a BST. Complexity O(n)."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Kth Smallest Element in a BST",
+    "Back": "In-order traversal yields nodes in sorted order for BST. Traverse the tree in-order (left, node, right). Keep a counter; each time you visit a node, decrement the counter (or increment a count). When you reach the k-th node visited, that's the answer. You can implement this with a simple recursion or using a stack iteratively. This runs in O(h + k) time, which is 13 efficient since you stop once found."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Lowest Common Ancestor of a Binary Tree",
+    "Back": "Use recursion to find LCA in a general binary tree. If the current node is null or equal to p or q, return it (base case). Recurse left and right. If both left and right recursive calls return non-null, that means p and q are found in different branches, so current node is their LCA. If one side returns a node and the other returns null, propagate the non-null value up (meaning p or q found in that branch). This runs in O(n) time."
+  },
+  {
+    "Category": "Trees",
+    "Front": "Serialize and Deserialize Binary Tree",
+    "Back": "Use a pre-order traversal to serialize, representing null children with a marker (e.g., 'null'). For example, '1,2,null,null,3,4,null,null,5,null,null' corresponds to a tree. To deserialize, use a queue or iterator of values. Recurse or iterate: take the next value, if it's 'null' return null, otherwise create a node with that value and recursively build its left and right children. This reconstructs the tree in O(n) time."
+  },
+  {
+    "Category": "Tries",
+    "Front": "Implement Trie (Prefix Tree)",
+    "Back": "Use a TrieNode class with an array or map of children (size 26 for lowercase letters) and a boolean flag for end-of-word. For insert, iterate over characters of the word, creating child nodes as needed. Mark the final node\u2019s end-of-word as true. For search, traverse the nodes according to each char; if a node is missing or final flag (for search) is false at the end, the word isn\u2019t present. startsWith is similar to search but only checks prefix existence (doesn\u2019t require end-of-word to be true). These operations run in O(m) for word length m."
+  },
+  {
+    "Category": "Tries",
+    "Front": "Design Add and Search Words Data Structure",
+    "Back": "Use a Trie with recursion (or DFS) to handle the '.' wildcard. Each Trie node has children pointers for each letter. The addWord operation is similar to insert in Trie. For search(word), use a recursive helper: if 14 the current character is not '.', just follow the corresponding child. If it is '.', try all possible children from that node and recursively search the remaining substring. If any path leads to a valid end-of-word, return true. This supports word matching with single-character wildcards in near O(m * 26) in worst case."
+  },
+  {
+    "Category": "Tries",
+    "Front": "Word Search II",
+    "Back": "Build a Trie from the list of words to efficiently prune the search. Then perform DFS on each board cell. At each step, check the current prefix against the Trie: if no prefix match, backtrack. If a word is found (Trie node marked as end), record it and optionally remove it from Trie to avoid duplicates. Mark cells as visited while exploring neighbors (up, down, left, right). This avoids reusing letters. Using the Trie greatly cuts down unnecessary exploration. Overall time is manageable for given board and words constraints."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Subsets",
+    "Back": "Generate all subsets of a set (the power set) via backtracking. Either use recursion adding or not adding each element, or iterative approach building up subsets. A simple recursion: helper(index, currentList) \u2013 at each index, you have the choice to include the element or not. Recurse to generate both possibilities. Collect every currentList into result (including the empty subset and full set). This takes O(2^n) time for n elements."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Combination Sum",
+    "Back": "Use backtracking to find all combinations that sum to target. Sort the candidate numbers (to handle combinations in non-decreasing order). Recursively build combinations: at each step, choose a candidate and recursively try to reach the remaining target (target - candidate). You can reuse the same candidate, so do not advance the index when recursing (or use an index parameter to avoid using earlier candidates again in the current combination). If the remaining target becomes 0, record the current combination. Prune recursion when target becomes negative. This finds all unique combinations without duplicates."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Permutations",
+    "Back": "Use backtracking by swapping or using a boolean used[] array. One approach: recursively build the permutation by picking any unused element to place next. Mark it as used and recurse to fill the next position. When the permutation reaches the length of the original array, add a copy of it to the results. Alternatively, swap the current element with each element not yet placed (including itself) and recursively permute the remainder of the list. Permutations count is n!, so the algorithm is O(n * n!)."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Subsets II (Unique Subsets)",
+    "Back": "If the input set contains duplicates, sort it first. Use backtracking similar to Subsets, but when encountering duplicates (nums[i] == nums[i-1]) while generating subsets, skip the duplicate branch unless the duplicate was included in the current subset (i.e., ensure each subset combination of equal numbers is generated once). Essentially, in the recursion, only take the next identical number if you took the previous identical number in the subset. This avoids duplicate subsets in results."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Combination Sum II",
+    "Back": "Similar to Combination Sum, but each candidate can only be used once and the input may have duplicates. Sort the array. Use backtracking to choose or skip each candidate, but skip duplicates: if candidates[i] is the same as candidates[i-1], then in the recursion at index i, you should not consider this candidate if you did not pick the previous identical candidate (to avoid generating the same combination in a different order). Recurse with target reduced by chosen value and advancing the index. Collect combinations when target hits 0."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Palindrome Partitioning",
+    "Back": "Use DFS to partition the string. At each position, try to cut the string into a prefix (if that prefix is a palindrome) and then partition the remainder. Use a helper to check palindromes or precompute a DP table for palindrome substrings for efficiency. Collect the partition when the entire string is consumed. This yields all possible palindrome partitionings."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Letter Combinations of a Phone Number",
+    "Back": "Map each digit to its corresponding letters (like 2->\"abc\", etc.). Use backtracking or DFS: recursively build a combination by appending each possible letter for the current digit and then moving to the next digit. Alternatively, do it iteratively by computing cartesian products of sets of letters for each digit. The total combinations are 3^m * 4^n depending on digit distribution (ex: digits 7 and 9 have 4 letters), which is the output size."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "Word Search",
+    "Back": "Use DFS from each cell of the board to search for the given word. Mark the current cell as visited (e.g., temporarily change its character or use a visited set) to avoid revisiting in one path. Recursively check its neighbors (up, down, left, right) for the next character of the word. If all characters are found in sequence, return true. If a path fails, backtrack (unmark visited). Optimize by stopping early if remaining word length is greater than remaining cells in any direction, etc. Worst-case complexity is O(m*n * 4^L), where L is word length."
+  },
+  {
+    "Category": "Backtracking",
+    "Front": "N Queens",
+    "Back": "Use backtracking to place N queens on an N\u00d7N board. Place one queen per row. Keep track of columns and diagonals that are already attacked using sets (or boolean arrays). Diagonal indices can be represented as row- col and row+col for the two diagonal directions. Recurse row by row: for row, try placing a queen in any column that is not under attack (not in usedCols, and not on used diagonals). Mark the column and diagonals as occupied and place queen, then move to next row. If you manage to place queens on all rows, record the board configuration. This explores solutions in roughly O(N!) time."
+  },
+  {
+    "Category": "Heap / Priority Queue",
+    "Front": "Last Stone Weight",
+    "Back": "Use a max-heap (in Python, a min-heap storing negatives can simulate this). Insert all stone weights. Then repeatedly take out the two heaviest stones (pop twice). If they are not equal, push the difference back into the heap. Continue until one or zero stones remain. The result is either the weight of the last stone or 0 if none left. This simulation runs in O(n 17 log n)."
+  },
+  {
+    "Category": "Heap / Priority Queue",
+    "Front": "K Closest Points to Origin",
+    "Back": "Use a max-heap of size k to keep track of the k closest points. Compute the distance squared for each point (dx^2 + dy^2 to avoid float operations). Add points to the heap; if heap size exceeds k, remove the point with the largest distance (to keep only k smallest distances). Alternatively, use `nth_element` selection or sort by distance and take first k (sorting is O(n log n)). The heap approach is O(n log k)."
+  },
+  {
+    "Category": "Heap / Priority Queue",
+    "Front": "Kth Largest Element in Array",
+    "Back": "Use a min-heap of size k. Iterate through the array, pushing elements onto the min-heap. If the heap size exceeds k, pop the smallest element (thus maintaining only k largest elements in the heap). After processing all numbers, the root of the min-heap is the k-th largest element. This approach is O(n log k). Alternatively, use Quickselect algorithm with average O(n) time."
+  },
+  {
+    "Category": "Heap / Priority Queue",
+    "Front": "Task Scheduler",
+    "Back": "Greedily schedule tasks by frequency. Count occurrences of each task. Let maxCount be the largest frequency. The ideal arrangement is to spread out tasks with maxCount as evenly as possible. The minimum time needed is (maxCount - 1) * (n + 1) plus any additional slots for tasks with frequency = maxCount. More directly: build a max-heap of counts and simulate time slots picking the k+1 most frequent tasks for each cooling interval. If idle time is needed (when heap empties before interval done), account for idles. The formula or simulation yields the answer. Essentially, answer = max(len(tasks), (maxCount - 1)*(n+1) + countMaxTasks)."
+  },
+  {
+    "Category": "Heap / Priority Queue",
+    "Front": "Find Median from Data Stream",
+    "Back": "Use two heaps: a max-heap for the lower half of numbers and a min- heap for the upper half. Ensure their sizes differ at most by one. To add a number: if it\u2019s smaller than or equal to max-heap\u2019s top, push it to max-heap; otherwise to min-heap. Rebalance if needed (move top of one heap to the other if size difference > 1). To find median: if heaps are equal size, average the 18 two tops; if one is bigger, that top is the median. Insertion is O(log n) and median retrieval O(1)."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Number of Islands",
+    "Back": "Use BFS or DFS to count connected components of '1's in the grid. Iterate over each cell; if it\u2019s '1' (land) and not yet visited, that marks a new island. Perform a DFS/BFS from that cell to visit all connected land (adjacent vertically or horizontally), marking them visited (e.g., change to '0'). Increment island count. This runs in O(m*n) for an m\u00d7n grid."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Clone Graph",
+    "Back": "Use DFS or BFS with a hash map. The map will map original node references to their cloned node. Start from the given node, create its clone. Traverse neighbors: if a neighbor isn\u2019t cloned yet, create a clone and put in map, then add to queue/stack. Link the cloned neighbor to current clone\u2019s neighbor list. Continue until all nodes are visited. The graph is copied in O(V + E) time."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Pacific Atlantic Water Flow",
+    "Back": "Perform two BFS/DFS starting from all cells adjacent to the Pacific and all cells adjacent to the Atlantic, respectively. Mark cells reachable by Pacific and cells reachable by Atlantic. A cell can flow into an ocean if water can travel from that cell to an ocean along non-decreasing heights. Practically, reverse the flow: start at oceans and move inward to higher or equal height neighbors. Use visited sets to avoid repeats. The intersection of the two reachable sets are cells from which water can flow to both oceans. Complexity O(m*n)."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Course Schedule",
+    "Back": "This is a cycle detection in directed graph problem (prerequisite graph). Build adjacency list of course prerequisites. Then perform a DFS on each unvisited node, marking nodes currently in recursion stack. If during DFS a node leads to an already-in-stack node, a cycle exists (return false). If no cycle found, return true. Alternatively, use Kahn\u2019s BFS: repeatedly remove nodes with in-degree 0. If you can remove all courses (count matches 19 total), it's possible to finish. If cycle, some courses remain with nonzero in-degree. Both approaches run in O(V+E)."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Word Ladder",
+    "Back": "Use BFS from the beginWord, treating each word as a node and connecting words that differ by one letter. To generate neighbors efficiently, precompute generic patterns (e.g., \"ho_\" for \"hot\") mapping to all words that match that pattern. This allows finding adjacent words in O(26 * L) per word where L is word length. BFS ensures the first time we reach endWord is the shortest transformation. Time complexity roughly O(N * L * 26) for N words."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Graph Valid Tree",
+    "Back": "For a graph with n nodes to be a valid tree, it must have n-1 edges and be acyclic and connected. You can do a DFS/BFS from node 0, checking for cycles using parent pointers. If a visited node is encountered that isn\u2019t the direct parent, a cycle is found. Also count nodes visited\u2014if less than n or an extra edge is found, it's not a tree. Alternatively, use Union-Find: iterate edges, if an edge connects two already-connected components, that\u2019s a cycle; in the end check that exactly one component remains. Complexity O(n + edges)."
+  },
+  {
+    "Category": "Graphs",
+    "Front": "Alien Dictionary",
+    "Back": "Construct a directed graph of character precedence from the given list of words. Compare adjacent words letter by letter until a difference is found; the differing letters give an ordering rule (edge from first word\u2019s letter to second word\u2019s letter). Collect all unique letters. Then perform a topological sort on this graph (using DFS or Kahn\u2019s algorithm). If the graph has a cycle, the ordering is invalid. Otherwise, the topological order of all characters is the alien alphabet. This runs in O(C) where C is total letters in all words."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Network Delay Time",
+    "Back": "Use Dijkstra's algorithm to find the longest shortest-path from the source node to all others. Represent the network as adjacency list of 20 (neighbor, time). Use a min-heap seeded with source (time 0). Pop the smallest time node, if unvisited, mark visited and relax its neighbors (update their distances and push into heap). Continue until heap empty. If all nodes get a distance, answer is the maximum distance; if some node is unreachable, return -1. Complexity O((V+E) log V)."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Minimum Spanning Tree (Min Cost to Connect All Points)",
+    "Back": "Use Prim's algorithm or Kruskal\u2019s. Prim\u2019s: start from an arbitrary point, use a min-heap to add the smallest edge connecting the growing MST to a new point. Repeatedly pick the smallest edge that connects a new vertex, until all points are included. Kruskal\u2019s: compute all pair distances (for all points, that\u2019s O(n^2) edges which is heavy) and sort edges, then use Union- Find to pick smallest edges that don\u2019t form a cycle. For dense input Prim\u2019s is more efficient. Either way, we get the sum of edge weights of MST connecting all points."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Cheapest Flights Within K Stops",
+    "Back": "Use BFS or Dijkstra\u2019s algorithm up to K+1 layers. A straightforward approach: use a modified Dijkstra where distance is cost and state includes stops used. Keep an array dist[node][stops] for the minimum cost to reach node with <= stops. Use a min-heap of (cost, node, stopsUsed). While heap not empty, pop the smallest cost state. If node is target, return cost. If stopsUsed <= K, explore neighbors (nextStop = stopsUsed + 1) and push if we can improve cost for neighbor with that many stops. If no route found within K stops, return -1. Complexity ~ O(E * log(V) * K)."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Climbing Stairs",
+    "Back": "This is the Fibonacci essentially. Let dp[i] be number of ways to reach step i. dp[0] = 1, dp[1] = 1 (one way to stay on ground or take one step). For i >= 2: dp[i] = dp[i-1] + dp[i-2], since you can arrive at step i from step i-1 or i-2. Thus the answer for n steps is dp[n]. Compute iteratively in O(n) time with O(1) space by only storing two previous values."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Min Cost Climbing Stairs",
+    "Back": "Let dp[i] be the minimum cost to reach step i (where reaching step n means you\u2019re past the top). We can take one or two steps from each point. Initialization: dp[0] = cost[0], dp[1] = cost[1]. For i >= 2: dp[i] = cost[i] + min(dp[i-1], dp[i-2]) because you pay the cost at step i plus the cheaper of coming from one step before or two steps before. The final answer is min(dp[n-1], dp[n-2]) (you can finish on either of the last two steps because from there you climb out without additional cost). Compute in O(n)."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "House Robber",
+    "Back": "Use DP to decide whether to rob each house. Let dp[i] be the maximum amount you can rob up to house i. Base: dp[0] = nums[0], dp[1] = max(nums[0], nums[1]). For i >= 2: dp[i] = max(dp[i-1], nums[i] + dp[i-2]). That is, either skip the current house (take dp[i-1]) or rob it and add to dp[i-2]. The result dp[n-1] is the maximum money possible. This runs in O(n)."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "House Robber II",
+    "Back": "This is like House Robber but houses are in a circle (first and last are adjacent). Break it into two linear subproblems: rob houses 0 to n-2, or rob houses 1 to n-1 (skip either the first or the last house). Compute the house robber DP for both scenarios and take the maximum. Edge cases: if there is only one house, just take that. Complexity O(n)."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Decode Ways",
+    "Back": "DP approach: Let dp[i] be number of ways to decode substring s[0..i-1]. dp[0] = 1 (empty string has one way to decode). For each i from 1 to n: if s[i-1] is not '0', then dp[i] += dp[i-1] (interpret single digit). If the two-digit number s[i-2..i-1] forms a valid code between 10 and 26, then dp[i] += dp[i-2]. Essentially, count using one digit or two digits if possible. The result is dp[n]. Time complexity is O(n)."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Coin Change",
+    "Back": "Use DP to compute the fewest coins needed for each amount up to 22 the target. Initialize dp[0] = 0 (0 coins to make 0). For each amount a from 1 to target: dp[a] = min(dp[a - coin] + 1 for each coin that is <= a). If an amount is not reachable, dp[a] stays at some large sentinel (e.g., infinity). The answer is dp[target] if it's not infinity, otherwise -1 if target cannot be made. This is O(amount * number_of_coins) time."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Word Break",
+    "Back": "Use DP or DFS + memo to check if the string can be segmented. Let dp[i] be true if substring s[0..i-1] can be segmented into dictionary words. dp[0] = true. For each i from 1 to n: check all j < i such that dp[j] is true and s[j:i] is a word in the dictionary. If such j is found, set dp[i] = true (meaning s[0..i-1] can be segmented). The result is dp[n]. Time complexity is O(n^2) in worst case."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Partition Equal Subset Sum",
+    "Back": "We need to see if we can select some numbers that sum to total_sum/2 (if total_sum is odd, immediately false). This becomes a subset sum problem. Use DP with a boolean array possible[0..target], starting possible[0] = true. For each num in nums, update possible sums in reverse order: for sum from target down to num, set possible[sum] = possible[sum] OR possible[sum - num]. In the end, check possible[target]. This runs in O(n * target) time."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Maximum Product Subarray",
+    "Back": "Use DP tracking both max and min products up to each position (because a negative * negative becomes positive). Initialize maxProd = minProd = nums[0], result = nums[0]. For each subsequent num: if num is negative, swap maxProd and minProd (so the negative flips effect). Then maxProd = max(num, maxProd * num), minProd = min(num, minProd * num). Update result = max(result, maxProd). This yields the largest product of any contiguous subarray in O(n) time."
+  },
+  {
+    "Category": "1-D Dynamic Programming",
+    "Front": "Longest Increasing Subsequence",
+    "Back": "Classic DP solution: dp[i] = length of longest increasing subsequence ending at index i. Initialize all dp[i] = 1. For each i from 0 to 23 n-1, loop j from 0 to i-1: if nums[j] < nums[i], we can append nums[i] after subsequence ending at j, so dp[i] = max(dp[i], dp[j] + 1). Track the maximum dp[i]. This O(n^2) algorithm finds LIS length. (There is an optimization with binary search to O(n log n), but DP approach is straightforward.)"
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Unique Paths",
+    "Back": "On an m x n grid, a simple DP: dp[i][j] = number of ways to reach cell (i,j). You can only move right or down, so dp[i][j] = dp[i-1][j] + dp[i] [j-1] (sum of ways from top and left cells). Initialize first row and first column to 1 (only one way straight across or down). Then fill the table. The value at dp[m-1][n-1] is the answer. Complexity O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Minimum Path Sum",
+    "Back": "DP on a grid: dp[i][j] = grid[i][j] + min(dp[i-1][j], dp[i][j-1]). This accumulates the minimum cost to reach (i,j). Initialize dp[0][0] = grid[0] [0]. First row can only come from left (cumulative sum across), first column from above. Fill the rest of the table with the recurrence. The result dp[m-1][n-1] is the minimum path sum from top-left to bottom-right. Time O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Coin Change 2 (Coin Change II)",
+    "Back": "We count combinations to make up an amount (order of coins does not matter, so this is unbounded knapSack combination count). Use DP array ways[0..amount] initialized with ways[0] = 1. For each coin in coins: for sum from coin value to amount: ways[sum] += ways[sum - coin]. By iterating coins outer and sum inner, we ensure combinations are counted uniquely (avoiding permutation differences). At end, ways[amount] is the number of ways to make that amount. O(amount * number_of_coins)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Longest Common Subsequence",
+    "Back": "Classic DP: use a 2D table dp[len(text1)+1][len(text2)+1], where dp[i][j] = length of LCS of text1[0..i-1] and text2[0..j-1]. Fill base row and column with 0s (LCS with empty string is 0). For each i, j: if text1[i-1] == text2[j-1], then dp[i][j] = 1 + dp[i-1][j-1]; else dp[i][j] = max(dp[i-1] 24 [j], dp[i][j-1]). Finally dp[m][n] is the LCS length. This runs in O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Longest Palindromic Subsequence",
+    "Back": "Use DP on indices. Let dp[i][j] = length of LPS in string[i..j]. If i == j, dp[i][j] = 1 (single char). If s[i] == s[j], then dp[i][j] = 2 + dp[i+1][j-1] (the two ends can be included in subsequence). If s[i] != s[j], dp[i][j] = max(dp[i+1][j], dp[i][j-1]) (one of the ends is not in the LPS). Fill for all substrings increasing in length. The answer is dp[0][n-1]. Complexity O(n^2)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Edit Distance",
+    "Back": "Use DP matrix dp[i][j] = minimum edit distance between word1[0..i-1] and word2[0..j-1]. Recurrence: If characters match, dp[i][j] = dp[i-1][j-1]; if not, consider insert, delete, replace: dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1]) (insert in word1 corresponds to dp[i][j-1], delete corresponds to dp[i-1][j], replace corresponds to dp[i-1] [j-1]). Initialize first row/col as distances from empty string. Final answer dp[m][n]. Complexity O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Wildcard Matching",
+    "Back": "DP on pattern and string indices. dp[i][j] = whether s[0..i-1] matches p[0..j-1]. Initialize dp[0][0] = true (empty matches empty). dp[0][j] is true only if all pattern chars up to j are '*' (they can match empty). Transition: If p[j-1] is a letter or '?', then it matches if that char can match s[i-1] and dp[i-1][j-1] was true. If p[j-1] is '*', it can match empty or some chars: dp[i][j] = dp[i][j-1] (treat * as empty) OR dp[i-1][j] (treat * as consuming one character of s). Fill table and answer is dp[len(s)] [len(p)]. Complexity O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Interleaving String",
+    "Back": "DP check if s3 is an interleaving of s1 and s2. Let dp[i][j] = true if s3[0..i+j-1] is an interleaving of s1[0..i-1] and s2[0..j-1]. Recurrence: dp[i][j] is true if either (dp[i-1][j] is true and s1[i-1] == s3[i+j-1]) OR (dp[i][j-1] is true and s2[j-1] == s3[i+j-1]). In other words, last char of s3 came from s1 or s2. Initialize dp[0][0] = true. Fill grid, 25 answer dp[m][n]. Complexity O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Distinct Subsequences",
+    "Back": "We count how many distinct ways to form t as a subsequence of s. DP approach: dp[i][j] = number of distinct subsequences of s[0..i-1] that equals t[0..j-1]. Base: dp[*][0] = 1 (there's exactly one way to form empty subsequence). For each i, j: if s[i-1] == t[j-1], then dp[i][j] = dp[i-1] [j-1] + dp[i-1][j] (we either use this matching character or skip it); if not equal, dp[i][j] = dp[i-1][j] (skip s char). The answer is dp[len(s)][len(t)]. Complexity O(m*n)."
+  },
+  {
+    "Category": "2-D Dynamic Programming",
+    "Front": "Maximal Square",
+    "Back": "Use DP to track largest square ending at each cell. Let dp[i][j] = side length of largest square whose bottom-right corner is at (i,j). If matrix[i] [j] is '1', then dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1 (it can extend a square from top, left, and top-left). If it's '0', dp[i][j] = 0. Track a global max side length. The maximal square area = (maxSide)^2. Complexity O(m*n)."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Merge Intervals",
+    "Back": "Sort the intervals by start time. Then iterate through sorted intervals, merging overlapping ones. Keep a current merged interval (curr_start, curr_end). For each interval, if its start <= curr_end, they overlap: update curr_end = max(curr_end, interval.end). If it doesn\u2019t overlap (interval.start > curr_end), push the current merged interval into result and start a new one. In the end, add the last interval. This yields a set of merged, non-overlapping intervals. Complexity O(n log n) due to sorting."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Non-overlapping Intervals",
+    "Back": "To find the maximum set of non-overlapping intervals (or equivalently minimum removals to make non-overlapping), use an interval scheduling greedy approach. Sort intervals by end time. Then iterate, and keep track of the last end time included. If the next interval\u2019s start < last_end (overlap), we skip that interval (that would be a removal). If it 26 doesn\u2019t overlap (start >= last_end), we include it and update last_end = interval.end. By maximizing kept intervals, you minimize removals. The answer for removals is total_intervals - count_non_overlapping. Complexity O(n log n)."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Gas Station",
+    "Back": "If a solution exists, the sum of gas - cost over the entire circuit must be >= 0. Greedy approach: attempt to start from station 0 with tank = 0. Traverse stations adding gas[i] - cost[i] to tank. If tank becomes negative at station j, it means 0\u2026j cannot be a valid start (we ran out). Set the next station (j+1) as new start and reset tank = 0. Continue until end. The station we end up assigning as start after traversing the loop is the answer (because we know overall sum is non-negative, this must succeed). Complexity O(n)."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Hand of Straights",
+    "Back": "We have a hand of cards and need to partition into groups of consecutive cards of a given size. Use a min-heap or sorted order. Greedily always start a group with the smallest available card. Use a frequency map for card counts. Iterate through the sorted unique card values: if some card value is still unused (freq > 0), that will be the start of a group. For group of length k, for each card value from start to start+k-1, reduce its count. If any required card is missing or count goes negative, it\u2019s not possible. If all groups form, return true. Complexity O(n log n) or O(n) depending on data structures."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Jump Game",
+    "Back": "Greedily track the furthest index that can be reached. Initialize reachable = 0. Iterate through the array with index i: if i <= reachable, you can get to i, and you can potentially extend the reachable range: reachable = max(reachable, i + nums[i]). If at any point reachable >= last index, you can reach the end. If the loop finishes with i surpassing reachable, then you hit a point you cannot reach and thus cannot complete the jump. Complexity O(n)."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Partition Labels",
+    "Back": "Greedily cut the string into largest possible pieces such that no letter appears in more than one piece. Compute the last index of each character in the string. Then iterate over the string, maintaining a current partition end (initially 0). As you scan characters, update the current partition end to the max last-occurrence index seen so far. When the index i reaches the current partition end, it means we've included all characters of that partition. Cut the partition here and start a new one. Record the partition length. Complexity O(n)."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Valid Parenthesis String",
+    "Back": "Use two counters (lo and hi) representing the range of possible open bracket counts. Initialize lo = hi = 0. Traverse the string: for '(' increase lo++ and hi++; for ')' decrease lo-- and hi--; for '*' (wildcard) treat it as either '(' or ')' or empty: so lo-- (if '*' as ')') and hi++ (if '*' as '('). Clamp lo to 0 (lo can't go negative). If hi < 0 at any point, return false (too many ')'). At the end, if lo == 0, a valid balance is achievable (lo being 0 means it\u2019s possible to have all open closed). Otherwise false. This greedy approach checks validity in one pass."
+  },
+  {
+    "Category": "Greedy",
+    "Front": "Maximum Subarray",
+    "Back": "Use Kadane\u2019s algorithm greedily. Maintain currentSum = 0 and maxSum = -\u221e. Iterate through each number: add it to currentSum. If currentSum becomes less than the number itself, restart currentSum at the number (it\u2019s better to start a new subarray). Then update maxSum = max(maxSum, currentSum). This finds the largest possible sum of any contiguous subarray in O(n) time."
+  },
+  {
+    "Category": "Other / Design",
+    "Front": "Insert Delete GetRandom O(1)",
+    "Back": "Use a combination of an array list and a hash map. The array stores the elements, and the hash map stores element -> index in array. For insert: if element not present, append it to array and store index in map. For delete: find its index from map, swap the last element of the array into that index (update its index in map), then pop the last element and remove the element from map. getRandom: pick a random index and return element from array. All operations average O(1)."
+  },
+  {
+    "Category": "Other / Design",
+    "Front": "LRU Cache",
+    "Back": "Use a hash map for O(1) access to cache entries, and a doubly- linked list to maintain usage order (most recently used at one end, least at the other). Each node holds a key and value. On get(key): if present, move node to MRU end and return its value. On put(key, value): if key exists, update value and move node to MRU. If new key, create node and add to MRU end; if capacity exceeded, remove the LRU node (from list and map). This yields O(1) time for get and put."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Majority Element",
+    "Back": "Use Boyer-Moore Voting algorithm. Maintain a candidate and count initialized to 0. For each number: if count == 0, set candidate = num. If num == candidate, increment count; else decrement count. After this pass, candidate will be the majority element (if one exists) because it dominates the count. (Optionally, you could do a second pass to verify the candidate appears more than \u230an/2\u230b times.) This works in O(n) time, O(1) space."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Single Number",
+    "Back": "Use XOR property: x ^ x = 0 and x ^ 0 = x. XOR all numbers in the array together. Pairs of identical numbers will cancel out to 0, leaving the single unpaired number as the result. This finds the unique number in O(n) time and O(1) space."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Missing Number",
+    "Back": "We have numbers 0..n with one missing. Compute the expected sum of 0..n as total = n*(n+1)/2. Then compute actual sum of given array. The missing number = total - actual_sum. Alternatively, use XOR: XOR all indices and XOR all values; the result is the missing number as all others cancel out. This runs in O(n)."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Number of 1 Bits",
+    "Back": "Loop and bit-mask the number. For example, initialize count = 0. While n != 0: increment count and clear the lowest set bit by doing n = n & (n - 1) (this operation removes one 1-bit from n each time). Repeat until n becomes 0. The count is the number of 1s. This runs in O(k) where k is number of set bits (at most 32 for a 32-bit integer)."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Counting Bits",
+    "Back": "Use DP. Let result[0] = 0. For each number i > 0, use the relation: result[i] = result[i >> 1] + (i & 1). Essentially, the number of 1s in i is number of 1s in i/2 (i right-shifted by one) plus 1 if the last bit of i is 1. This builds the array of bit counts from 0 to n in O(n) time."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Sum of Two Integers (Bit Addition)",
+    "Back": "Use bit manipulation (full adder logic) to add two integers without using '+' operator. Repeatedly calculate carry = (a & b) << 1 (common set bits shifted left) and sum = a ^ b (sum of bits without carry). Then assign a = carry, b = sum until carry becomes 0. Then b (or a) will hold the result. This works because XOR adds bits without carry and AND finds where carry occurs. The loop iterates for each bit position that generates carry, so in at most 32 iterations for 32-bit integers."
+  },
+  {
+    "Category": "Other / Math",
+    "Front": "Reverse Bits",
+    "Back": "Use bit-by-bit manipulation. Initialize result = 0. Iterate 32 times (for 32-bit integer): at each step, left-shift result and add the last bit of n to result (result |= (n & 1)). Then right-shift n to process the next bit. This effectively reverses the bit order of n in result. Complexity O(1) since fixed 32 iterations."
+  },
+  {
+    "Category": "Other / Two Pointers",
+    "Front": "Valid Palindrome II",
+    "Back": "Use the two-pointer technique with at most one deletion allowed. Start from both ends like normal palindrome check. If characters match, move inward. If a mismatch occurs at i and j, try skipping the character at i or the character at j and then check if the remainder of the string (i+1..j or i..j-1) is a palindrome. If either possibility yields a palindrome, then the string can be palindrome after one deletion. Only one deletion is tried. 30 Complexity O(n)."
+  },
+  {
+    "Category": "Intervals",
+    "Front": "Meeting Rooms",
+    "Back": "Sort meetings by start time. Then simply check if any meeting starts before the previous meeting ends. If for all i, start[i] >= end[i-1] (assuming sorted by start), then no conflict and one person can attend all. If a violation occurs, then there is an overlap and one cannot attend all meetings. This check is O(n log n) due to sorting."
+  },
+  {
+    "Category": "Intervals",
+    "Front": "Meeting Rooms II",
+    "Back": "To find the minimum number of meeting rooms, consider start and end times separately. Sort start times and end times. Use two pointers or a min-heap. Pointer method: iterate through sorted starts, and use a pointer for end times. Keep a count of ongoing meetings. For each start time, if it\u2019s >= the earliest ending time, that meeting can reuse a room (increment end pointer and reuse that room). Otherwise, a new room is needed (increment ongoing count). Track the maximum simultaneous count. The result is the max count of overlapping meetings. Complexity O(n log n)."
+  },
+  {
+    "Category": "Other / Stack",
+    "Front": "Next Greater Element",
+    "Back": "Use a monotonic decreasing stack. Traverse the array (for circular array, simulate wrap-around by modulus). As you iterate, maintain a stack of indices whose next greater hasn't been found. For current index i (or value), while stack is not empty and nums[i] > nums[stack.top()], you found the NGE for stack.top(): record nums[i] as result for that index and pop it. Then push i onto stack. For a circular variant, you can loop the array twice. This finds next greater for each element in O(n) time."
+  },
+  {
+    "Category": "Other / Linked List",
+    "Front": "Intersection of Two Linked Lists",
+    "Back": "Use two pointers technique. Set pointer A at headA and pointer B at headB. Advance them step by step. When A reaches end, set it to headB; when B reaches end, set it to headA. If there is an intersection, they will meet at the intersection node after at most 2 passes. If no intersection, they will both reach null at the same time (meeting at null). This works 31 because by switching heads, they traverse the same total distance. Complexity O(m+n)."
+  },
+  {
+    "Category": "Other / Tree",
+    "Front": "Symmetric Tree",
+    "Back": "Check if a tree is a mirror of itself by comparing left and right subtrees. Use a helper that takes two nodes (node1 from left subtree, node2 from right subtree). Recursively check: if both are null, true; if one is null or values differ, false; otherwise check that node1.left vs node2.right are symmetric AND node1.right vs node2.left are symmetric. Essentially, pair up corresponding nodes from left and right in mirror positions. BFS can also be used. O(n) time."
+  },
+  {
+    "Category": "Other / Tree",
+    "Front": "Flatten Binary Tree to Linked List",
+    "Back": "Perform a preorder traversal and rewire the nodes to form a single linked list (using right pointers as 'next'). One approach: recursively flatten left and right subtrees. Then, for current node, attach the flattened left subtree as its right and then append the flattened right subtree at the end of that left list. Specifically, save current.right, set current.right = current.left and current.left = null, then find the tail of the new right subtree (which was left) and attach the saved right subtree. This runs in O(n) time."
+  },
+  {
+    "Category": "Other / Tree",
+    "Front": "Binary Search Tree Iterator",
+    "Back": "Use a controlled traversal. The iterator uses a stack to simulate an in-order traversal. Initialize by pushing all left children of root onto the stack (down to the leftmost). hasNext() returns true if stack is not empty. next(): pop the top node (which is the next smallest). Then, if the popped node has a right child, push all its left children onto the stack (the next in-order nodes). This ensures each node is processed at most once, making next() and hasNext() O(1) amortized time."
+  },
+  {
+    "Category": "Other / Matrix",
+    "Front": "Spiral Matrix",
+    "Back": "Use boundaries (top, bottom, left, right) to iterate in spiral order through the matrix. While top <= bottom and left <= right: traverse the top row from left to right, then top++. Traverse the right column from top to 32 bottom, then right--. If top <= bottom: traverse bottom row from right to left, then bottom--. If left <= right: traverse left column from bottom to top, then left++. Collect elements in this order. Complexity O(m*n)."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Redundant Connection",
+    "Back": "We have a graph that started as a tree (n nodes, n-1 edges) and one extra edge was added (forming exactly one cycle). Use Union-Find: iterate through each edge. If an edge connects two nodes already in the same set (find(u) == find(v)), then this edge is the redundant one causing a cycle \u2013 return it. If not, union their sets and continue. This finds the extra edge in O(n) time approximately."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Course Schedule II",
+    "Back": "This is the topological sort problem for course prerequisites (DAG). Use Kahn\u2019s algorithm (BFS) to produce an order: compute in-degrees of all nodes, push nodes with in-degree 0 into a queue. Repeatedly pop from queue, append to result, and decrement in-degree of neighbors (prerequisites fulfilled). If any neighbor\u2019s in-degree drops to 0, push it. If you output all courses (result length == numCourses), the order is valid; if a cycle prevented some courses from output, return empty array. Complexity O(V+E)."
+  },
+  {
+    "Category": "Advanced Graphs",
+    "Front": "Evaluate Division",
+    "Back": "Build a graph where each variable is a node and an edge from A to B has weight = value of (A/B). For a query (x, y), do a BFS/DFS from x to find y, accumulating product of weights along the path. If you reach y, that product is the answer (x/y). Also add reverse edges (B to A with weight = 1/ value). If y is not reachable, answer is -1. Using BFS ensures we find a path if it exists. Complexity per query roughly O(V+E)."
+  },
+  {
+    "Category": "Other / Matrix",
+    "Front": "Set Matrix Zeroes",
+    "Back": "Use first row/col as markers or use separate sets. The idea: if a cell is 0, its entire row and column should become 0. One optimal approach: first pass identify rows and cols to zero (store in sets or mark in first row/col to save space). Second pass, set those rows and cols to 0. Alternatively, modify in-place by using an indicator value and careful 33 ordering. Complexity O(m*n)."
+  },
+  {
+    "Category": "Strings",
+    "Front": "Reverse Words in a String",
+    "Back": "Split the string by spaces into words, filter out any empty tokens (to handle multiple spaces), then join the words in reverse order with a single space between. Alternatively, do it in-place by reversing the entire string, then reversing each word individually. This trims and normalizes spaces and yields the words reversed. Complexity O(n)."
+  },
+  {
+    "Category": "Matrix / Binary Search",
+    "Front": "Search a 2D Matrix II",
+    "Back": "The matrix is sorted in rows and columns. Start from the top-right corner (or bottom-left). At top-right: if value == target, found; if value < target, move down (to a larger value); if value > target, move left (to a smaller value). By moving in this greedy way, you eliminate one row or one column with each step. Continue until you find target or go out of bounds. Complexity O(m + n)."
+  }
+]
