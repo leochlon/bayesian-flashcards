@@ -1,0 +1,169 @@
+.loading-screen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+}
+
+.loading-screen-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: calc(500px * var(--size-multiplier));
+  margin: 0 auto;
+  padding: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+}
+
+.loading-logo {
+  margin-bottom: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+}
+
+.loading-app-logo {
+  width: calc(100px * var(--size-multiplier));
+  height: calc(100px * var(--size-multiplier));
+  object-fit: contain;
+  animation: pulse 2s infinite;
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.loading-title {
+  font-size: calc(var(--font-xxl) * var(--size-multiplier));
+  font-weight: 700;
+  margin-bottom: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+  color: var(--accent-secondary);
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading spinner */
+.loading-spinner {
+  position: relative;
+  width: calc(60px * var(--size-multiplier));
+  height: calc(60px * var(--size-multiplier));
+  margin-bottom: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.loading-spinner-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: calc(4px * var(--size-multiplier)) solid transparent;
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner-inner:before {
+  content: '';
+  position: absolute;
+  top: calc(5px * var(--size-multiplier));
+  left: calc(5px * var(--size-multiplier));
+  right: calc(5px * var(--size-multiplier));
+  bottom: calc(5px * var(--size-multiplier));
+  border: calc(4px * var(--size-multiplier)) solid transparent;
+  border-top-color: var(--accent-secondary);
+  border-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+
+.loading-message {
+  font-size: calc(var(--font-md) * var(--size-multiplier));
+  color: var(--text-secondary);
+  margin-top: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+/* Error display */
+.loading-error {
+  background-color: var(--bg-secondary);
+  padding: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+  border-radius: var(--border-radius-small);
+  border: 1px solid var(--border-color);
+  margin-top: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading-error-icon {
+  width: calc(40px * var(--size-multiplier));
+  height: calc(40px * var(--size-multiplier));
+  background-color: var(--error);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--font-xl) * var(--size-multiplier));
+  font-weight: bold;
+  margin: 0 auto calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.loading-error-message {
+  font-size: calc(var(--font-md) * var(--size-multiplier));
+  color: var(--error);
+  margin-bottom: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.loading-error-hint {
+  font-size: calc(var(--font-sm) * var(--size-multiplier));
+  color: var(--text-muted);
+  margin-bottom: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.loading-retry-btn {
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  padding: calc(var(--spacing-md) * var(--size-multiplier)) calc(var(--spacing-xl) * var(--size-multiplier));
+  border-radius: var(--border-radius-small);
+  font-size: calc(var(--font-sm) * var(--size-multiplier));
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.loading-retry-btn:hover {
+  background-color: var(--accent-secondary);
+}
+
+.loading-api-url {
+  font-size: calc(var(--font-xs) * var(--size-multiplier));
+  color: var(--text-muted);
+  margin-top: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

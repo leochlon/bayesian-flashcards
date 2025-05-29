@@ -1,5 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';  // Pomodoro timer state for easy mode
+  const [pomodoroTimer, setPomodoroTimer] = useState(25 * 60); // 25 minutes in seconds
+  const [isPomodoroRunning, setIsPomodoroRunning] = useState(false);
+  const [pomodoroInterval, setPomodoroInterval] = useState(null);
+  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [breakTimer, setBreakTimer] = useState(5 * 60); // 5 minutes in seconds
+  const [pomodoroWorkDuration, setPomodoroWorkDuration] = useState(25); // Default work duration in minutes
+  const [pomodoroBreakDuration, setPomodoroBreakDuration] = useState(5); // Default break duration in minutest axios from 'axios';
 
 // Import hooks
 import { useBackendStatus } from './hooks/useBackendStatus';
@@ -68,11 +74,9 @@ function App() {
   const [pomodoroInterval, setPomodoroInterval] = useState(null);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [breakTimer, setBreakTimer] = useState(5 * 60); // 5 minutes break
-  const [pomodoroWorkDuration, setPomodoroWorkDuration] = useState(25); // Default work duration in minutes
-  const [pomodoroBreakDuration, setPomodoroBreakDuration] = useState(5); // Default break duration in minutes
 
   // Custom hooks
-  const { isBackendReady, backendError, isLoading, checkBackendStatus } = useBackendStatus();
+  const { isBackendReady, backendError, checkBackendStatus } = useBackendStatus();
   const {
     decks,
     currentDeck,
@@ -430,7 +434,7 @@ function App() {
           <StudyView
             currentDeck={currentDeck}
             currentSession={currentSession}
-            card={reviewCard}
+            reviewCard={reviewCard}
             showBack={showBack}
             setShowBack={setShowBack}
             rating={rating}
@@ -439,18 +443,10 @@ function App() {
             isTimerRunning={isTimerRunning}
             stopTimer={stopTimer}
             easyMode={easyMode}
-            onToggleEasyMode={handleEasyModeToggle}
-            onSubmit={handleReview}
-            onShowStats={() => setShowStatsModal(true)}
-            onEndSession={handleEndStudySession}
-            pomodoroTimer={pomodoroTimer}
-            breakTimer={breakTimer}
-            isPomodoroRunning={isPomodoroRunning}
-            isBreakTime={isBreakTime}
-            startPomodoroTimer={startPomodoroTimer}
-            stopPomodoroTimer={stopPomodoroTimer}
-            resetPomodoroTimer={resetPomodoroTimer}
-            skipBreak={skipBreak}
+            handleEasyModeToggle={handleEasyModeToggle}
+            endStudySession={handleEndStudySession}
+            handleReview={handleReview}
+            navigateTo={navigateTo}
           />
         )}
         

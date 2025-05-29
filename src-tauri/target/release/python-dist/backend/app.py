@@ -14,6 +14,12 @@ from routes.users import users_bp
 from routes.stats import stats_bp
 from routes.health import health_bp
 
+# Import seed database functionality
+from utils.seed_database import seed_database_if_needed
+
+# Try to seed the database with initial data if needed
+seed_database_if_needed()
+
 # App factory
 app = Flask(__name__)
 CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"]}})

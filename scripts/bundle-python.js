@@ -31,10 +31,18 @@ async function bundlePython() {
             stdio: 'inherit'
         });
         
-        // Copy backend files - Note: We're no longer bundling any existing database
-        // The init_db.py script will create a fresh database on first run
+        // Copy backend files including our cleaned database
         console.log('Copying backend files...');
         fs.copySync(srcDir, path.join(distDir, 'backend'));
+        
+        // Create a seed_data directory in the backend for initial database content
+        console.log('Copying seed database...');
+        const seedDir = path.join(distDir, 'backend', 'seed_data');
+        fs.ensureDirSync(seedDir);
+        fs.copySync(
+            path.join(srcDir, 'flashcards.db'),
+            path.join(seedDir, 'flashcards.db')
+        );
         
         // Create a wrapper script
         const wrapperScript = process.platform === 'win32' ? `

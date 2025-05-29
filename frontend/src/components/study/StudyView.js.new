@@ -30,7 +30,7 @@ const StudyView = ({
   stopPomodoroTimer,
   resetPomodoroTimer,
   skipBreak,
-  onSubmit,
+  onSubmit: handleReview,
   onShowStats,
   onEndSession
 }) => {
@@ -57,18 +57,45 @@ const StudyView = ({
               {easyMode && <span className="legacy-easy-mode-indicator">✓</span>}
             </label>
           </div>
-          <button 
-            onClick={onEndSession} 
-            className="legacy-end-session-btn"
-          >
-            End Session
-          </button>
-          <button 
-            onClick={onShowStats} 
-            className="legacy-stats-btn"
-          >
-            View Stats
-          </button>
+          <div className="legacy-session-buttons">
+            <button 
+              onClick={onShowStats} 
+              className="legacy-stats-btn"
+            >
+              View Stats
+            </button>
+            {currentSession && (
+              <button 
+                onClick={onEndSession} 
+                className="legacy-end-session-btn"
+              >
+                End Session
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Pomodoro Timer UI */}
+      <div className={`pomodoro-container ${isBreakTime ? 'break-time' : ''}`}>
+        <div className="pomodoro-timer-display">
+          <div className="pomodoro-timer-label">
+            {isBreakTime ? "Break Time" : "Study Time"}
+          </div>
+          <div className="pomodoro-time">
+            {isBreakTime ? formatTime(breakTimer) : formatTime(pomodoroTimer)}
+          </div>
+          <div className="pomodoro-controls">
+            {isPomodoroRunning ? (
+              <button className="pomodoro-btn" onClick={stopPomodoroTimer}>Pause</button>
+            ) : (
+              <button className="pomodoro-btn" onClick={startPomodoroTimer}>Start</button>
+            )}
+            <button className="pomodoro-btn" onClick={resetPomodoroTimer}>Reset</button>
+            {isBreakTime && (
+              <button className="pomodoro-btn" onClick={skipBreak}>Skip Break</button>
+            )}
+          </div>
         </div>
       </div>
       
@@ -97,7 +124,7 @@ const StudyView = ({
                   className="legacy-rating-slider"
                 />
                 <span className="legacy-rating-label">Easy</span>
-                <button onClick={onSubmit} className="legacy-submit-button">Submit Review</button>
+                <button onClick={handleReview} className="legacy-submit-button">Submit Review</button>
               </div>
             </div>
           ) : (

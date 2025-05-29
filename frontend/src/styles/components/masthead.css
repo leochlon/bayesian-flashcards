@@ -1,0 +1,136 @@
+/* Masthead Footer Styles */
+.masthead-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-xl);
+  margin-top: auto;
+}
+
+.masthead-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xl);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Logo Container */
+.logo-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* App Logo */
+.app-logo {
+  width: calc(60px * var(--size-multiplier));
+  height: calc(60px * var(--size-multiplier));
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.3));
+  border-radius: calc(4px * var(--size-multiplier));
+}
+
+.app-logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+}
+
+.brain-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Logo styling */
+.logo-container {
+  position: relative;
+}
+
+.logo-container::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: var(--accent-primary);
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-container:hover::after {
+  opacity: 1;
+}
+
+/* Masthead Text */
+.masthead-text {
+  text-align: center;
+}
+
+.app-title {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.2;
+}
+
+.app-credits {
+  font-size: var(--font-md);
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Hover Effects */
+.brain-sagittal:hover .brain-outline {
+  stroke: var(--text-primary);
+  stroke-width: 2.5;
+}
+
+.brain-sagittal:hover .brain-cerebellum,
+.brain-sagittal:hover .brain-stem {
+  stroke: var(--text-primary);
+}
+
+.brain-sagittal:hover .brain-sulcus {
+  stroke: var(--text-secondary);
+  opacity: 1;
+}
+
+.brain-sagittal:hover .bayes-formula-overlay {
+  background: var(--success);
+  color: var(--white);
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .masthead-content {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .brain-sagittal {
+    width: 60px;
+    height: 48px;
+  }
+  
+  .bayes-formula-overlay {
+    font-size: var(--font-xs);
+    padding: 3px 6px;
+    top: -12px;
+  }
+  
+  .app-title {
+    font-size: var(--font-lg);
+  }
+  
+  .app-credits {
+    font-size: var(--font-sm);
+  }
+}

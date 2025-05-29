@@ -1,0 +1,102 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+
+// Import hooks
+import { useBackendStatus } from './hooks/useBackendStatus';
+import { useAppData } from './hooks/useAppData';
+import useShowDeleteDeckModal from './components/modals/useShowDeleteDeckModal';
+import { API, DEFAULT_USER, fetchUserSettings } from './api';
+
+// Import styles
+import './styles/components/pomodoro.css';
+
+// Import all components
+import {
+  // Individual components
+  StatsView,
+  HomeView,
+  LoadingScreen,
+  NavigationHeader,
+  Masthead,
+  
+  // Component modules
+  StudyView,
+  AddCardView,
+  ManageView,
+  SettingsView,
+  
+  // Modal components
+  CreateDeckModal,
+  StudySessionModal,
+  ConfirmDeleteModal,
+  ConfirmDeleteSessionModal,
+  ConfirmEndSessionModal,
+  StatsModal
+} from './components';
+
+function App() {
+  // State for UI navigation
+  const [view, setView] = useState('decks');
+  const [manageTab, setManageTab] = useState('cards');
+  const [statsType, setStatsType] = useState('user');
+  
+  // State for modals
+  const [showCreateDeckModal, setShowCreateDeckModal] = useState(false);
+  const { showDeleteDeckModal, setShowDeleteDeckModal } = useShowDeleteDeckModal();
+  const [showStudySessionModal, setShowStudySessionModal] = useState(false);
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState(null);
+  const [editingCard, setEditingCard] = useState(null);
+  const [cardToDelete, setCardToDelete] = useState(null);
+  const [deckToDelete, setDeckToDelete] = useState(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  // Stats modal state
+  const [showStatsModal, setShowStatsModal] = useState(false);
+
+  // Get app data from custom hook
+  const {
+    isBackendReady,
+    backendError,
+    checkBackendStatus,
+    decks,
+    currentDeck,
+    setCurrentDeck,
+    deck,
+    setDeck,
+    createDeck,
+    deleteDeck,
+    currentSession,
+    reviewCard,
+    startStudySession,
+    endStudySession,
+    deleteSession,
+    sessions,
+    loadSessions,
+    selectedSession,
+    setSelectedSession,
+    showBack,
+    setShowBack,
+    rating,
+    setRating,
+    handleReview,
+    getNextCard,
+    easyMode,
+    handleEasyModeToggle,
+    statsRefreshTrigger,
+    setStatsRefreshTrigger
+  } = useAppData();
+
+  // Timer state (for normal study mode)
+  const [timer, setTimer] = useState(60);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerInterval, setTimerInterval] = useState(null);
+
+  // Pomodoro timer state for easy mode
+  const [pomodoroTimer, setPomodoroTimer] = useState(25 * 60); // 25 minutes in seconds
+  const [isPomodoroRunning, setIsPomodoroRunning] = useState(false);
+  const [pomodoroInterval, setPomodoroInterval] = useState(null);
+  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [breakTimer, setBreakTimer] = useState(5 * 60); // 5 minutes in seconds
+  const [pomodoroWorkDuration, setPomodoroWorkDuration] = useState(25); // Default work duration in minutes
+  const [pomodoroBreakDuration, setPomodoroBreakDuration] = useState(5); // Default break duration in minutes

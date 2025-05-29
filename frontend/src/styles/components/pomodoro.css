@@ -1,0 +1,123 @@
+/* Pomodoro timer settings in study session modal */
+.pomodoro-settings {
+  margin-top: calc(var(--spacing-xl) * 2 * var(--size-multiplier));
+  border-top: 1px solid var(--border-color);
+  padding-top: calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+}
+
+.pomodoro-settings h3 {
+  margin-top: 0;
+  margin-bottom: calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+  font-size: calc(var(--font-md) * var(--size-multiplier));
+  color: var(--accent-secondary);
+  font-weight: 600;
+}
+
+.pomodoro-input-group {
+  margin-bottom: calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+}
+
+.pomodoro-input-group label {
+  display: block;
+  margin-bottom: calc(var(--spacing-md) * var(--size-multiplier));
+  font-size: calc(var(--font-sm) * var(--size-multiplier));
+  color: var(--text-secondary);
+}
+
+.pomodoro-input {
+  width: 100%;
+  padding: calc(var(--spacing-xl) * var(--size-multiplier)) calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: calc(var(--font-md) * var(--size-multiplier));
+  font-family: var(--font-family);
+}
+
+.modal-body label {
+  display: block;
+  margin-bottom: calc(var(--spacing-md) * var(--size-multiplier));
+  font-size: calc(var(--font-sm) * var(--size-multiplier));
+  color: var(--text-secondary);
+}
+
+/* Pomodoro timer display in study view */
+.pomodoro-container {
+  width: 100%;
+  max-width: calc(600px * var(--size-multiplier));
+  margin: calc(var(--spacing-xl) * var(--size-multiplier)) auto;
+  padding: calc(var(--spacing-xl) * var(--size-multiplier));
+  background-color: var(--bg-tertiary);
+  border-radius: var(--border-radius-small);
+  box-shadow: 0 calc(4px * var(--size-multiplier)) calc(8px * var(--size-multiplier)) rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.pomodoro-timer-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+}
+
+.pomodoro-timer-label {
+  font-size: calc(var(--font-md) * var(--size-multiplier));
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: calc(var(--spacing-md) * var(--size-multiplier));
+}
+
+.pomodoro-time {
+  font-size: calc(var(--font-xxl) * 1.5 * var(--size-multiplier));
+  font-weight: 700;
+  color: var(--accent-secondary);
+  margin-bottom: calc(var(--spacing-xl) * var(--size-multiplier));
+  font-family: monospace;
+}
+
+.pomodoro-controls {
+  display: flex;
+  gap: calc(var(--spacing-xl) * var(--size-multiplier));
+}
+
+.pomodoro-btn {
+  padding: calc(var(--spacing-md) * var(--size-multiplier)) calc(var(--spacing-xl) * 1.5 * var(--size-multiplier));
+  background-color: var(--accent-primary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-size: calc(var(--font-sm) * var(--size-multiplier));
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pomodoro-btn:hover {
+  background-color: var(--accent-secondary);
+}
+
+/* Break time styling */
+.pomodoro-container.break-time {
+  background-color: var(--bg-success-light);
+}
+
+.pomodoro-container.break-time .pomodoro-time {
+  color: var(--success);
+}
+
+.legacy-stats-btn {
+  padding: calc(var(--spacing-md) * var(--size-multiplier)) calc(var(--spacing-xl) * var(--size-multiplier));
+  background-color: var(--accent-tertiary);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-size: calc(var(--font-xs) * var(--size-multiplier));
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.legacy-stats-btn:hover {
+  background-color: var(--accent-secondary);
+}
