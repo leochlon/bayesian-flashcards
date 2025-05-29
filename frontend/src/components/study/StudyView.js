@@ -20,11 +20,17 @@ const StudyView = ({
 }) => {
   return (
     <div className="legacy-review-container">
+      {easyMode && (
+        <div className="easy-mode-banner">
+          <span className="easy-mode-banner-text">🎯 EASY MODE ACTIVE</span>
+          <span className="easy-mode-banner-description">Relaxed scheduling • Extended review intervals</span>
+        </div>
+      )}
       {currentSession && (
-        <div className="legacy-active-session-row">
+        <div className={`legacy-active-session-row ${easyMode ? 'easy-mode-active' : ''}`}>
           <div className="legacy-session-label">Session: <span className="legacy-session-name">{currentSession.name}</span></div>
           <div className="legacy-session-controls-row">
-            <div className="legacy-easy-mode-toggle">
+            <div className={`legacy-easy-mode-toggle ${easyMode ? 'active' : ''}`}>
               <label>
                 <input
                   type="checkbox"
@@ -45,7 +51,7 @@ const StudyView = ({
         </div>
       )}
       {reviewCard ? (
-        <div className="legacy-review-card">
+        <div className={`legacy-review-card ${easyMode ? 'easy-mode-active' : ''}`}>
           <div className="legacy-card-content">
             <div className="legacy-card-text" dangerouslySetInnerHTML={{ __html: reviewCard.front }} />
             {reviewCard.frontImage && (

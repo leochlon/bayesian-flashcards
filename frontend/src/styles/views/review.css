@@ -1,3 +1,33 @@
+/* Easy Mode Banner */
+.easy-mode-banner {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.easy-mode-banner-text {
+  font-weight: 700;
+  font-size: 16px;
+  display: block;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.easy-mode-banner-description {
+  font-size: 13px;
+  opacity: 0.9;
+  font-weight: 500;
+  width: 100%;
+  display: block;
+}
+
 /* Review interface styles - Modern dark theme */
 .legacy-review-container, .review-container {
   max-width: 900px;

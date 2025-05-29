@@ -60,13 +60,13 @@ function App() {
   const [timer, setTimer] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
-
-  // State for add card modal fields (for modal actions)
-  const [front, setFront] = useState("");
-  const [back, setBack] = useState("");
-  const [frontImage, setFrontImage] = useState(null);
-  const [backImage, setBackImage] = useState(null);
-  const [cardType, setCardType] = useState("Basic");
+  
+  // Pomodoro timer state for easy mode
+  const [pomodoroTimer, setPomodoroTimer] = useState(25 * 60); // 25 minutes in seconds
+  const [isPomodoroRunning, setIsPomodoroRunning] = useState(false);
+  const [pomodoroInterval, setPomodoroInterval] = useState(null);
+  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [breakTimer, setBreakTimer] = useState(5 * 60); // 5 minutes break
 
   // Custom hooks
   const { isBackendReady, backendError, checkBackendStatus } = useBackendStatus();
@@ -122,13 +122,73 @@ function App() {
     }
   };
 
-  // Cleanup timer when changing views
+  // Pomodoro timer functions for easy mode
+  const stopPomodoroTimer = useCallback(() => {
+    if (pomodoroInterval) {
+      clearInterval(pomodoroInterval);
+      setPomodoroInterval(null);
+    }
+    setIsPomodoroRunning(false);
+  }, [pomodoroInterval]);
+
+  const resetPomodoroTimer = useCallback(() => {
+    stopPomodoroTimer();
+    setPomodoroTimer(25 * 60);
+    setIsBreakTime(false);
+    setBreakTimer(5 * 60);
+  }, [stopPomodoroTimer]);
+
+  const startPomodoroTimer = () => {
+    if (!isPomodoroRunning) {
+      setIsPomodoroRunning(true);
+      const interval = setInterval(() => {
+        if (isBreakTime) {
+          setBreakTimer((prev) => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setIsPomodoroRunning(false);
+              setIsBreakTime(false);
+              setPomodoroTimer(25 * 60);
+              return 5 * 60;
+            }
+            return prev - 1;
+          });
+        } else {
+          setPomodoroTimer((prev) => {
+            if (prev <= 1) {
+              // Start break time
+              setIsBreakTime(true);
+              setBreakTimer(5 * 60);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
+      }, 1000);
+      setPomodoroInterval(interval);
+    }
+  };
+
+  const skipBreak = () => {
+    setIsBreakTime(false);
+    setPomodoroTimer(25 * 60);
+    setBreakTimer(5 * 60);
+  };
+
+  // Cleanup timers when changing views
   useEffect(() => {
     if (view !== 'study') {
       stopTimer();
       resetTimer();
+      stopPomodoroTimer();
+      resetPomodoroTimer();
+    } else if (view === 'study') {
+      // Auto-start pomodoro timer when entering study mode
+      if (!isPomodoroRunning) {
+        startPomodoroTimer();
+      }
     }
-  }, [view, stopTimer, resetTimer]);
+  }, [view, stopTimer, resetTimer, stopPomodoroTimer, resetPomodoroTimer, isPomodoroRunning, startPomodoroTimer]);
 
   // Get next card for review
   const getNextCard = async () => {
@@ -167,7 +227,8 @@ function App() {
         id: reviewCard.id,
         rating: rating,
         session_id: currentSession.id,
-        max_reviews_per_card: maxReviewsPerCard
+        max_reviews_per_card: maxReviewsPerCard,
+        easy_mode: easyMode
       });
       // Get next card
       await getNextCard();
@@ -312,6 +373,15 @@ function App() {
         startTimer={startTimer}
         stopTimer={stopTimer}
         resetTimer={resetTimer}
+        easyMode={easyMode}
+        pomodoroTimer={pomodoroTimer}
+        isPomodoroRunning={isPomodoroRunning}
+        startPomodoroTimer={startPomodoroTimer}
+        stopPomodoroTimer={stopPomodoroTimer}
+        resetPomodoroTimer={resetPomodoroTimer}
+        isBreakTime={isBreakTime}
+        breakTimer={breakTimer}
+        skipBreak={skipBreak}
       />
 
       <main className="app-content">
@@ -508,11 +578,6 @@ function App() {
                     onClick={() => {
                       setShowStatsModal(false);
                       setEditingCard(null);
-                      setFront("");
-                      setBack("");
-                      setFrontImage(null);
-                      setBackImage(null);
-                      setCardType("Basic");
                       setView('add');
                     }}
                   >

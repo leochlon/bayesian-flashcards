@@ -352,15 +352,46 @@
   font-size: 1rem;
   color: #aaa;
   margin-right: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+.legacy-easy-mode-toggle.active {
+  background: rgba(39, 174, 96, 0.2);
+  border: 1px solid rgba(39, 174, 96, 0.4);
+  color: #27ae60;
+}
+.legacy-easy-mode-toggle input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 8px;
+  accent-color: #27ae60;
 }
 .legacy-easy-mode-label {
   margin-left: 6px;
   font-weight: 500;
+  transition: color 0.3s ease;
+}
+.legacy-easy-mode-toggle.active .legacy-easy-mode-label {
+  color: #27ae60;
+  font-weight: 600;
 }
 .legacy-easy-mode-indicator {
   color: #27ae60;
   font-weight: 700;
   margin-left: 6px;
+  font-size: 1.2em;
+  animation: easy-mode-check-bounce 0.5s ease;
+}
+@keyframes easy-mode-check-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
 }
 .legacy-end-session-btn {
   background: #ff4444;
@@ -580,4 +611,80 @@
   font-size: 1.1rem;
   text-align: center;
   margin-top: 60px;
+}
+
+/* Enhanced Easy Mode Styling removed for session panel - easy mode banner provides visual indicator */
+
+.legacy-easy-mode-toggle {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #aaa;
+  margin-right: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.legacy-easy-mode-toggle.active {
+  background: rgba(39, 174, 96, 0.2);
+  border: 1px solid rgba(39, 174, 96, 0.4);
+  color: #27ae60;
+}
+
+.legacy-easy-mode-toggle input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 8px;
+  accent-color: #27ae60;
+}
+
+.legacy-easy-mode-label {
+  margin-left: 6px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.legacy-easy-mode-toggle.active .legacy-easy-mode-label {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.legacy-easy-mode-indicator {
+  color: #27ae60;
+  font-weight: 700;
+  margin-left: 6px;
+  font-size: 1.2em;
+  animation: easy-mode-check-bounce 0.5s ease;
+}
+
+@keyframes easy-mode-check-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+.legacy-review-card.easy-mode-active {
+  border: 2px solid rgba(39, 174, 96, 0.3);
+  box-shadow: 0 4px 20px rgba(39, 174, 96, 0.2);
+  position: relative;
+}
+
+.legacy-review-card.easy-mode-active::before {
+  content: "🌿 Easy Mode";
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 10;
 }

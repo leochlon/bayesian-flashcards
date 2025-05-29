@@ -122,6 +122,7 @@ def review_card(deck, user):
         card_id = data.get('id')
         rating = data.get('rating')
         session_id = data.get('session_id')
+        easy_mode = data.get('easy_mode', False)
         
         if card_id is None:
             return jsonify({'error': 'Card ID is required', 'success': False}), 400
@@ -135,6 +136,11 @@ def review_card(deck, user):
             user_obj = User(username=user)
             db.session.add(user_obj)
             db.session.commit()
+        
+        # Update user's easy mode setting if provided
+        if easy_mode != user_obj.easy_mode:
+            user_obj.easy_mode = easy_mode
+            print(f"Updated user easy mode to: {easy_mode}")
         
         # Find the card
         card = Card.query.get(card_id)
