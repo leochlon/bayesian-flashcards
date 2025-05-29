@@ -6,10 +6,15 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .App {
   text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-logo {
@@ -57,4 +62,15 @@ html, body, #root {
   padding: 0;
   overflow: hidden;
   font-family: var(--font-family);
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: calc(1rem * var(--size-multiplier));
+  width: 100%;
+  max-width: calc(1200px * var(--size-multiplier));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

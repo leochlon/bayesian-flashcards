@@ -200,6 +200,7 @@ const AddCardView = ({
             onChange={setFront}
             modules={{ toolbar: { container: `#${toolbarId}` } }}
             formats={formats}
+            placeholder="Type or drag an image here..."
           />
         </div>
       </div>
@@ -213,6 +214,7 @@ const AddCardView = ({
             onChange={setBack}
             modules={{ toolbar: { container: `#${toolbarId}` } }}
             formats={formats}
+            placeholder="Type or drag an image here..."
           />
         </div>
       </div>

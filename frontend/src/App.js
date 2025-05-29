@@ -14,6 +14,7 @@ import {
   HomeView,
   LoadingScreen,
   NavigationHeader,
+  Masthead,
   
   // Component modules
   StudyView,
@@ -481,6 +482,8 @@ function App() {
           </div>
         )}
       </main>
+
+      <Masthead />
 
       {/* Modals */}
       {showCreateDeckModal && (

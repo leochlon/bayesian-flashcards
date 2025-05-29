@@ -45,10 +45,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between; /* Changed from center to space-between */
-  padding: 10px 15px; /* Reduced padding */
+  padding: calc(var(--spacing-lg) + var(--spacing-sm)) var(--spacing-xl); /* Reduced padding */
   background-color: #373737;
-  margin-bottom: 20px;
-  border-radius: 8px;
+  margin-bottom: calc(var(--spacing-xl) * 2.5);
+  border-radius: var(--border-radius-small);
   flex-wrap: nowrap;
   overflow: hidden; /* Prevent overflow */
   width: 100%; /* Ensure it takes full width */
@@ -59,14 +59,14 @@
   background-color: transparent;
   color: #fff;
   border: 1px solid #484848;
-  padding: 6px 10px; /* Further reduced padding */
-  border-radius: 4px;
+  padding: var(--spacing-lg) calc(var(--spacing-lg) + var(--spacing-sm)); /* Further reduced padding */
+  border-radius: var(--border-radius-small);
   cursor: pointer;
-  font-size: 14px; /* Reduced font size */
-  transition: all 0.2s ease;
+  font-size: var(--font-xs); /* Reduced font size */
+  transition: var(--transition-fast);
   white-space: nowrap;
   flex: 1 1 0; /* Allow buttons to grow/shrink equally */
-  margin: 0 3px; /* Reduced margins */
+  margin: 0 var(--spacing-xs); /* Reduced margins */
   min-width: 0; /* Allow buttons to shrink below content size if needed */
   text-align: center;
   position: relative; /* Allow absolute positioning of badge */
@@ -77,27 +77,27 @@
   background-color: #2c2c2c;
   color: #fff;
   border: 1px solid #484848;
-  padding: 6px 10px; /* Reduced padding */
-  border-radius: 4px;
-  font-size: 14px; /* Reduced font size */
+  padding: var(--spacing-lg) calc(var(--spacing-lg) + var(--spacing-sm)); /* Reduced padding */
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-xs); /* Reduced font size */
   font-weight: 500;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 70px; /* Reduced width */
+  min-width: calc(var(--spacing-xl) * 8); /* Reduced width */
   text-align: center;
-  margin-right: 6px; /* Reduced margin */
+  margin-right: var(--spacing-lg); /* Reduced margin */
 }
 
 .timer-time {
-  font-size: 14px; /* Reduced font size */
+  font-size: var(--font-xs); /* Reduced font size */
   font-weight: 500;
   line-height: 1.1; /* Tighter line height */
 }
 
 .timer-mode-indicator {
-  font-size: 10px; /* Reduced font size */
+  font-size: calc(var(--font-xs) * 0.7); /* Reduced font size */
   font-weight: 400;
   opacity: 0.8;
   margin-top: 2px;

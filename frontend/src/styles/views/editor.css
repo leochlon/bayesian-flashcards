@@ -1,12 +1,12 @@
 /* Editor styles - Modern dark theme */
 .card-editor {
-  max-width: 900px;
+  max-width: calc(900px * var(--size-multiplier));
   margin: 0 auto;
   background: var(--bg-secondary);
   color: var(--text-primary);
   box-shadow: var(--shadow-lg);
   border-radius: var(--border-radius);
-  border: 2px solid var(--border-color);
+  border: calc(2px * var(--size-multiplier)) solid var(--border-color);
   padding: var(--spacing-xl);
   min-height: 0;
   height: 100%;
@@ -14,9 +14,10 @@
   flex-direction: column;
   overflow: auto;
   font-family: var(--font-family);
+  width: 100%;
 }
 
-@media (max-width: 900px) {
+@media (max-width: calc(900px * var(--size-multiplier))) {
   .card-editor {
     padding: var(--spacing-lg);
     margin: var(--spacing-md);
@@ -91,8 +92,8 @@
 }
 
 .ql-toolbar button {
-  width: 36px;
-  height: 36px;
+  width: calc(var(--spacing-xl) * 4.5);
+  height: calc(var(--spacing-xl) * 4.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +108,7 @@
 }
 
 .ql-toolbar .ql-picker {
-  height: 36px;
+  height: calc(var(--spacing-xl) * 4.5);
   display: flex;
   align-items: center;
   color: var(--input-text) !important;
@@ -139,15 +140,15 @@
 .type-selector, .deck-selector {
   background: var(--input-bg);
   color: var(--input-text);
-  padding: 14px var(--spacing-lg);
+  padding: calc(var(--spacing-xl) + var(--spacing-lg)) var(--spacing-lg);
   border: 2px solid transparent;
   border-radius: var(--border-radius);
   font-size: var(--font-md);
   font-family: var(--font-family);
-  min-width: 320px;
+  min-width: calc(var(--spacing-xl) * 40);
   width: 100%;
-  max-width: 500px;
-  height: 52px;
+  max-width: calc(var(--spacing-xl) * 62);
+  height: calc(var(--spacing-xl) * 6.5);
   line-height: 1.2;
   text-align: left;
   box-shadow: var(--shadow-input);

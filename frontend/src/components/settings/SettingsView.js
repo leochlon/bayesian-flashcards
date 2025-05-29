@@ -28,7 +28,8 @@ const SettingsView = ({ onSettingsSaved }) => {
     mature_cards_per_session: 5,
     pomodoro_length: 25,
     break_length: 5,
-    easy_mode: false
+    easy_mode: false,
+    view_size: 'normal'
   }), []);
 
   // Default hyperparameter info to use if API fails
@@ -50,7 +51,17 @@ const SettingsView = ({ onSettingsSaved }) => {
     experience: {
       pomodoro_length: { label: "Pomodoro Length", description: "Pomodoro timer length (minutes).", min: 5, max: 60, step: 1 },
       break_length: { label: "Break Length", description: "Break timer length (minutes).", min: 1, max: 30, step: 1 },
-      easy_mode: { label: "Easy Mode", description: "Enable easy mode for reviews.", type: "boolean" }
+      easy_mode: { label: "Easy Mode", description: "Enable easy mode for reviews.", type: "boolean" },
+      view_size: { 
+        label: "View Size", 
+        description: "Controls the overall size of text and UI components.", 
+        type: "select",
+        options: [
+          { value: "compact", label: "Compact" },
+          { value: "normal", label: "Normal" },
+          { value: "large", label: "Large" }
+        ]
+      }
     }
   }), []);
 
@@ -91,6 +102,78 @@ const SettingsView = ({ onSettingsSaved }) => {
     };
     loadSettingsData();
   }, [defaultHyperInfo, initialized]);
+
+  // Apply view size setting to CSS variables
+  useEffect(() => {
+    if (settings && settings.view_size) {
+      const applySizeMultiplier = (size) => {
+        const multipliers = {
+          compact: 0.85,
+          normal: 1.0,
+          large: 1.15
+        };
+        
+        const multiplier = multipliers[size] || 1.0;
+        document.documentElement.style.setProperty('--size-multiplier', multiplier);
+        
+        // Apply to all CSS variables that should scale
+        const scalableProperties = [
+          '--font-xs', '--font-sm', '--font-md', '--font-lg', '--font-xl', '--font-xxl',
+          '--spacing-xs', '--spacing-sm', '--spacing-md', '--spacing-lg', '--spacing-xl',
+          '--border-radius', '--border-radius-small'
+        ];
+        
+        // Base values for mobile
+        const baseValues = {
+          '--font-xs': 14,
+          '--font-sm': 16,
+          '--font-md': 18,
+          '--font-lg': 20,
+          '--font-xl': 22,
+          '--font-xxl': 26,
+          '--spacing-xs': 1,
+          '--spacing-sm': 2,
+          '--spacing-md': 4,
+          '--spacing-lg': 6,
+          '--spacing-xl': 8,
+          '--border-radius': 24,
+          '--border-radius-small': 12
+        };
+        
+        // Base values for desktop (768px+)
+        const desktopValues = {
+          '--font-xs': 16,
+          '--font-sm': 18,
+          '--font-md': 20,
+          '--font-lg': 22,
+          '--font-xl': 26,
+          '--font-xxl': 30
+        };
+        
+        // Apply scaled values
+        const isDesktop = window.innerWidth >= 768;
+        scalableProperties.forEach(prop => {
+          const baseValue = isDesktop && desktopValues[prop] ? desktopValues[prop] : baseValues[prop];
+          if (baseValue !== undefined) {
+            const scaledValue = Math.round(baseValue * multiplier);
+            if (prop.includes('font') || prop.includes('spacing') || prop.includes('radius')) {
+              document.documentElement.style.setProperty(prop, `${scaledValue}px`);
+            }
+          }
+        });
+      };
+      
+      applySizeMultiplier(settings.view_size);
+      
+      // Listen for window resize to reapply scaling
+      const handleResize = () => {
+        applySizeMultiplier(settings.view_size);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [settings?.view_size]);
 
   // Handle saving settings
   const handleSaveSettings = async () => {
@@ -170,6 +253,17 @@ const SettingsView = ({ onSettingsSaved }) => {
                     checked={!!settings[key]}
                     onChange={e => handleInputChange(activeCategory, key, e.target.checked)}
                   />
+                ) : info.type === "select" ? (
+                  <select
+                    value={settings[key]}
+                    onChange={e => handleInputChange(activeCategory, key, e.target.value)}
+                  >
+                    {info.options.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 ) : (
                   <>
                     <input
@@ -190,7 +284,7 @@ const SettingsView = ({ onSettingsSaved }) => {
                     />
                   </>
                 )}
-                <span className="setting-value">{String(settings[key])}</span>
+                {info.type !== "select" && <span className="setting-value">{String(settings[key])}</span>}
               </div>
               <div className="setting-description">{info.description}</div>
             </div>

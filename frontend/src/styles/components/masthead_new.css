@@ -1,0 +1,253 @@
+/* Masthead Footer Styles */
+.masthead-footer {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-top: 2px solid #2d3748;
+  padding: 20px;
+  margin-top: auto;
+}
+
+.masthead-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Brain Container */
+.brain-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Brain Side View - Cartoon Style */
+.brain-side-view {
+  position: relative;
+  width: 80px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brain-outline {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Frontal Lobe */
+.brain-frontal {
+  position: absolute;
+  width: 35px;
+  height: 40px;
+  background: linear-gradient(135deg, #ff6b9d, #c44569);
+  border-radius: 20px 15px 10px 25px;
+  top: 8px;
+  left: 5px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Parietal Lobe */
+.brain-parietal {
+  position: absolute;
+  width: 25px;
+  height: 30px;
+  background: linear-gradient(135deg, #4834d4, #686de0);
+  border-radius: 15px 12px 8px 15px;
+  top: 5px;
+  right: 8px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Temporal Lobe */
+.brain-temporal {
+  position: absolute;
+  width: 20px;
+  height: 25px;
+  background: linear-gradient(135deg, #00d2d3, #54a0ff);
+  border-radius: 12px 8px 15px 12px;
+  bottom: 12px;
+  left: 8px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Occipital Lobe */
+.brain-occipital {
+  position: absolute;
+  width: 18px;
+  height: 22px;
+  background: linear-gradient(135deg, #ff9ff3, #f368e0);
+  border-radius: 8px 15px 12px 8px;
+  bottom: 15px;
+  right: 12px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Brain Stem */
+.brain-stem {
+  position: absolute;
+  width: 8px;
+  height: 20px;
+  background: linear-gradient(135deg, #ffa726, #ff7043);
+  border-radius: 4px;
+  bottom: 5px;
+  left: 25px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Cerebellum */
+.brain-cerebellum {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(135deg, #5f27cd, #741b47);
+  border-radius: 50%;
+  bottom: 8px;
+  right: 25px;
+  border: 2px solid #2c2c54;
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Bayes Formula Overlay */
+.bayes-formula-overlay {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #2ed573, #1e90ff);
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  animation: pulse-formula 2s ease-in-out infinite;
+}
+
+@keyframes pulse-formula {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 0 6px 12px rgba(46, 213, 115, 0.4);
+  }
+}
+
+/* Masthead Text */
+.masthead-text {
+  text-align: center;
+}
+
+.app-title {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.app-credits {
+  font-size: 14px;
+  color: #a0aec0;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Hover Effects */
+.brain-side-view:hover .brain-frontal {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.brain-side-view:hover .brain-parietal {
+  transform: scale(1.05);
+  transition: transform 0.3s ease 0.1s;
+}
+
+.brain-side-view:hover .brain-temporal {
+  transform: scale(1.05);
+  transition: transform 0.3s ease 0.2s;
+}
+
+.brain-side-view:hover .brain-occipital {
+  transform: scale(1.05);
+  transition: transform 0.3s ease 0.3s;
+}
+
+.brain-side-view:hover .bayes-formula-overlay {
+  transform: translateX(-50%) scale(1.2);
+  transition: transform 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .masthead-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .brain-side-view {
+    width: 60px;
+    height: 45px;
+  }
+  
+  .brain-frontal {
+    width: 26px;
+    height: 30px;
+  }
+  
+  .brain-parietal {
+    width: 19px;
+    height: 23px;
+  }
+  
+  .brain-temporal {
+    width: 15px;
+    height: 19px;
+  }
+  
+  .brain-occipital {
+    width: 14px;
+    height: 17px;
+  }
+  
+  .brain-stem {
+    width: 6px;
+    height: 15px;
+  }
+  
+  .brain-cerebellum {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .bayes-formula-overlay {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  
+  .app-title {
+    font-size: 20px;
+  }
+  
+  .app-credits {
+    font-size: 12px;
+  }
+}

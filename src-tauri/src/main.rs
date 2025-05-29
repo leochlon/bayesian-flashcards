@@ -12,11 +12,36 @@ struct AppState {
 }
 
 #[tauri::command]
-async fn start_backend() -> Result<String, String> {
+async fn start_backend(app_handle: tauri::AppHandle) -> Result<String, String> {
     println!("Starting backend server...");
     
+    // Get the resource directory path
+    let resource_dir = app_handle.path().resource_dir()
+        .map_err(|e| format!("Failed to get resource directory: {}", e))?;
+    
+    let python_executable = if cfg!(debug_assertions) {
+        // Development mode - use system python
+        "python3".to_string()
+    } else {
+        // Production mode - use bundled python
+        let python_path = resource_dir.join("python-portable").join("bin").join("python");
+        python_path.to_string_lossy().to_string()
+    };
+    
+    let backend_dir = if cfg!(debug_assertions) {
+        // Development mode - use relative path
+        "../backend".to_string()
+    } else {
+        // Production mode - use bundled backend
+        let backend_path = resource_dir.join("python-dist").join("backend");
+        backend_path.to_string_lossy().to_string()
+    };
+    
+    println!("Using python executable: {}", python_executable);
+    println!("Using backend directory: {}", backend_dir);
+    
     // Try to start the Python backend
-    let mut cmd = Command::new("python3");
+    let mut cmd = Command::new(&python_executable);
     cmd.arg("-m")
        .arg("flask")
        .arg("--app")
@@ -26,7 +51,7 @@ async fn start_backend() -> Result<String, String> {
        .arg("127.0.0.1")
        .arg("--port")
        .arg("5002")
-       .current_dir("../backend")
+       .current_dir(&backend_dir)
        .stdout(Stdio::piped())
        .stderr(Stdio::piped());
 
@@ -40,10 +65,16 @@ async fn start_backend() -> Result<String, String> {
             Ok("Backend started successfully".to_string())
         },
         Err(e) => {
-            println!("Failed to start backend: {}", e);
+            println!("Failed to start backend with {}: {}", python_executable, e);
             
-            // Try with python instead of python3
-            let mut cmd2 = Command::new("python");
+            // Try with alternative python command
+            let alt_python = if cfg!(debug_assertions) {
+                "python"
+            } else {
+                "python3"
+            };
+            
+            let mut cmd2 = Command::new(alt_python);
             cmd2.arg("-m")
                 .arg("flask")
                 .arg("--app")
@@ -53,7 +84,7 @@ async fn start_backend() -> Result<String, String> {
                 .arg("127.0.0.1")
                 .arg("--port")
                 .arg("5002")
-                .current_dir("../backend")
+                .current_dir(&backend_dir)
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped());
                 
@@ -64,7 +95,7 @@ async fn start_backend() -> Result<String, String> {
                     Ok("Backend started successfully".to_string())
                 },
                 Err(e2) => {
-                    Err(format!("Failed to start backend with both python3 and python: {} / {}", e, e2))
+                    Err(format!("Failed to start backend with both {} and {}: {} / {}", python_executable, alt_python, e, e2))
                 }
             }
         }
@@ -135,12 +166,12 @@ fn main() {
             get_app_version
         ])
         .setup(|app| {
-            let _app_handle = app.handle();
+            let app_handle = app.handle().clone();
             let _state = app.state::<AppState>();
             
             tauri::async_runtime::spawn(async move {
                 println!("Setting up backend during app initialization...");
-                match start_backend().await {
+                match start_backend(app_handle).await {
                     Ok(msg) => {
                         println!("Backend setup successful: {}", msg);
                     }

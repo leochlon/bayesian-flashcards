@@ -83,7 +83,7 @@
   margin: 0 0 var(--spacing-lg) 0;
   padding: 0;
   width: 100%;
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
   line-height: 1.6;
   font-family: var(--font-family);
   white-space: pre-wrap;
@@ -191,7 +191,7 @@
 
 .show-answer, .legacy-show-answer, .submit-button, .legacy-submit-button {
   background: var(--accent-primary);
-  color: var(--text-primary);
+  color: var(--bg-primary); /* Use dark color for high contrast on light button */
   border: none;
   padding: 8px 20px;
   border-radius: 4px;
@@ -207,6 +207,7 @@
 
 .show-answer:hover, .legacy-show-answer:hover, .submit-button:hover, .legacy-submit-button:hover {
   background: var(--accent-secondary);
+  color: var(--bg-primary); /* Maintain dark text on light background */
   color: var(--text-primary);
 }
 
@@ -261,7 +262,7 @@
 
 .submit-button {
   background: var(--accent-primary);
-  color: var(--text-primary);
+  color: var(--bg-primary); /* Dark text for high contrast on light button */
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
@@ -271,6 +272,7 @@
 
 .submit-button:hover {
   background: var(--accent-secondary);
+  color: var(--bg-primary); /* Maintain high contrast on hover */
 }
 
 .no-cards {
@@ -283,7 +285,7 @@
 
 .refresh-button {
   background: var(--accent-primary);
-  color: var(--text-primary);
+  color: var(--bg-primary); /* Dark text for high contrast on light button */
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -294,7 +296,7 @@
 
 .refresh-button:hover {
   background: var(--accent-secondary);
-  color: var(--text-primary);
+  color: var(--bg-primary); /* Maintain high contrast on hover */
 }
 
 /* Easy mode banner styles */

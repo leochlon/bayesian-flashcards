@@ -1,5 +1,8 @@
 /* CSS Variables for consistent theming */
 :root {
+  /* Size multiplier for responsive scaling */
+  --size-multiplier: 1.0;
+
   /* Dark minimalist palette */
   --bg-primary: #121212;         /* main background: very dark gray */
   --bg-secondary: #1e1e1e;      /* card/section: slightly lighter dark gray */
@@ -35,13 +38,13 @@
   --spacing-lg: 6px;
   --spacing-xl: 8px;
 
-  /* Font sizes - Further reduced for Tauri compact layout */
-  --font-xs: 8px;
-  --font-sm: 10px;
-  --font-md: 12px;
-  --font-lg: 14px;
-  --font-xl: 16px;
-  --font-xxl: 20px;
+  /* Font sizes - Increased significantly for better accessibility */
+  --font-xs: 14px;
+  --font-sm: 16px;
+  --font-md: 18px;
+  --font-lg: 20px;
+  --font-xl: 22px;
+  --font-xxl: 26px;
 
   /* Shadows - softer for modern look */
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.15);
@@ -59,4 +62,16 @@
 
   /* Modern font stack */
   --font-family: 'Inter', 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Desktop font sizes for better accessibility */
+@media (min-width: 768px) {
+  :root {
+    --font-xs: 16px;
+    --font-sm: 18px;
+    --font-md: 20px;
+    --font-lg: 22px;
+    --font-xl: 26px;
+    --font-xxl: 30px;
+  }
 }

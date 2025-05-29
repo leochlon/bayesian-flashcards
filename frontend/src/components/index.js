@@ -3,6 +3,7 @@ export { default as StatsView } from './StatsView';
 export { default as HomeView } from './HomeView';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as NavigationHeader } from './NavigationHeader';
+export { default as Masthead } from './Masthead';
 export { default as DeckView } from './DeckView';
 export { default as NavigationBar } from './NavigationBar';
 export { default as FooterMasthead } from './FooterMasthead';

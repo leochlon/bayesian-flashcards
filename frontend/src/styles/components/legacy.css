@@ -4,25 +4,25 @@
   align-items: center;
   justify-content: space-between;
   background: #373737;
-  border-radius: 6px;
-  padding: 6px 12px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
 }
 .legacy-nav-group {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-lg);
 }
 .legacy-nav-button {
   background: transparent;
   color: #fff;
   border: 1px solid #484848;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 0.9rem;
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border 0.2s;
+  transition: var(--transition-fast);
 }
 .legacy-nav-button.active, .legacy-nav-button:hover {
   background: #2496dc;
@@ -32,54 +32,54 @@
 .legacy-session-timer-group {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: calc(var(--spacing-xl) * 2);
 }
 .legacy-timer-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: calc(var(--spacing-lg) + var(--spacing-md));
 }
 .legacy-timer-display {
-  font-size: 1.4rem;
+  font-size: var(--font-lg);
   font-family: monospace;
   color: #fff;
   font-weight: 700;
   background: #232323;
-  border-radius: 6px;
-  padding: 6px 18px;
-  margin-right: 6px;
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-lg) calc(var(--spacing-xl) * 2);
+  margin-right: var(--spacing-lg);
 }
 .legacy-timer-button {
   background: #2496dc;
   color: #fff;
   border: none;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  font-size: 1.1rem;
+  border-radius: var(--border-radius-small);
+  width: calc(var(--spacing-xl) * 4);
+  height: calc(var(--spacing-xl) * 4);
+  font-size: var(--font-md);
   font-weight: 600;
   cursor: pointer;
-  margin-right: 4px;
-  transition: background 0.2s;
+  margin-right: var(--spacing-sm);
+  transition: var(--transition-fast);
 }
 .legacy-timer-button:hover {
   background: #1a7bb9;
 }
 .legacy-session-name {
-  font-size: 1.1rem;
+  font-size: var(--font-md);
   color: #2496dc;
   font-weight: 600;
-  margin-left: 18px;
+  margin-left: calc(var(--spacing-xl) * 2);
   letter-spacing: 0.5px;
 }
 
 /* Legacy deck details styles for HomeView */
 .legacy-deck-details {
   background: #232323;
-  border-radius: 10px;
-  margin-top: 32px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  padding: 32px 32px 24px 32px;
+  border-radius: calc(var(--border-radius-small) + var(--spacing-sm));
+  margin-top: calc(var(--spacing-xl) * 4);
+  box-shadow: var(--shadow-md);
+  padding: calc(var(--spacing-xl) * 4) calc(var(--spacing-xl) * 4) calc(var(--spacing-xl) * 3) calc(var(--spacing-xl) * 4);
   max-width: 700px;
   margin-left: auto;
   margin-right: auto;
@@ -88,26 +88,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: calc(var(--spacing-xl) * 2);
 }
 .legacy-deck-title {
-  font-size: 2rem;
+  font-size: var(--font-xxl);
   color: #fff;
   margin: 0;
   font-weight: 700;
 }
 .legacy-deck-actions-buttons {
   display: flex;
-  gap: 18px;
+  gap: calc(var(--spacing-xl) * 2);
 }
 .legacy-action-button {
-  font-size: 1rem;
-  padding: 10px 26px;
-  border-radius: 6px;
+  font-size: var(--font-sm);
+  padding: calc(var(--spacing-lg) + var(--spacing-sm)) calc(var(--spacing-xl) * 3);
+  border-radius: var(--border-radius-small);
   font-weight: 600;
   border: none;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 .legacy-action-button.study-action {
   background: #2496dc;
@@ -131,23 +131,23 @@
   background: #219150;
 }
 .legacy-deck-cards-preview {
-  margin-top: 30px;
+  margin-top: calc(var(--spacing-xl) * 3.5);
 }
 .legacy-preview-title {
   color: #2496dc;
-  font-size: 1.1rem;
-  margin-bottom: 18px;
+  font-size: var(--font-md);
+  margin-bottom: calc(var(--spacing-xl) * 2);
   font-weight: 600;
 }
 .legacy-cards-preview-grid {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: calc(var(--spacing-xl) * 2);
 }
 .legacy-card-preview-item {
   display: flex;
   flex-direction: row;
-  gap: 18px;
+  gap: calc(var(--spacing-xl) * 2);
   background: #181818;
   border-radius: 8px;
   border: 1px solid #333;
@@ -172,7 +172,7 @@
 .legacy-preview-card-content {
   max-height: 80px;
   overflow: hidden;
-  font-size: 14px;
+  font-size: var(--font-sm); /* Use CSS variable for better accessibility */
   color: #fff;
 }
 .legacy-preview-card-image {
@@ -574,33 +574,35 @@
   cursor: pointer;
 }
 .legacy-submit-button {
-  background: #2496dc;
-  color: #fff;
+  background: var(--accent-primary); /* Light background */
+  color: var(--bg-primary); /* Dark text for high contrast */
   border: none;
   border-radius: 6px;
   padding: 10px 26px;
-  font-size: 1rem;
+  font-size: var(--font-md); /* Use CSS variable for accessibility */
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 .legacy-submit-button:hover {
-  background: #1a7bb9;
+  background: var(--accent-secondary);
+  color: var(--bg-primary); /* Maintain high contrast on hover */
 }
 .legacy-show-answer {
-  background: #2496dc;
-  color: #fff;
+  background: var(--accent-primary); /* Light background */
+  color: var(--bg-primary); /* Dark text for high contrast */
   border: none;
   border-radius: 6px;
   padding: 14px 32px;
-  font-size: 1.2rem;
+  font-size: var(--font-lg); /* Use CSS variable for accessibility */
   font-weight: 600;
   cursor: pointer;
   margin-top: 18px;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 .legacy-show-answer:hover {
-  background: #1a7bb9;
+  background: var(--accent-secondary);
+  color: var(--bg-primary); /* Maintain high contrast on hover */
 }
 .legacy-loading-card {
   color: #aaa;
@@ -702,16 +704,16 @@
 }
 
 .legacy-card-text {
-  font-size: 13px; /* Smaller text for Tauri */
-  line-height: 1.4;
-  margin: 0 0 8px 0; /* Reduced margins */
+  font-size: var(--font-xl); /* Increased for accessibility - matches primary card text */
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-md) 0; /* Use CSS variables for consistency */
 }
 
-/* Make buttons more compact in Tauri */
+/* Make buttons more accessible while keeping compact design */
 .legacy-show-answer, .legacy-submit-button {
-  padding: 6px 16px; /* Smaller buttons */
-  font-size: 12px;
-  margin-top: 6px;
+  padding: 8px 18px; /* Slightly larger for better touch targets */
+  font-size: var(--font-sm); /* Use CSS variable for consistency */
+  margin-top: 8px;
 }
 
 /* Tauri-specific compact rating controls */
@@ -725,7 +727,7 @@
 }
 
 .legacy-rating-label {
-  font-size: 12px; /* Smaller labels */
+  font-size: var(--font-sm); /* Use CSS variable for better accessibility */
 }
 
 .legacy-rating-slider {
