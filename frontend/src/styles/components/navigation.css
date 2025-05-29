@@ -59,14 +59,14 @@
   background-color: transparent;
   color: #fff;
   border: 1px solid #484848;
-  padding: 10px 15px; /* Reduced padding */
+  padding: 6px 10px; /* Further reduced padding */
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px; /* Reduced from 18px */
+  font-size: 14px; /* Reduced font size */
   transition: all 0.2s ease;
   white-space: nowrap;
   flex: 1 1 0; /* Allow buttons to grow/shrink equally */
-  margin: 0 4px; /* Add small margins between buttons */
+  margin: 0 3px; /* Reduced margins */
   min-width: 0; /* Allow buttons to shrink below content size if needed */
   text-align: center;
   position: relative; /* Allow absolute positioning of badge */
@@ -77,27 +77,27 @@
   background-color: #2c2c2c;
   color: #fff;
   border: 1px solid #484848;
-  padding: 10px 15px;
+  padding: 6px 10px; /* Reduced padding */
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 14px; /* Reduced font size */
   font-weight: 500;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 80px;
+  min-width: 70px; /* Reduced width */
   text-align: center;
-  margin-right: 8px;
+  margin-right: 6px; /* Reduced margin */
 }
 
 .timer-time {
-  font-size: 16px;
+  font-size: 14px; /* Reduced font size */
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.1; /* Tighter line height */
 }
 
 .timer-mode-indicator {
-  font-size: 12px;
+  font-size: 10px; /* Reduced font size */
   font-weight: 400;
   opacity: 0.8;
   margin-top: 2px;
@@ -109,17 +109,17 @@
   background-color: #27ae60;
   color: #fff;
   border: 1px solid #229954;
-  padding: 10px 12px;
+  padding: 6px 8px; /* Reduced padding */
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px; /* Reduced font size */
   font-weight: 500;
   transition: all 0.2s ease;
-  margin-left: 4px;
+  margin-left: 3px; /* Reduced margin */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
+  min-width: 32px; /* Reduced width */
 }
 
 .legacy-timer-button:hover {
@@ -173,10 +173,10 @@
   background: #e74c3c !important;
   color: #fff !important;
   border: 1px solid #c0392b !important;
-  margin-left: 8px;
-  padding: 10px 12px !important;
+  margin-left: 6px;
+  padding: 6px 8px !important;
   border-radius: 4px !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
   transition: all 0.2s ease !important;
   cursor: pointer;

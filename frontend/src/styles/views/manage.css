@@ -1,13 +1,13 @@
 /* Manage View Styles - Modern dark theme */
 .manage-view, .modular-manage-view {
-  max-width: 1000px;
+  max-width: 500px; /* Further reduced for Tauri compact layout */
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-md); /* Reduced padding */
   background: var(--bg-secondary);
   color: var(--text-primary);
   box-shadow: var(--shadow-lg);
-  border-radius: var(--border-radius);
-  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  border: 1px solid var(--border-color);
   font-family: var(--font-family);
   animation: modal-pop-in 0.3s cubic-bezier(0.4,0,0.2,1);
   min-height: 0;
@@ -24,9 +24,9 @@
 
 .manage-view h2 {
   color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   text-align: center;
-  font-size: var(--font-xxl);
+  font-size: var(--font-lg);
   font-weight: 600;
   letter-spacing: -0.02em;
   font-family: var(--font-family);
@@ -35,9 +35,9 @@
 .deck-actions {
   display: flex;
   justify-content: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
   align-items: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   background: var(--bg-tertiary);
   border-radius: var(--border-radius-small);
   box-shadow: var(--shadow-sm);
@@ -46,10 +46,10 @@
 .add-new-button, .modular-add-new-button {
   background: var(--accent-primary);
   color: var(--bg-primary);
-  border: 2px solid var(--accent-primary);
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--border-radius);
-  font-size: var(--font-md);
+  border: 1px solid var(--accent-primary);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-small);
+  font-size: var(--font-sm);
   font-weight: 600;
   font-family: var(--font-family);
   cursor: pointer;
@@ -65,37 +65,37 @@
 .no-cards-message, .modular-no-cards-message {
   background: var(--bg-tertiary);
   color: var(--text-muted);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-small);
   box-shadow: var(--shadow-sm);
-  border: 1.2px solid var(--border-color);
-  padding: 32px;
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-lg);
   text-align: center;
-  font-size: 1.1rem;
-  margin-top: 18px;
+  font-size: var(--font-sm);
+  margin-top: var(--spacing-md);
 }
 
 .cards-list {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: var(--spacing-lg);
 }
 
 .card-item, .modular-card-item {
   background: var(--bg-secondary);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-small);
   box-shadow: var(--shadow-md);
-  border: 1.2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   color: var(--text-primary);
-  padding: 32px 18px 24px 18px;
+  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md) var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--spacing-md);
 }
 
 .card-preview, .modular-card-preview {
   display: flex;
-  gap: 24px;
-  margin-bottom: 18px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 
 .card-preview-front, .card-preview-back, .modular-card-preview-front, .modular-card-preview-back {
@@ -103,43 +103,43 @@
   color: var(--text-primary);
   border-radius: var(--border-radius-small);
   border: 1px solid var(--border-color);
-  padding: 18px 14px;
+  padding: var(--spacing-md) var(--spacing-sm);
 }
 
 .card-preview h4 {
   margin-top: 0;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-sm);
   color: var(--accent-secondary);
-  font-size: 1.1rem;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 
 .preview-content {
-  max-height: 120px;
+  max-height: 80px;
   overflow-y: auto;
-  font-size: 1rem;
+  font-size: var(--font-xs);
   color: var(--text-primary);
 }
 
 .preview-image {
   max-width: 100%;
-  max-height: 48px;
+  max-height: 32px;
   object-fit: contain;
-  margin-top: 8px;
+  margin-top: var(--spacing-xs);
   border-radius: 4px;
 }
 
 .card-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 14px;
+  gap: var(--spacing-sm);
 }
 
 .edit-button, .delete-button {
-  padding: 8px 20px;
-  border-radius: 7px;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-small);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: var(--font-xs);
   border: none;
   font-weight: 700;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s;
@@ -169,40 +169,43 @@
 /* Manage View Tabs */
 .manage-tabs {
   display: flex;
-  margin: var(--spacing-lg) 0;
+  margin: var(--spacing-md) 0;
   border-bottom: 1px solid var(--border-color);
+  gap: var(--spacing-xs);
 }
 
 .manage-tab {
   background-color: transparent;
   color: var(--text-primary);
   border: none;
-  border-bottom: 3px solid transparent;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  font-size: var(--font-md);
+  border-bottom: 2px solid transparent;
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-sm);
   cursor: pointer;
-  margin-right: var(--spacing-lg);
   transition: var(--transition-fast);
+  border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
 }
 
 .manage-tab:hover, .manage-tab.active {
   color: var(--accent-primary);
   border-bottom-color: var(--accent-primary);
+  background-color: var(--bg-tertiary);
 }
 
 /* Sessions List in Manage View */
 .sessions-list {
   background-color: var(--bg-secondary);
-  border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
-  margin-top: var(--spacing-lg);
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
   overflow-x: auto;
 }
 
 .sessions-list p {
   color: var(--text-muted);
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
+  font-size: var(--font-sm);
 }
 
 /* --- Modular ManageView Styles --- */

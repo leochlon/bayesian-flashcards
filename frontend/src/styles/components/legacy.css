@@ -4,22 +4,22 @@
   align-items: center;
   justify-content: space-between;
   background: #373737;
-  border-radius: 8px;
-  padding: 10px 18px;
-  margin-bottom: 24px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin-bottom: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 .legacy-nav-group {
   display: flex;
-  gap: 14px;
+  gap: 8px;
 }
 .legacy-nav-button {
   background: transparent;
   color: #fff;
-  border: 1.5px solid #484848;
-  border-radius: 6px;
-  padding: 10px 22px;
-  font-size: 1rem;
+  border: 1px solid #484848;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, color 0.2s, border 0.2s;
@@ -221,10 +221,6 @@
   font-size: 15px;
 }
 
-.legacy-study-session-modal {
-  /* Ensures legacy modal style is applied if needed for specificity */
-}
-
 /* Legacy End Session Modal Styles */
 .legacy-end-session-modal {
   background-color: #373737 !important;
@@ -325,13 +321,13 @@
   align-items: center;
   justify-content: space-between;
   background: #232323;
-  border-radius: 8px;
-  padding: 12px 24px;
-  margin-bottom: 18px;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 .legacy-session-label {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: #fff;
   font-weight: 600;
 }
@@ -344,16 +340,16 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 .legacy-easy-mode-toggle {
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #aaa;
-  margin-right: 10px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  margin-right: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
   transition: all 0.3s ease;
 }
 .legacy-easy-mode-toggle.active {
@@ -397,9 +393,9 @@
   background: #ff4444;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 10px 26px;
-  font-size: 1rem;
+  border-radius: 5px;
+  padding: 6px 16px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -687,4 +683,61 @@
   font-size: 0.8rem;
   font-weight: 600;
   z-index: 10;
+}
+
+/* Tauri-specific compact overrides */
+.legacy-review-container {
+  padding: 8px 0 0 0; /* Reduced from 24px */
+  max-width: 100%; /* Use full width in Tauri */
+}
+
+.legacy-review-card {
+  padding: 16px 20px 16px 20px; /* Reduced from 36px 32px */
+  margin-bottom: 8px; /* Reduced spacing */
+}
+
+.legacy-card-content {
+  padding: 12px; /* Reduced from larger padding */
+  min-height: 120px; /* Reduced min height */
+}
+
+.legacy-card-text {
+  font-size: 13px; /* Smaller text for Tauri */
+  line-height: 1.4;
+  margin: 0 0 8px 0; /* Reduced margins */
+}
+
+/* Make buttons more compact in Tauri */
+.legacy-show-answer, .legacy-submit-button {
+  padding: 6px 16px; /* Smaller buttons */
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Tauri-specific compact rating controls */
+.legacy-rating-controls {
+  margin-top: 8px; /* Reduced spacing */
+}
+
+.legacy-rating-scale {
+  gap: 6px; /* Reduced gap */
+  margin-bottom: 8px; /* Reduced margin */
+}
+
+.legacy-rating-label {
+  font-size: 12px; /* Smaller labels */
+}
+
+.legacy-rating-slider {
+  width: 200px; /* Smaller slider */
+  height: 4px; /* Thinner slider */
+}
+
+.legacy-rating-buttons {
+  gap: 6px; /* Reduced button spacing */
+}
+
+.legacy-rating-button {
+  padding: 4px 8px; /* Smaller buttons */
+  font-size: 11px; /* Smaller text */
 }

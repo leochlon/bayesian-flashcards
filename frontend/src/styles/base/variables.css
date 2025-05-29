@@ -28,20 +28,20 @@
   --input-bg: #f5f5f5;            /* light gray input background */
   --input-text: #121212;          /* dark text in inputs */
 
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
+  /* Spacing - Further reduced for Tauri compact layout */
+  --spacing-xs: 1px;
+  --spacing-sm: 2px;
+  --spacing-md: 4px;
+  --spacing-lg: 6px;
+  --spacing-xl: 8px;
 
-  /* Font sizes */
-  --font-xs: 12px;
-  --font-sm: 14px;
-  --font-md: 16px;
-  --font-lg: 18px;
-  --font-xl: 24px;
-  --font-xxl: 32px;
+  /* Font sizes - Further reduced for Tauri compact layout */
+  --font-xs: 8px;
+  --font-sm: 10px;
+  --font-md: 12px;
+  --font-lg: 14px;
+  --font-xl: 16px;
+  --font-xxl: 20px;
 
   /* Shadows - softer for modern look */
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.15);
