@@ -85,7 +85,7 @@ export const useAppData = () => {
   // Function to delete a deck
   const deleteDeck = async (deckName) => {
     try {
-      await axios.delete(`${API}/decks/${deckName}`);
+      await axios.delete(`${API}/decks/${encodeURIComponent(deckName)}`);
       const updatedDecks = await fetchDecks();
       setDecks(updatedDecks);
       if (currentDeck === deckName) {
@@ -101,7 +101,7 @@ export const useAppData = () => {
   // Function to delete a card
   const deleteCard = async (cardToDelete) => {
     try {
-      await axios.delete(`${API}/cards/${currentDeck}/${cardToDelete}`);
+      await axios.delete(`${API}/cards/${encodeURIComponent(currentDeck)}/${cardToDelete}`);
       const updatedDeck = await fetchDeckCards(currentDeck);
       setDeck(updatedDeck);
       return true;

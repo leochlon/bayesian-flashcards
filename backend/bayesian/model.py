@@ -10,8 +10,8 @@ def bayesian_posterior(card, user_profile, prior_alpha=None, prior_beta=None):
     ratings = card.get_ratings()
     if not ratings:
         return prior_alpha, prior_beta
-    success = sum(r >= 7 for r in ratings)
-    fail = sum(r < 7 for r in ratings)
+    success = sum(r >= 3 for r in ratings)  # Rating 3-5 considered success on 1-5 scale
+    fail = sum(r < 3 for r in ratings)
     return prior_alpha + success, prior_beta + fail
 
 def adaptive_decay(card, user_profile, base_decay=None, history_window=None):

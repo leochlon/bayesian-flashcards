@@ -19,7 +19,7 @@ export const fetchDecks = async () => {
 };
 
 export const fetchDeckCards = async (deckName) => {
-  const response = await axios.get(`${API}/cards/${deckName}`);
+  const response = await axios.get(`${API}/cards/${encodeURIComponent(deckName)}`);
   return response.data;
 };
 
@@ -29,7 +29,7 @@ export const fetchSessions = async (allSessions = false, deckName = null) => {
     url += '?all=true';
   }
   if (deckName) {
-    url += `${allSessions ? '&' : '?'}deck=${deckName}`;
+    url += `${allSessions ? '&' : '?'}deck=${encodeURIComponent(deckName)}`;
   }
   const response = await axios.get(url);
   return response.data;

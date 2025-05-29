@@ -171,9 +171,9 @@ const ManageView = ({
           onClose={() => setCardToDelete(null)}
           onConfirm={async () => {
             try {
-              await axios.delete(`${API}/cards/${currentDeck}/${cardToDelete}`);
+              await axios.delete(`${API}/cards/${encodeURIComponent(currentDeck)}/${cardToDelete}`);
               // Refresh the cards list
-              const response = await axios.get(`${API}/cards/${currentDeck}`);
+              const response = await axios.get(`${API}/cards/${encodeURIComponent(currentDeck)}`);
               setDeck && setDeck(response.data); // <-- update state if provided
               setCardToDelete(null);
               loadSessions && loadSessions();

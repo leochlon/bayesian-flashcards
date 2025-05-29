@@ -56,7 +56,7 @@ function App() {
   // State for study/review functionality
   const [reviewCard, setReviewCard] = useState(null);
   const [showBack, setShowBack] = useState(false);
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(3);
   const [timer, setTimer] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerInterval, setTimerInterval] = useState(null);
@@ -138,13 +138,13 @@ function App() {
       const userSettings = await fetchUserSettings();
       const maxReviewsPerCard = userSettings.max_reviews_per_card || 2;
       const response = await axios.get(
-        `${API}/next_card/${currentDeck}/${DEFAULT_USER}` +
+        `${API}/next_card/${encodeURIComponent(currentDeck)}/${DEFAULT_USER}` +
         `?max_reviews_per_card=${maxReviewsPerCard}`
       );
       if (response.data && response.data.success) {
         setReviewCard(response.data.next_card);
         setShowBack(false);
-        setRating(5);
+        setRating(3);
       } else {
         alert("No more cards to review!");
         setView('decks');
@@ -163,7 +163,7 @@ function App() {
       // Fetch latest user settings
       const userSettings = await fetchUserSettings();
       const maxReviewsPerCard = userSettings.max_reviews_per_card || 2;
-      await axios.post(`${API}/review/${currentDeck}/${DEFAULT_USER}`, {
+      await axios.post(`${API}/review/${encodeURIComponent(currentDeck)}/${DEFAULT_USER}`, {
         id: reviewCard.id,
         rating: rating,
         session_id: currentSession.id,

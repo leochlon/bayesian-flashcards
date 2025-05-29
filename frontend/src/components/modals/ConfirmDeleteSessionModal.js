@@ -3,7 +3,7 @@ import React from 'react';
 const ConfirmDeleteSessionModal = ({ onClose, onConfirm, sessionName, sessionDate }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content create-deck-modal" onClick={e => e.stopPropagation()}>
+      <div className="modal-content confirm-modal delete-confirmation-modal" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">Delete Study Session</h2>
         <div className="modal-body">
           <p>

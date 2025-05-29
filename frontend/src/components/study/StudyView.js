@@ -20,13 +20,6 @@ const StudyView = ({
 }) => {
   return (
     <div className="legacy-review-container">
-      {/* Easy Mode Banner */}
-      {easyMode && (
-        <div className="easy-mode-banner">
-          <span role="img" aria-label="sparkles" className="easy-mode-icon">✨</span>
-          <span className="easy-mode-text">Easy Mode Active</span>
-        </div>
-      )}
       {currentSession && (
         <div className="legacy-active-session-row">
           <div className="legacy-session-label">Session: <span className="legacy-session-name">{currentSession.name}</span></div>
@@ -69,8 +62,8 @@ const StudyView = ({
                 <span className="legacy-rating-label">Hard</span>
                 <input 
                   type="range"
-                  min="0"
-                  max="10"
+                  min="1"
+                  max="5"
                   value={rating}
                   onChange={(e) => setRating(parseInt(e.target.value))}
                   className="legacy-rating-slider"

@@ -90,7 +90,7 @@ const AddCardView = ({
     }
 
     try {
-      await axios.post(`${API}/cards/${currentDeck}`, {
+      await axios.post(`${API}/cards/${encodeURIComponent(currentDeck)}`, {
         front,
         back,
         type: cardType
@@ -102,7 +102,7 @@ const AddCardView = ({
       setCardType("Basic");
 
       // Reload cards
-      const response = await axios.get(`${API}/cards/${currentDeck}`);
+      const response = await axios.get(`${API}/cards/${encodeURIComponent(currentDeck)}`);
       if (response.data) {
         // Navigate back to manage view after success
         navigateTo('manage');
@@ -118,7 +118,7 @@ const AddCardView = ({
     if (!currentDeck || !editingCard) return;
     
     try {
-      await axios.put(`${API}/cards/${currentDeck}/${editingCard.id}`, {
+      await axios.put(`${API}/cards/${encodeURIComponent(currentDeck)}/${editingCard.id}`, {
         front,
         back,
         type: cardType

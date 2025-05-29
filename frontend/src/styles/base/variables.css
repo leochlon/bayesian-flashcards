@@ -49,6 +49,10 @@
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.25);
   --shadow-input: 0 2px 12px rgba(0,0,0,0.1);
 
+  /* Code styling */
+  --bg-code: #333333;
+  --text-code: #e9e9e9;
+
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;

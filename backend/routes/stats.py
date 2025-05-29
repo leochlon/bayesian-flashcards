@@ -39,7 +39,7 @@ def get_stats(stat_type):
             all_user_reviews = Review.query.join(Session).filter(Session.user_id == user.id).all()
             print(f"[STATS DEBUG] Found {len(all_user_reviews)} reviews via direct query")
             if all_user_reviews:
-                data = [(0, 1 if review.rating >= 7 else 0) for review in all_user_reviews]
+                data = [(0, 1 if review.rating >= 3 else 0) for review in all_user_reviews]
                 print(f"[STATS DEBUG] Converted to data: {data}")
         if not data:
             data = []
@@ -53,14 +53,14 @@ def get_stats(stat_type):
             card_reviews = Review.query.filter_by(card_id=card.id).all()
             reviews.extend(card_reviews)
         if reviews:
-            data = [(0, 1 if review.rating >= 7 else 0) for review in reviews]
+            data = [(0, 1 if review.rating >= 3 else 0) for review in reviews]
         if not data:
             data = []
     elif stat_type == "session" and session_id:
         session = Session.query.get(session_id)
         if not session:
             return jsonify({'error': 'Session not found'}), 404
-        data = [(0, 1 if review.rating >= 7 else 0) for review in session.reviews]
+        data = [(0, 1 if review.rating >= 3 else 0) for review in session.reviews]
         if not data:
             data = []
     else:
@@ -90,7 +90,7 @@ def get_stats(stat_type):
         cumulative_success = [sum(1 for _, s in data[:i+1] if s == 1) / (i+1) for i in range(len(data))]
         if all(rate == 0 for rate in cumulative_success):
             ax1.plot(review_indices, cumulative_success, '-', linewidth=2, color='#ff6b6b', label='Success Rate')
-            ax1.text(0.5, 0.5, 'All reviews marked as failures\n(Rating < 7)\nTry using higher ratings!',
+            ax1.text(0.5, 0.5, 'All reviews marked as failures\n(Rating < 3)\nTry using higher ratings!',
                     ha='center', va='center', transform=ax1.transAxes,
                     fontsize=10, color='yellow',
                     bbox=dict(boxstyle="round,pad=0.3", facecolor='red', alpha=0.4))

@@ -392,13 +392,114 @@
   font-size: 1.2rem;
   color: #fff;
   margin-bottom: 18px;
+  min-height: 200px;
+  overflow-y: auto;
+  align-items: flex-start; /* Start content from top */
+  padding: 20px;
+  box-sizing: border-box;
 }
 .legacy-card-text {
   font-size: 1.2rem;
   color: #fff;
-  margin-bottom: 18px;
+  margin: 0 0 18px 0;
+  padding: 0;
   word-break: break-word;
+  white-space: pre-wrap;
+  width: 100%;
+  overflow-x: auto;
+  text-align: left;
 }
+
+.legacy-card-text code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #444;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #eee;
+  white-space: pre;
+  display: inline-block;
+}
+
+.legacy-card-text pre {
+  margin: 15px 0;
+  background-color: #444;
+  border-radius: 4px;
+  padding: 12px;
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.legacy-card-text pre code {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.9em;
+  color: #eee;
+  white-space: pre;
+  display: block;
+  width: 100%;
+  tab-size: 4;
+  -moz-tab-size: 4;
+}
+
+.legacy-card-text pre.array-format,
+.legacy-card-text span.array-format,
+.legacy-card-text span.example-format {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #444;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #eee;
+  white-space: pre-wrap;
+  display: inline-block;
+  margin: 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.legacy-card-text span.example-format {
+  background-color: #333;
+  border: 1px solid #555;
+}
+
+.legacy-card-text table.sudoku-grid {
+  font-family: 'Courier New', Courier, monospace;
+  border-collapse: collapse;
+  margin: 15px auto;
+  background-color: #444;
+  border: 2px solid #777;
+  border-radius: 4px;
+  display: table;
+  width: auto;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.legacy-card-text table.sudoku-grid td {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  border: 1px solid #777;
+  font-size: 1.2em;
+  color: #eee;
+  font-weight: bold;
+}
+
+.legacy-card-text table.sudoku-grid td.empty-cell {
+  color: #888;
+  font-weight: normal;
+}
+
+.legacy-card-text strong {
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
 .legacy-card-image {
   max-width: 80%;
   max-height: 260px;

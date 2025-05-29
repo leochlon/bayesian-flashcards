@@ -10,7 +10,7 @@ import traceback
 
 cards_bp = Blueprint('cards', __name__)
 
-@cards_bp.route('/api/cards/<deck>', methods=['GET', 'POST'])
+@cards_bp.route('/api/cards/<path:deck>', methods=['GET', 'POST'])
 def cards(deck):
     deck_obj = Deck.query.filter_by(name=deck).first()
     if not deck_obj:
@@ -32,13 +32,13 @@ def cards(deck):
         db.session.commit()
         return jsonify({'success': True, 'id': new_card.id})
 
-@cards_bp.route('/api/next_card/<deck>', methods=['GET'])
+@cards_bp.route('/api/next_card/<path:deck>', methods=['GET'])
 def next_card_get(deck):
     """Get next card with user as query parameter."""
     user = request.args.get('user', 'default')
     return next_card(deck, user)
 
-@cards_bp.route('/api/next_card/<deck>/<user>', methods=['GET'])
+@cards_bp.route('/api/next_card/<path:deck>/<user>', methods=['GET'])
 def next_card(deck, user):
     """Get the next card to review for a specific deck and user."""
     print(f"Request for next card - deck: {deck}, user: {user}")
@@ -108,7 +108,7 @@ def next_card(deck, user):
         print(traceback.format_exc())
         return jsonify({'error': str(e), 'success': False}), 500
 
-@cards_bp.route('/api/review/<deck>/<user>', methods=['POST'])
+@cards_bp.route('/api/review/<path:deck>/<user>', methods=['POST'])
 def review_card(deck, user):
     """Submit a review for a card."""
     print(f"Receiving review for deck: {deck}, user: {user}")
@@ -147,7 +147,7 @@ def review_card(deck, user):
         
         # Add the review
         card.add_review(rating, session_id)
-        user_obj.add_recall(0, rating >= 7)  # Simple success/fail based on rating
+        user_obj.add_recall(0, rating >= 3)  # Simple success/fail based on rating (1-5 scale)
         
         db.session.commit()
         
@@ -191,7 +191,7 @@ def review_card(deck, user):
         print(traceback.format_exc())
         return jsonify({'error': str(e), 'success': False}), 500
 
-@cards_bp.route('/api/cards/<deck>/<card_id>', methods=['DELETE'])
+@cards_bp.route('/api/cards/<path:deck>/<card_id>', methods=['DELETE'])
 def delete_card(deck, card_id):
     deck_obj = Deck.query.filter_by(name=deck).first()
     if not deck_obj:
@@ -206,6 +206,31 @@ def delete_card(deck, card_id):
         db.session.delete(card)
         db.session.commit()
         return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@cards_bp.route('/api/cards/<path:deck>/<card_id>', methods=['PUT'])
+def update_card(deck, card_id):
+    """Update an existing card."""
+    deck_obj = Deck.query.filter_by(name=deck).first()
+    if not deck_obj:
+        return jsonify({'error': 'Deck not found'}), 404
+    
+    card = Card.query.get(card_id)
+    if not card:
+        return jsonify({'error': 'Card not found'}), 404
+    
+    try:
+        card_data = request.json
+        card.front = card_data.get('front', card.front)
+        card.back = card_data.get('back', card.back)
+        card.front_image = card_data.get('frontImage', card.front_image)
+        card.back_image = card_data.get('backImage', card.back_image)
+        card.card_type = card_data.get('type', card.card_type)
+        
+        db.session.commit()
+        return jsonify({'success': True, 'id': card.id})
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e), 'success': False}), 500

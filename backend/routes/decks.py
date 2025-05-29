@@ -42,7 +42,7 @@ def decks():
             db.session.rollback()
             return jsonify({'error': str(e)}), 500
 
-@decks_bp.route('/api/decks/<deck_name>', methods=['DELETE'])
+@decks_bp.route('/api/decks/<path:deck_name>', methods=['DELETE'])
 def delete_deck(deck_name):
     from models import Review, Session, Card  # avoid circular import
     deck = Deck.query.filter_by(name=deck_name).first()
