@@ -16,25 +16,31 @@ npm install
 npm run build
 echo "Frontend build complete."
 
-# 2. Bundle Python backend
-echo "\n[2/5] Bundling Python backend..."
+# 2. Bundle Python backend (optimized)
+echo "\n[2/5] Bundling Python backend (optimized)..."
 cd "$ROOT_DIR"  # Go back to the root directory
 echo "Current directory: $(pwd)"
 
-if [ -f "./scripts/bundle-python.js" ]; then
-  echo "Script file exists at ./scripts/bundle-python.js"
-  node ./scripts/bundle-python.js
+if [ -f "./scripts/bundle-python-optimized.js" ]; then
+  echo "Using optimized bundling script"
+  node ./scripts/bundle-python-optimized.js
 else
-  echo "Script file does not exist at ./scripts/bundle-python.js"
-  echo "Contents of current directory:"
-  ls -la
-  echo "Contents of scripts directory (if it exists):"
-  if [ -d "./scripts" ]; then
-    ls -la ./scripts
+  echo "Optimized script not found, falling back to original"
+  if [ -f "./scripts/bundle-python.js" ]; then
+    echo "Script file exists at ./scripts/bundle-python.js"
+    node ./scripts/bundle-python.js
   else
-    echo "scripts directory does not exist"
+    echo "Script file does not exist at ./scripts/bundle-python.js"
+    echo "Contents of current directory:"
+    ls -la
+    echo "Contents of scripts directory (if it exists):"
+    if [ -d "./scripts" ]; then
+      ls -la ./scripts
+    else
+      echo "scripts directory does not exist"
+    fi
+    exit 1
   fi
-  exit 1
 fi
 echo "Python backend bundled successfully."
 
